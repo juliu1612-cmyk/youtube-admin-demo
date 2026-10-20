@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="OGBekOhdNgmsigzz9U5eJ9">
+<head data-page-node-id="sr0BrDXtVnd9jth9PEgR2q">
+<meta charset="UTF-8" data-page-node-id="Um7U3fqW9PhoiiqJUFhbOd">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="EOWUbZh19rTubpAdNeoQYI">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" data-page-node-id="h1GCuUrSXCdVNDj3D75fs3">
+<meta http-equiv="Pragma" content="no-cache" data-page-node-id="KTB9nog34dVMTyI6KzyhZO">
+<meta http-equiv="Expires" content="0" data-page-node-id="NAXDVA9FEyCdFmpnLdPy9a">
+<title>YouTube Studio — 视频上传</title>
+<link rel="stylesheet" href="./css/style.css?v=20261020a" data-page-node-id="WsExLEeRHJJ5lmtEOpYs5D">
+<style>
+  /* Critical: prevent broken layout when CSS fails or page is opened via file:// */
+  html{font-size:16px;-webkit-font-smoothing:antialiased}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#0b0f19;color:#e8edf5;line-height:1.6;min-height:100vh}
+  svg{width:1em;height:1em;display:inline-block;vertical-align:middle;flex-shrink:0}
+  .loading-overlay{display:none}
+  .page{display:none}
+  .page.active{display:block}
+  .file-warning{display:none;background:#ef4444;color:#fff;padding:12px 16px;text-align:center;font-size:13px}
+  .file-warning a{color:#fff;text-decoration:underline}
+</style>
+</head>
+<body data-page-node-id="t9BaLn8Dv5csmX2AUNFYXg">
+<div class="file-warning" id="fileWarning" data-page-node-id="xfoGFGox7GTCpuSWM9cqcH">
+  ⚠️ 检测到通过本地文件直接打开。请通过 <a href="http://localhost:3000" data-page-node-id="zc7HAsWuaPFodwnZONtwVE">http://localhost:3000</a> 访问本后台以获得完整功能。
+</div>
+
+<!-- Toast 通知容器 -->
+<div class="toast-container" id="toastContainer" data-page-node-id="OAQnrHv2FjFhhxoJvCakvl"></div>
+
+<!-- 全局加载遮罩 -->
+<div class="loading-overlay" id="loadingOverlay" data-page-node-id="tJ1WCT7Ax78Pd4ZTrMkbWx">
+  <div class="loading-content" data-page-node-id="AmFZbQvlCgNo1LL3O4pyyU">
+    <div class="loading-ring" id="loadingRing" data-page-node-id="NwGxSY89CnIe5RtsjYOPSA"></div>
+    <p class="loading-text" id="loadingText" data-page-node-id="vcze372b1XMQYyG7qUJhMO">正在处理...</p>
+    <div class="loading-progress" id="loadingProgressBar" style="display:none" data-page-node-id="jMIFLElfW5oHVCCFAmwItM">
+      <div class="loading-progress-track" data-page-node-id="fUACBTBNp1NXkhMpK2n1LG">
+        <div class="loading-progress-fill" id="loadingProgressFill" data-page-node-id="0dEjaM2FGDHeC9uOE5EWhI"></div>
+      </div>
+      <span class="loading-progress-text" id="loadingProgressText" data-page-node-id="vO26E6l5CYrumBTYfh6qB6">0%</span>
+    </div>
+  </div>
+</div>
+
+<div class="app" data-page-node-id="5wjZfMKpZelWDMN1t0hPpj">
+  <!-- 侧边栏 -->
+  <aside class="sidebar" id="sidebar" data-page-node-id="OaaVHDpOa9vr0qkEyRWUmw">
+    <div class="sidebar-brand" id="sidebarBrand" data-page-node-id="9w832xTGTCLVnhpKfE9gyH">
+      <div class="brand-logo" data-page-node-id="rGXyhET6NZUREVSpZozwJ6">
+        <svg viewBox="0 0 28 28" data-page-node-id="wwygUC5dtTiKEEy5SD6oos"><rect width="28" height="28" rx="6" fill="#ff0000" data-page-node-id="gqqE5AIq7HVnFrPVHfKFfC"/><polygon points="11,8 20,14 11,20" fill="#fff" data-page-node-id="SHbwj7X4iv8pfBUB6hCFhU"/></svg>
+      </div>
+      <div class="brand-text" data-page-node-id="67YuZw9Hs64caXMbUFymGE">
+        <span class="brand-name" data-page-node-id="Y66axOldcvKPA4fPggYc5O">Creator Studio</span>
+        <span class="brand-sub" data-page-node-id="oq8BDeLbvjxAsWENFZBqPO">视频管理中心</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" data-page-node-id="3jkRYpA71rEwCqfH12AQTy">
+      <a href="#" class="nav-item" data-page="upload" style="display:none" data-page-node-id="5igNwQUEMlpbmalQAQPUOA">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="kFyYVIl7hYLa8D63osGxYE"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" data-page-node-id="Bhrg2yc1Vw6KOZvo4IcdBx"/><polyline points="17 8 12 3 7 8" data-page-node-id="WRcDLZ8JLkHWOoVRxoIq3j"/><line x1="12" y1="3" x2="12" y2="15" data-page-node-id="V2msiJ540CkroYynlgBqGC"/></svg>
+        <span data-page-node-id="4RuUkJ4xgA8b6fHPoC27sK">上传视频</span>
+      </a>
+      <a href="#" class="nav-item" data-page="channels" data-page-node-id="W11CZiq41UKLFAZzSkepcX">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="SpmboX716SvsuDWLGWQN64"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" data-page-node-id="OfhH1DBB4H9CmyHcC80oou"/><circle cx="9" cy="7" r="4" data-page-node-id="bmS1pvUzZHlttzcWJ0UlEZ"/><path d="M23 21v-2a4 4 0 0 0-3-3.87" data-page-node-id="37EA6fEwhFXDC2Ew7EiuWe"/><path d="M16 3.13a4 4 0 0 1 0 7.75" data-page-node-id="mAsFxLxYuAAYKC7kOLNyE1"/></svg>
+        <span data-page-node-id="j0qcv8ubz18wXemfYqTbJJ">社媒账号采集表</span>
+      </a>
+      <a href="#" class="nav-item" data-page="history" data-page-node-id="liJzTNB6yUvuf31gsBHS5m">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="qVUOglsYhriOa8hNuwUUXe"><rect x="3" y="3" width="18" height="18" rx="2" data-page-node-id="ar4r0jZCs1e8vtE20eNo8c"/><line x1="3" y1="9" x2="21" y2="9" data-page-node-id="uTTqeAEPzOG0u3Lbje58ez"/><line x1="9" y1="21" x2="9" y2="9" data-page-node-id="YWGtNss70QJGMH089UUytg"/></svg>
+        <span data-page-node-id="q21VrQ4pA82a7zVoDKDKwi">发布内容关联表</span>
+      </a>
+      <a href="#" class="nav-item active" data-page="translation" data-page-node-id="JwDKswVElTxAzhMA0DuXmQ">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="mXNejVhoYfCZsadTH3edbA"><path d="M5 8l6 6" data-page-node-id="65spU52U85oknCOw0c7nzt"/><path d="M4 14l6-6 2-3" data-page-node-id="NHqOAzAJXgNPI2C06ugCv2"/><path d="M2 5h12" data-page-node-id="70C4tUANKa3JRCblaGzqib"/><path d="M7 2h1" data-page-node-id="6xqdaG8r1CMaPbQlllWRyr"/><path d="m22 22-5-10-5 10" data-page-node-id="wEgE8Of8TxemaBrgOLiP1J"/><path d="M14 18h6" data-page-node-id="H41stL5Dt1FUvks1RgyYz3"/></svg>
+        <span data-page-node-id="m2f8FIHdEapK5YYPbosebJ">翻译合成视频</span>
+      </a>
+      <a href="#" class="nav-item" data-page="pubtasks" data-page-node-id="navPubTasks001">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="navPubTasksSvg001"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" data-page-node-id="navPubTasksSvgP001"/></svg>
+        <span data-page-node-id="navPubTasksLabel001">发布任务</span>
+      </a>
+      <a href="#" class="nav-item" data-page="ytvideos" data-page-node-id="navYtVideos001">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="navYtVideosSvg001"><rect x="2" y="4" width="20" height="14" rx="2" data-page-node-id="navYtVideosSvgR001"/><path d="M10 9l5 3-5 3V9z" data-page-node-id="navYtVideosSvgP001"/></svg>
+        <span data-page-node-id="navYtVideosLabel001">YT视频列表</span>
+      </a>
+      <a href="#" class="nav-item" data-page="instructions" id="navInstructions">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="7" x2="16" y2="7"/><line x1="9" y1="11" x2="16" y2="11"/></svg>
+        <span>指令库</span>
+      </a>
+      <a href="#" class="nav-item" data-page="settings" data-page-node-id="FZoXqYJ7LJm9Yu6zmtF7sV">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="af4aoZl4FYLMhAOAMyEToE"><circle cx="12" cy="12" r="3" data-page-node-id="4y7cgU6c5LbnFdzMYc5sV7"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" data-page-node-id="yzGc6jKCnlKqFWX8ATXuu3"/></svg>
+        <span data-page-node-id="FzCWYYhWPvnuwHknQ26Gyj">设置</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer" data-page-node-id="OOZG4F1jaaNOmc6uXqL09Q">
+      <div class="admin-account-card" data-page-node-id="UL6IZHhaq2uxmE4i5WtDjQ">
+        <div class="admin-avatar" data-page-node-id="BKR8CTNdTXbTqVQY5pXZID">
+          <svg viewBox="0 0 32 32" fill="none" data-page-node-id="iiEEAoKyPy6jxbH1EfzNgH"><circle cx="16" cy="16" r="16" fill="#1e3a5f" data-page-node-id="DGT0PdFBubZlaJwLclQnoJ"/><path d="M16 8a4 4 0 100 8 4 4 0 000-8z" fill="#60a5fa" data-page-node-id="wGUMUoPYcorbnVQLtHa48a"/><path d="M8 26c0-5 3.6-8 8-8s8 3 8 8" fill="#60a5fa" data-page-node-id="Gfhnt6Lb4iS6TOjCKgb8UY"/></svg>
+        </div>
+        <div class="admin-meta" data-page-node-id="vSXXliplpCgzKl4RSxCxWd">
+          <span class="admin-name" id="adminName" data-page-node-id="LqLDMFkmIEMnnrHO8qUPoF">管理员</span>
+          <span class="admin-role" id="adminStatus" data-page-node-id="RDCOTjXrIvJd0xAcAaX8X2">后台账号</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 主内容 -->
+  <main class="main" id="mainContent" data-page-node-id="bU9JS1w5arg5zBESEyp7Zk">
+    <!-- ========== 上传页面 ========== -->
+    <section class="page" id="page-upload" data-page-node-id="Cm3LBD1Pw1gn6ACrzb76Be">
+      <!-- 上传界面 -->
+      <div class="upload-workspace" id="uploadWorkspace" data-page-node-id="Kx1N2CPcQYUFWa0LNgOMIL">
+        <!-- 顶部工具栏 -->
+        <div class="toolbar" data-page-node-id="vnsCNRqxIL8dN12NtAnJ1M">
+          <div class="toolbar-left" data-page-node-id="Dm7BRSTx4TEg1ghUq8G8ST">
+            <button class="btn-back" id="btnBack" data-page-node-id="Q6tHrSmhVsXpRkr6Lrx7Az">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="LYCg76DpLQfFsfxd4m5bY8"><polyline points="15 18 9 12 15 6" data-page-node-id="Ajp5nHe4qHnu0iwxXN2VoU"/></svg>
+            </button>
+            <h2 data-page-node-id="wxB93qTY3ZVqivZDLAFHYE">上传视频</h2>
+          </div>
+          <div class="toolbar-right" data-page-node-id="B50B5IUGmjem6G3NPJ2blk">
+            <button class="btn-icon" id="btnLogout" title="退出登录" data-page-node-id="ZVIgvK93gObm4KqIEjpD8x">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="G1HGiUERkxhhmZpuf4VJRY"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" data-page-node-id="Pai9oqdRgcXHXHITdO5sHv"/><polyline points="16 17 21 12 16 7" data-page-node-id="4t70nFcg9pCh3aqKKeCI8Y"/><line x1="21" y1="12" x2="9" y2="12" data-page-node-id="rTXzMfnzQcwiZRh42D3rHL"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- 步骤指示器 -->
+        <div class="steps-bar" data-page-node-id="RBgd3XVXPM6476XGTSK8eG">
+          <div class="step active" data-step="1" data-page-node-id="2SKiLqOevjcX1XWRtw2zbN">
+            <div class="step-dot" data-page-node-id="PFUs2mICOFcYGHm0Y400IA">1</div>
+            <span data-page-node-id="4HzvCuOqLPqYG2A3hy4BXg">选择视频/频道</span>
+          </div>
+          <div class="step-line" data-page-node-id="3sGmzUh61KcZPo6WjJTGOn"></div>
+          <div class="step" data-step="2" data-page-node-id="LwuUfx0e9zf3CgVG4WyHwM">
+            <div class="step-dot" data-page-node-id="ncW85Gwxq5mZlDzhwfVzaO">2</div>
+            <span data-page-node-id="diqp3wxMyeBAFwI2xhm471">填写信息</span>
+          </div>
+          <div class="step-line" data-page-node-id="Vm0g2d5pI8gJbEt9cq75So"></div>
+          <div class="step" data-step="3" data-page-node-id="n9VWu9HUn6oyvGEYoP7ygO">
+            <div class="step-dot" data-page-node-id="rHUVMErcHRGwpF1a8a1dAM">3</div>
+            <span data-page-node-id="AUWkp9j5AbREZFECsv7aZ6">预览发布</span>
+          </div>
+        </div>
+
+        <!-- 步骤 1：选择视频 + 配置频道（合并） -->
+        <div class="step-panel active" id="stepPanel1" data-page-node-id="VjwRhnSNqzFkPGRMcIlJlj">
+          <div class="step1-merge-grid" data-page-node-id="SOvLljMqDLrPAtuN4ryc2K">
+            <!-- 左列：频道 + 合集 -->
+            <div class="step1-col step1-col-channel" data-page-node-id="0dW4ayRmHVfO7bYz9NiaJc">
+              <div class="step1-col-title" data-page-node-id="Rx2WkOyRVEOdoCqI3t0VOH">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="7xF1yREbLxGhQl3EjGcuzM"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" data-page-node-id="QAEnedm5jEIVp7gWm4pnvB"/><circle cx="9" cy="7" r="4" data-page-node-id="YnEsOsPBXjBGIoKxNnLGph"/><path d="M23 21v-2a4 4 0 0 0-3-3.87" data-page-node-id="FAODPUxHH6CY5M9AJykUDO"/><path d="M16 3.13a4 4 0 0 1 0 7.75" data-page-node-id="iJFOydEDGkGd85s7ZkdcOy"/></svg>
+                <span data-page-node-id="YGxw7BHEVTRwARZmyByLOk">发布配置</span>
+              </div>
+              <div class="step1-channel-card" data-page-node-id="rlXSOCZPeqZ8Fsw7BvGfLP">
+                <p class="step1-channel-hint" data-page-node-id="BWsw6XCo6nMpDYqEnI8QNI">选择发布频道，然后点下方按钮开始上传并填写信息</p>
+                <div class="field" data-page-node-id="eIaiRkd5O3oxSVmCJyweJe">
+                  <div class="field-label" data-page-node-id="SdyFCDDnQFGCHVDQ4eywMb">发布频道 <span class="required" data-page-node-id="rBjQgSD94JtxEojyK5rtQX">*</span></div>
+                  <select id="targetChannel" data-page-node-id="7g3zEbmk9zPNAwZa0iRU3G">
+                    <option value="" data-page-node-id="1o7eFgqZpVdWmP9zyCeCF2">选择频道</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- 右列：视频来源 -->
+            <div class="step1-col step1-col-video" data-page-node-id="ryKFQW5URLdkGKEu1OUXMv">
+              <div class="step1-col-title" data-page-node-id="qqvmLnPOv0f8RKqfMliS7Y">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="0SM8XjPB6FtA55JuXt7O1q"><polygon points="23 7 16 12 23 17 23 7" data-page-node-id="Ok4e5c2fq55SO6da9ARDe9"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2" data-page-node-id="UvAfLf62r43myopJ7zRMrp"/></svg>
+                <span data-page-node-id="raujTabXDQq8imV0ORrkLy">视频来源</span>
+              </div>
+              <div class="field" data-page-node-id="sourceEpField01">
+                <div class="field-label">视频来源 <span class="required">*</span></div>
+                <div class="source-combobox" id="sourceCombo" data-page-node-id="sourceCombo001">
+                  <input type="text" id="sourceEpisodeDisplay" class="source-display-input" placeholder="点击选择剧集(可输入关键字搜索)..." readonly data-page-node-id="srcEpDisp001">
+                  <select id="sourceEpisode" data-page-node-id="sourceEpSel01" style="display:none;">
+                    <option value="">选择剧集</option>
+                  </select>
+                  <div class="source-dropdown" id="sourceDropdown" data-page-node-id="sourceDropdown01">
+                    <div class="source-filter-row" data-page-node-id="sourceFilterRow001">
+                      <select id="filterSourceCollection" class="inline-filter" data-page-node-id="filterSrcCol001" title="按关联合集组筛选">
+                        <option value="">关联合集组(全部)</option>
+                      </select>
+                      <select id="filterSourceLanguage" class="inline-filter" data-page-node-id="filterSrcLang001" title="按语言筛选">
+                        <option value="">语言(全部)</option>
+                      </select>
+                      <select id="filterSourceType" class="inline-filter" data-page-node-id="filterSrcType001" title="按类型筛选">
+                        <option value="">类型(全部)</option>
+                      </select>
+                    </div>
+                    <input type="text" id="sourceSearchInput" class="source-search-input" placeholder="输入关键字过滤(合集名/语言/类型)..." data-page-node-id="srcSearch001">
+                    <ul class="source-options" id="sourceOptions" data-page-node-id="srcOpts001"></ul>
+                    <div class="source-count-hint" id="sourceCountHint" data-page-node-id="sourceCountHint001"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-actions" data-page-node-id="FitenXYWwYleWzrNZK9K1H">
+            <button class="btn-primary" id="btnNextStep1" disabled data-page-node-id="yVQksOBrXNZPjwDmwyiRpg">下一步：上传并填写信息</button>
+          </div>
+        </div>
+
+        <!-- 步骤 2：填写元数据（原 stepPanel3） -->
+        <div class="step-panel" id="stepPanel2" data-page-node-id="JXgClSSxwrezfS2Uf4mRuj">
+          <form id="metadataForm" class="metadata-form" data-page-node-id="2mZjF881oQT6j9N5YxvHM3">
+            <div class="form-section" data-page-node-id="VAFqZNqXLFiXmOGEMDjJYr">
+              <div class="section-header" data-page-node-id="mMbq8GMKNbZYt5PtWyPHVf">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-page-node-id="hrgWxyHC2Q7PdGQehqyxW5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" data-page-node-id="DpTQmyPbhGSumNCoKuGICG"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" data-page-node-id="1YI53JCEbBl5L7aCTwE2ob"/></svg>
+                <span data-page-node-id="nih5IAKRyCmJyXqRuCp65W">基本信息</span>
+              </div>
+              <div class="field" data-page-node-id="Ppk9fwFo9d07NeWTU7tkfR">
+                <div class="field-label" data-page-node-id="tH3yLFLqyyBZKYQZdhxb56">
+                  视频标题 <span class="required" data-page-node-id="BY51h8xxYICGWjwfkZbb2a">*</span>
+                  <button type="button" class="field-link-btn" id="btnAiGenTitle" title="按「指令库 → 标题指令」中匹配当前频道的模板生成标题" data-page-node-id="btnAiGenTitle01">AI生成</button>
+                </div>
+                <div class="field-input-wrap" data-page-node-id="BNC9IP3nWjOT1XeeZJAnEE">
+                  <input type="text" id="title" maxlength="100" placeholder="为你的视频起一个吸引人的标题" data-page-node-id="3m2tOGjebxm4C5HcJGpC9R">
+                  <span class="field-counter" id="titleCount" data-page-node-id="0Bdcn5Hi1pJ79gCJBjFAdu">0/100</span>
+                </div>
+                <span class="field-hint" id="titleAiHint">按「指令库 → 标题指令」中匹配当前频道的模板生成，可重复点击换一个</span>
+              </div>
+              <div class="field" data-page-node-id="Fy9mrdp7WdPmFDAAZqQCtY">
+                <div class="field-label" data-page-node-id="wv1iZjOcREkBh4IZEwRsMd">
+                  视频描述
+                  <button type="button" class="field-link-btn" id="btnUseChannelDesc" title="用当前发布频道的「关于」简介填充">使用频道简介</button>
+                  <button type="button" class="field-link-btn" id="btnAiGenDesc" title="按「指令库 → 简介指令」中匹配当前频道的模板生成描述">AI生成</button>
+                </div>
+                <div class="field-input-wrap" data-page-node-id="8tlr0Rxej8FC3WBLacCzfm">
+                  <textarea id="description" rows="5" maxlength="5000" placeholder="详细描述视频内容，可使用 #话题标签"></textarea>
+                  <span class="field-counter" id="descCount" data-page-node-id="YcYyKOPF5QY3ACMWi0Pztb">0/5000</span>
+                </div>
+                <span class="field-hint" id="descAutoHint">进入第 2 步时会自动填入当前发布频道的「关于」简介，可随意修改</span>
+              </div>
+            </div>
+
+            <div class="form-section" data-page-node-id="8RqOMCgJxp94hmkqtY4k89">
+              <div class="section-header" data-page-node-id="XY5ocwITdmXpYNSAb2KoWe">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-page-node-id="WGGCfiJQKpt7LRJQBSZAma"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" data-page-node-id="IPSUukXqf1U5oIireWCqYj"/><circle cx="8.5" cy="8.5" r="1.5" data-page-node-id="4ueBtzYt2Dq8I3EOv9YMOL"/><polyline points="21 15 16 10 5 21" data-page-node-id="OIMVDJiAyNkoWuexFoS6lz"/></svg>
+                <span data-page-node-id="I7rYjYsL9fWBeDpqFjB7lD">自定义缩略图</span>
+                <button type="button" class="field-link-btn" id="btnAiGenThumb" title="按「指令库 → 封面指令」中匹配当前频道的模板生成封面" data-page-node-id="btnAiGenThumb01">AI生成</button>
+                <span class="section-hint" data-page-node-id="07bkvtGsID27XBIsFm4GMq">（可选）推荐 1280x720，最大 10MB</span>
+              </div>
+              <div class="thumbnail-form" data-page-node-id="uDuRAQw9RAonDjm2kBjkBR">
+                <label class="thumbnail-file-label" for="thumbnailFileInput" data-page-node-id="RQkW5Uw0pPirDKtFQoAuT3">
+                  <div class="thumbnail-upload-zone" id="thumbnailUploadZone" data-page-node-id="vmzs2HyCVzd0X9iiHMUGYt">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-page-node-id="7ZNDf7eH0NOd3DOBQHWFbp"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" data-page-node-id="5BVx7YeIEp1CQykbaCedd8"/><polyline points="17 8 12 3 7 8" data-page-node-id="DNVzWSJjfqRqTECG7G0fXl"/><line x1="12" y1="3" x2="12" y2="15" data-page-node-id="cYLd6XGk6aHIJvSQKvpwdp"/></svg>
+                    <span data-page-node-id="pc1ujSwRxXjiFNWPHZFC5Z">点击上传自定义缩略图</span>
+                    <span class="thumbnail-file-hint" data-page-node-id="e3mltjEF6oZmeEFvFCUHb5">支持 .jpg, .png, .gif, .webp</span>
+                  </div>
+                </label>
+                <input type="file" id="thumbnailFileInput" accept=".jpg,.jpeg,.png,.gif,.bmp,.webp" hidden data-page-node-id="7y5kWrnoRcUvP4jxLqKJpL">
+                <div class="thumbnail-preview-area" id="thumbnailPreviewArea" style="display:none" data-page-node-id="JDAYueeqHRGdvsoWIu2mUr">
+                  <img id="thumbnailPreview" src="" alt="缩略图预览" class="thumbnail-preview-img" data-page-node-id="oqKLIs9kPf9BmgWOHhGyBD">
+                  <div class="thumbnail-file-info" data-page-node-id="VLxi7eWkBZqk51za4fYfv1">
+                    <span id="thumbnailFileName" data-page-node-id="OTVaGqKARa0CEYwPbO1ndP">—</span>
+                    <button class="thumbnail-remove-btn" id="thumbnailRemoveBtn" data-page-node-id="MtNap17UR6mhqtOU64IFl8">移除</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section" data-page-node-id="MiREoP1tjUDxPcI69DJpxl">
+              <div class="section-header" data-page-node-id="yxBbtBtnDjZOLnwrPyWEF2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-page-node-id="o3rfqCX3LSK0IxWT6SzLN4"><circle cx="12" cy="12" r="10" data-page-node-id="G2GQ7f9Hk1gmD2Av21kJBt"/><path d="M12 6v6l4 2" data-page-node-id="7zdLEpLazZHm06R6LKjoGN"/></svg>
+                <span data-page-node-id="hJF9mUIHuslxI6et2pPCnf">发布设置</span>
+              </div>
+              <div class="field-row" data-page-node-id="8AfjGGLR4juNrU3AaZQ6ig">
+                <div class="field" data-page-node-id="5bbb5Myg9iFN04qML7CKWX">
+                  <div class="field-label" data-page-node-id="bT4z8N4A6lBuz8XmJBGnkT">隐私设置 <span class="required" data-page-node-id="MBEYCZrUKQwFmOKIwYJ2F1">*</span></div>
+                  <div class="radio-group" id="privacyGroup" data-page-node-id="rhIcCm1t1sgUm5P0iOfAQj">
+                    <label class="radio-card" data-value="public" data-page-node-id="9GvA1WBIi8rQzMHvNXZHYp">
+                      <div class="radio-icon" data-page-node-id="xTUeUdzbHOQPPeDD03cOdr">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="jsdFIom318xl6cOw8vDqVu"><circle cx="12" cy="12" r="10" data-page-node-id="I8EuQHwMsfbqHAAKGYDrHx"/></svg>
+                      </div>
+                      <div class="radio-text" data-page-node-id="Fd3ZGcgAKoQmkMpNPifaG6">
+                        <strong data-page-node-id="KvHXMLVKXpekyab4tN0KRr">公开</strong>
+                        <span data-page-node-id="A1iJOWwIVT8WLNi4IHeo2X">所有人可见</span>
+                      </div>
+                    </label>
+                    <label class="radio-card" data-value="unlisted" data-page-node-id="sMNgmAsvZiSitHg6ciEiBq">
+                      <div class="radio-icon" data-page-node-id="zOlRDZzkvUXGCASbUrMdCM">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="TwWFske0puMHF48X87vgRq"><path d="M1 1l22 22" data-page-node-id="4lnHAe0qqEOQIgEoTD1BsR"/><path d="M17.94 18A10 10 0 0 1 2 12c1.53-3.15 5.84-8 10-8 2.8 0 5.47 2.05 7.46 4.5" data-page-node-id="vnEHklnJytChhrGKU8Ib4x"/><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" data-page-node-id="AeD3WP4BHw7gDIBnTvn3NZ"/></svg>
+                      </div>
+                      <div class="radio-text" data-page-node-id="YYDeq3Cnvy7PKDlNJimwmE">
+                        <strong data-page-node-id="zd34RSwpdIPn3DLagtxsrC">不公开</strong>
+                        <span data-page-node-id="3X8h14qXYm0Z4PfRP11oFt">有链接可见</span>
+                      </div>
+                    </label>
+                    <label class="radio-card active" data-value="private" data-page-node-id="zdQFMKCNC0kfgQAZi2w2Ki">
+                      <div class="radio-icon" data-page-node-id="VWFmFpWMY83lWCy8p8aNS7">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="l2cRndFNBLlPO82DdzCG7z"><rect x="3" y="11" width="18" height="11" rx="2" data-page-node-id="PbevkquIWXQEKs3HjIpdxO"/><path d="M7 11V7a5 5 0 0 1 10 0v4" data-page-node-id="UQJxK8bo48tcobiggp6oDw"/></svg>
+                      </div>
+                      <div class="radio-text" data-page-node-id="vF80chpSfcL9hlNlIp2IU6">
+                        <strong data-page-node-id="3pDDU6rfQu8aglqBvYj2DS">私享</strong>
+                        <span data-page-node-id="UtwQolu6plRZoge3H8fAME">仅自己可见</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="field-row" data-page-node-id="ahfTrCiQ0SL40HwxMYHNdT">
+                <div class="field" data-page-node-id="eF1hkOLD4IGkxDqpI5cbDi">
+                  <div class="field-label" data-page-node-id="zmltuKj0BVmSkWZGXy9BL1">定时发布</div>
+                  <input type="datetime-local" id="publishAt" data-page-node-id="wtcFhiQzhwcKBPITWyq52G">
+                  <span class="field-hint" data-page-node-id="653k5wtKdXwsLMop88hKUZ">仅私享视频支持定时发布，填写后会自动切换为「私享」</span>
+                </div>
+              </div>
+              <div class="field" data-page-node-id="xaxakOA5EqeO9k9BEz3luu">
+                <div class="field-label" data-page-node-id="gLlMgvmISjxx9wzyBw6BGY">其他选项</div>
+                <div class="switch-list" data-page-node-id="HFUQn4LLpiIaBxGjO0GaRc">
+                  <label class="switch-item" data-page-node-id="3WWDx7KABKptKy1ipX2dxt">
+                    <span data-page-node-id="BDrdmQ2RHC3R6RQ4PHXKyS">允许嵌入</span>
+                    <div class="switch-track" data-page-node-id="f6fRtXmPobBXEF3GHX30wa">
+                      <input type="checkbox" id="embeddable" checked data-page-node-id="wfzRhFqqEVAgeP5ENvja4M">
+                      <div class="switch-thumb" data-page-node-id="AOcAQkaxhK0Ok5StzvYaRC"></div>
+                    </div>
+                  </label>
+                  <label class="switch-item" data-page-node-id="xY01gN3ctkZ07wVa9OaUla">
+                    <span data-page-node-id="UJwYzE33cAAuRfY0jurMWr">通知订阅者</span>
+                    <div class="switch-track" data-page-node-id="TPBxDvE961BrGF0GEJXJG3">
+                      <input type="checkbox" id="notifySubscribers" checked data-page-node-id="OA2SJ5JBr9sSwxmPt95bRC">
+                      <div class="switch-thumb" data-page-node-id="VZmXnBZbmJxEBKQPDkEOov"></div>
+                    </div>
+                  </label>
+                  <label class="switch-item" data-page-node-id="HllVLBexsgEoAkuYaug44B">
+                    <span data-page-node-id="i6uX24o2Q6KAz6ogbwvPK5">面向儿童</span>
+                    <div class="switch-track" data-page-node-id="GoIOGkrKNOFbBNRcLjaqbQ">
+                      <input type="checkbox" id="selfDeclaredMadeForKids" data-page-node-id="ZTLL1uRIAA1YqpKoOeztkg">
+                      <div class="switch-thumb" data-page-node-id="aAiwkYC52pWV7IOYrsGOai"></div>
+                    </div>
+                  </label>
+                  <label class="switch-item" data-page-node-id="ZJkL7HtvvKPdDxBBGO1Swa">
+                    <span data-page-node-id="joSZfOIxL63a50SyE1E1dk">含 AI 合成内容</span>
+                    <div class="switch-track" data-page-node-id="c8ZcHkM7xEGIhffKCWJeNd">
+                      <input type="checkbox" id="containsSyntheticMedia" data-page-node-id="BfsDcrTUhxRodiKW3TNnPq">
+                      <div class="switch-thumb" data-page-node-id="mlHaQGf9R5rf7GJ5g2EIyp"></div>
+                    </div>
+                  </label>
+                  <label class="switch-item" data-page-node-id="JovFIzQcJdEyURKIjmZ63P">
+                    <span data-page-node-id="aMkzM3F03BStFktiwCmBGr">仅限 18 岁以上观看</span>
+                    <div class="switch-track" data-page-node-id="X6eOSLzQlpequYHAbOyBH2">
+                      <input type="checkbox" id="ageRestricted" data-page-node-id="QIow324XzUgEov70jgM0sj">
+                      <div class="switch-thumb" data-page-node-id="le2ftWw8HgpF8fH0DLywlH"></div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+          </form>
+          <div class="step-actions" data-page-node-id="o3WrPdkUwgOU6QdIE9xupi">
+            <button class="btn-secondary" id="btnPrevStep2" data-page-node-id="ZGAVZCzmmd92kGCDpd4tWx">上一步</button>
+            <button class="btn-primary" id="btnNextStep2" data-page-node-id="DnKEMDWCrc1RqUnN0neK2E">下一步：预览发布</button>
+          </div>
+        </div>
+
+        <!-- 步骤 3：预览确认（原 stepPanel4） -->
+        <div class="step-panel" id="stepPanel3" data-page-node-id="EdGjYLRwkL2wVFzPPCszxF">
+          <div class="review-grid" data-page-node-id="YCBSZuaQnRTe9vP7WbDi93">
+            <!-- 文件预览 -->
+            <div class="review-card file-review" data-page-node-id="lwhuu0qwaT4DwZDUdiQyjn">
+              <h4 class="review-title" data-page-node-id="ps3XvRGhpHEf66JBCdz4Dx">视频文件</h4>
+              <div class="review-file-preview" id="reviewFilePreview" data-page-node-id="3soq1QNuEWBuB6IloBJNR9"></div>
+              <div class="review-file-info" data-page-node-id="IG0hpB3JD0ok1cvnuuyBjA">
+                <span class="review-file-name" id="reviewFileName" data-page-node-id="keSlHdmUD1MDVjxqsceB5V">—</span>
+                <span class="review-file-size" id="reviewFileSize" data-page-node-id="qHgYVeQ9JCTfD3asGz6aiw">—</span>
+              </div>
+              <div class="review-youtube-url" id="reviewYoutubeUrl" style="display:none" data-page-node-id="Urh091JBkqOmu1E1KDJHGu">
+                <div class="youtube-url-label" data-page-node-id="QdTypU8fRKn9o65qBWlOJg">YouTube 播放地址</div>
+                <div class="youtube-url-link" data-page-node-id="cHo6gVCdVaXF4rPIdGXfxR">
+                  <a id="reviewYoutubeLink" href="#" target="_blank" data-page-node-id="69iqaUG5QMHtlWpdbNIjTs"></a>
+                  <button class="btn-copy-url" id="btnCopyYoutubeUrl" title="复制链接" data-page-node-id="HJP9BDF6ITZPZIWAnX7Xn1">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" data-page-node-id="fpJGwolqs6x6qIBKWJrD1v"><rect x="9" y="9" width="13" height="13" rx="2" data-page-node-id="zVUVBJntnCJIGsz7wEmqmv"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" data-page-node-id="mF7gItpjdfrXlfpPSsysZI"/></svg>
+                    复制
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 元数据预览 -->
+            <div class="review-card meta-review" data-page-node-id="ZEsdqtM6qXerwDC0tMoxeX">
+              <h4 class="review-title" data-page-node-id="zt14qORqeL01SiTC2LTGzZ">视频信息</h4>
+              <div class="review-list" id="reviewMetaList" data-page-node-id="CuCQNmGeZPrzIZtsAY5UKR"></div>
+            </div>
+          </div>
+
+          <!-- 字幕上传 -->
+          <div class="review-card caption-card" data-page-node-id="5gghZI9UbPoFzQOHgTheOa">
+            <h4 class="review-title" data-page-node-id="ywNxVlZ56jfVucWbZA8SUV">
+              字幕设置
+              <span class="title-hint" data-page-node-id="dOjPHPJwXFpYRgAo1nNBlV">（可选）支持 .srt 格式，可添加多语言</span>
+              <button class="btn-sm btn-add-caption" id="btnAddCaption" type="button" data-page-node-id="5yBgZfvXW5ucRYFH2tzk3m">+ 添加字幕</button>
+            </h4>
+            <div class="caption-entries" id="captionEntries" data-page-node-id="d6RQb3r8XQl4YyInj3hYdT">
+              <!-- 动态注入字幕条目 -->
+            </div>
+          </div>
+
+          <div class="step-actions" data-page-node-id="sCcc2ACulnYCvmKUkmUFD0">
+            <button class="btn-secondary" id="btnPrevStep3" data-page-node-id="pwUAyjDxiKjx7olfoAISbf">上一步</button>
+            <button class="btn-publish" id="btnSubmit" data-page-node-id="QuWrGEp0vMDrLUXsMAVVRB">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="kzI0G2g4HxmzjerNq3EgCq"><polygon points="5 3 19 12 5 21 5 3" data-page-node-id="LiALlJpKTVjumk3ObW57pE"/></svg>
+              更新并发布
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 频道管理页面 ========== -->
+    <section class="page" id="page-channels" data-page-node-id="HntLMkAGFlHHnAIW2Rc9b8">
+      <div class="toolbar" data-page-node-id="fF7HazsQLmtMak6aIWuwnT">
+        <h2 data-page-node-id="io4cSkALtXSIFyLeORcS4X">社媒账号采集表</h2>
+        <div class="toolbar-actions" data-page-node-id="flTLqdZA24MLtxvIHQJxCU">
+          <button class="btn-secondary" id="btnManageDictionaries" data-page-node-id="557KvRFeMZUUlRFlxKDesh">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="kwGtYTqawPZeOz9Q1FH6Uy"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" data-page-node-id="g8FKDXJATSuxzyAARp4flG"/><polyline points="14 2 14 8 20 8" data-page-node-id="a8Ow3GTqXqvq5DjtriUPP2"/><line x1="9" y1="13" x2="15" y2="13" data-page-node-id="bJaMiVaYxksPDB8esgiDsU"/><line x1="9" y1="17" x2="15" y2="17" data-page-node-id="7IoIfHJlNiydxWApBzjSs9"/></svg>
+            字典管理
+          </button>
+          <button class="btn-primary" id="btnAddChannel" data-page-node-id="ruUyK5ukmt6kNJOPHzCvbN">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="1EDFUxl2ajDFF0CU8DVei7"><line x1="12" y1="5" x2="12" y2="19" data-page-node-id="UShnhaB5ObOiTF3G1GTd3l"/><line x1="5" y1="12" x2="19" y2="12" data-page-node-id="iWxacG4EnedghK9ykxjkDS"/></svg>
+            添加频道
+          </button>
+        </div>
+      </div>
+
+      <!-- 频道筛选栏 -->
+      <div class="channels-filter" id="channelsFilter" data-page-node-id="QhU2rq4QEb57BERz51oO4C">
+        <div class="filter-grid" data-page-node-id="HqjckYf6XJXMueJbZ7zmiV">
+          <div class="filter-field" data-page-node-id="55KlrjCaP2T8g3LBak0jLQ">
+            <label data-page-node-id="yGo6B3iijq8ZHULYb5fqHX">频道ID</label>
+            <input type="text" id="filterChannelId" placeholder="请输入频道ID" data-page-node-id="etUhRpvRC3omO3oBnOKPE9">
+          </div>
+          <div class="filter-field" data-page-node-id="qzWQNubu8ZXIKXs9Fq5MAg">
+            <label data-page-node-id="4p6FwZz7VbPBhyGN5szVSz">频道名称</label>
+            <input type="text" id="filterChannelName" placeholder="请输入账号名称" data-page-node-id="swIN1vrfSKkVe6AY46gKVQ">
+          </div>
+          <div class="filter-field" data-page-node-id="G175PcK1ANhWYh2UQBDMVq">
+            <label data-page-node-id="futgm720GnowO56UCe03L6">频道类型</label>
+            <select id="filterChannelType" data-page-node-id="PIYG6IlWbpZgHNG0ziifAB">
+              <option value="" data-page-node-id="ufyJbGIdkzgzxOzuwnLuHV">请选择</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="n9m98Y8OJHGrhGRlCLFehs">
+            <label data-page-node-id="t8RwVG8mxlasmehy1G4ZIN">语言</label>
+            <select id="filterLanguage" data-page-node-id="TLFsMPSsEB7L0ofIDO6AF7">
+              <option value="" data-page-node-id="rvpaACpEekHy1820MGlfdz">请选择</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="Ekp7cST0NdCxkGXgIcIylf">
+            <label data-page-node-id="VjSuIJvBf5BEIhoywoh80Y">运营模式</label>
+            <select id="filterOperationMode" data-page-node-id="ZDACRTRHohXO3TGCfQmMBP">
+              <option value="" data-page-node-id="gT1rnhc5ppFZryJk2J6JAA">请选择</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="Cu5AhYPrdq4OAhkqMe1ZNC">
+            <label data-page-node-id="vDZRkrPEiR3OGuUB9NLkcW">真人剧/漫剧</label>
+            <select id="filterDramaType" data-page-node-id="D03h2BQwcLVSx0iJGC5akM">
+              <option value="" data-page-node-id="yl9ahIPVQupp5j4sgJuB40">请选择</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="YzBdYFtPOYpCQwnGGChyxA">
+            <label data-page-node-id="ACaPNs8ng3zoOHqDEGcUKs">挂靠方</label>
+            <select id="filterRanking" data-page-node-id="QA7PlPwzz6IZhSxtveoQKt">
+              <option value="" data-page-node-id="XcsTng1VcXAkvkrFNaNsuw">请选择</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="supplierFilterField01">
+            <label>供应商</label>
+            <select id="filterSupplier">
+              <option value="">请选择</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="copyrightFilterField01">
+            <label>版权类型</label>
+            <select id="filterCopyrightType">
+              <option value="">请选择</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="5rqQJ9KpB3lYHR8U8AG71K">
+            <label data-page-node-id="FApUmKXatRaSSHyDeW5fOJ">男女频</label>
+            <select id="filterGender" data-page-node-id="HAqtNUpHTQyLLmNGyA0KLV">
+              <option value="" data-page-node-id="GPpX8Pi92RGqIALJwDkiB7">请选择</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="mmxYRgHuvF155dldoIBIbT">
+            <label data-page-node-id="QSOMhMrLLQVIeH4p4S8Ymz">小组</label>
+            <select id="filterGroup" data-page-node-id="CsPepgQGoaM67E8P7jJ8KG">
+              <option value="" data-page-node-id="fFjx9sVfWHt8n9Bf9PxnoZ">请选择</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="86e1qIDXH6LZPhOEgCZ0hL">
+            <label data-page-node-id="yupveUENkCdQN3lfo62wEF">归属人</label>
+            <select id="filterOwner" data-page-node-id="JVp4jZJC4rADdN2e3LpODg">
+              <option value="" data-page-node-id="aJApzeL6z4scl5x6QiFUwK">请选择</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="bHN2EFF9d5bItGBtMo4oNW">
+            <label data-page-node-id="vixZttHRBNNOaDxJuSepCg">运营频道状态</label>
+            <select id="filterStatus" data-page-node-id="rEZEfGjbpMLfRuyaPwtGZl">
+              <option value="" data-page-node-id="1PsDoO88wRjyqRC2wHyEnE">请选择</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="pMepC2qjjaA0qgGZJGPS9W">
+            <label data-page-node-id="6quFbjsUxckAUUxRwBVMsC">是否过获利</label>
+            <select id="filterMonetized" data-page-node-id="b5FlfG2VoNoRskoz80Y3zO">
+              <option value="" data-page-node-id="2Uw2m17qJXDP1lkF5g75Cw">请选择</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-actions" data-page-node-id="qPDYNpAlppEZGpczek71qa">
+          <button class="btn-secondary" id="btnResetChannelFilter" data-page-node-id="8fBcAOWFoBvKRWqoSU2tpT">重置</button>
+          <button class="btn-primary" id="btnApplyChannelFilter" data-page-node-id="Hpvoms7rh4dbNHPO1eKkur">查询</button>
+        </div>
+      </div>
+
+      <div class="channels-content" id="channelsContent" data-page-node-id="HUg8Fbp7lIuRVJ42i1NMUE">
+        <div class="empty-state" id="channelsEmpty" data-page-node-id="2E8rd0b1TEVMJEhTx25uZ1">
+          <div class="empty-icon" data-page-node-id="tXbsySeGq45CEmL2jAmmr7">
+            <svg viewBox="0 0 64 64" fill="none" data-page-node-id="HBSBdQfgvcB2d6HSe8YtqS"><path d="M17 21v-2a4 4 0 014-4h6a4 4 0 014 4v2" stroke="#475569" stroke-width="1.5" data-page-node-id="iM9rilLJurFFCTXBnEpghT"/><circle cx="32" cy="35" r="12" stroke="#475569" stroke-width="1.5" data-page-node-id="FyiRrkekxQfdW5LWOy0wsQ"/><line x1="32" y1="28" x2="32" y2="42" stroke="#475569" stroke-width="1.5" data-page-node-id="QDr61KjJkQFEnDBZIyb26G"/><line x1="25" y1="35" x2="39" y2="35" stroke="#475569" stroke-width="1.5" data-page-node-id="pBldSLIUc6dAkADF4mC6NU"/></svg>
+          </div>
+          <h3 data-page-node-id="XEWzC2TwL1FVMkD13Abwb7">暂无已授权频道</h3>
+          <p data-page-node-id="vBDC0tKjlazz1eGYlk2NAB">点击"添加频道"授权你的 YouTube 频道</p>
+        </div>
+        <div class="channels-table-wrap" id="channelsTableWrap" data-page-node-id="NBwSYSrE2O6uFQuBNlHgmk">
+          <table class="channels-table" id="channelsTable" data-page-node-id="VNlM2p4JsAHuECBlSLPLPM">
+            <thead data-page-node-id="lIjYS8yFQiJTF8Mb1SmTut">
+              <tr data-page-node-id="bx5tu4beSfwxrY8Lkrpb4a">
+                <th class="col-name" data-page-node-id="rj6TtBVm7nNQlSJh0Ia4QG">频道名称</th>
+                <th class="col-cid" data-page-node-id="mYfaMNMhwBgfOoa9zjcGTn">ChannelID</th>
+                <th class="col-owner" data-page-node-id="jeZKiNtqWfXWoibS1zak3m">归属人</th>
+                <th class="col-lang" data-page-node-id="I8bmyfbR37SaFR7JpTDriB">语言</th>
+                <th class="col-company" data-page-node-id="Lwfh1HZMHGEankxBqCyMIu">所属公司</th>
+                <th class="col-group" data-page-node-id="NEO9fS6xrm0PqJ9dGQ08Hy">小组</th>
+                <th class="col-gender" data-page-node-id="7CSZgIWu230q8J2izCUEhg">男女频</th>
+                <th class="col-type" data-page-node-id="ASn2mRDtcx0Lf74RHzLid2">频道类型</th>
+                <th class="col-mode" data-page-node-id="r5OwHV0BRt7nnHSpPZTZLv">运营模式</th>
+                <th class="col-supplier" data-page-node-id="supplierCol01">供应商</th>
+                <th class="col-copyright" data-page-node-id="copyrightCol01">版权类型</th>
+                <th class="col-drama" data-page-node-id="xD5wbjQxibVV0ioS6JjlBP">真人剧/漫剧</th>
+                <th class="col-monetized" data-page-node-id="osym2O25p38nqnocMr1vnL">是否过获利</th>
+                <th class="col-rank" data-page-node-id="LkGENIkKzcI8xbt4vLadL1">挂靠方</th>
+                <th class="col-status" data-page-node-id="Bs0zgNBCgAZeQxY3QymUlm">运营频道状态</th>
+                <th class="col-remark" data-page-node-id="Z9qaC1YUynMWSW5MCq6SK8">备注</th>
+                <th class="col-actions" data-page-node-id="iIzw8x1E8qlwDP4SbIIFVd">操作</th>
+              </tr>
+            </thead>
+            <tbody id="channelsTableBody" data-page-node-id="1FmFyonyWBWZ7yOrXBWg8A"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 视频库页面 ========== -->
+    <section class="page" id="page-history" data-page-node-id="ErPneXp2vyBtPawKZA0QTp">
+      <div class="toolbar" data-page-node-id="VN30SFWKwbagy1R1x5FJ4I">
+        <h2 data-page-node-id="tqUgfePR9ScgK3UTITfSld">发布内容关联表</h2>
+      </div>
+
+      <!-- 视频库筛选栏 -->
+      <div class="history-filter" id="historyFilter" data-page-node-id="YaBCADXJkBR5TL6BofhRi6">
+        <div class="filter-grid" data-page-node-id="q1Jinnb6Vq5H9HjtGOdzCg">
+          <div class="filter-field" data-page-node-id="b6IRkIxtbGBGozXzxLAd10">
+            <label data-page-node-id="BsNmlxWXjnTCfKdEuty0VU">内容ID</label>
+            <input type="text" id="filterContentId" placeholder="请输入内容ID" data-page-node-id="2SaUHUoxBbVf7lLMMk8AqQ">
+          </div>
+          <div class="filter-field" data-page-node-id="X1nLHPtMkirtHH6ZchtRMR">
+            <label data-page-node-id="ATY35OZUZi9cDkJwtKHezf">合集组名</label>
+            <input type="text" id="filterCollectionName" placeholder="请输入合集组名" data-page-node-id="4Ydt3UT5kiqveyWts95KoG">
+          </div>
+          <div class="filter-field" data-page-node-id="75rQ5qYuJA3ZGnLuEagCkb">
+            <label data-page-node-id="yNtPznhCoLrMb4xKxdjsux">负责人</label>
+            <select id="filterOwner" data-page-node-id="04eMLlH58H0ajpCUHeLqPV">
+              <option value="" data-page-node-id="WvnNol2mDRdcbV8VrZrjAE">请选择</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="PRku25z1VZatW5Ovm78mQW">
+            <label data-page-node-id="e6WATUHdpCspF81ESlEfuA">语言</label>
+            <select id="filterLanguage" data-page-node-id="SzeVcBQKfVuMXqaaUjIHiF">
+              <option value="" data-page-node-id="V0BjPoufavgAaZaq0MHPoS">请选择</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="Fg9FPeIBXg9gtjDcu4RiQb">
+            <label data-page-node-id="djRaB7zrMiCaYEPhVrP7Qu">性别</label>
+            <select id="filterGender" data-page-node-id="jglyfSH1GD1LX7uJTHUKEn">
+              <option value="" data-page-node-id="X07VmCtxovrQBZ9k0hszla">请选择</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="uMqoGFHd1ypYFniIoOMA1p">
+            <label data-page-node-id="wMu70zxLraboShTFOwWBhm">供应商</label>
+            <select id="filterHistorySupplier" data-page-node-id="filterHistorySupplier001">
+              <option value="">请选择</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="2AtG1da2kFqiE9sHA8jokK">
+            <label data-page-node-id="R8ymmo0HXjGpN0DOsnOBrK">关联视频ID</label>
+            <input type="text" id="filterVideoId" placeholder="请输入关联视频ID" data-page-node-id="mCpV1LTRBVgzIFSnusNZkE">
+          </div>
+          <div class="filter-field filter-date-range" data-page-node-id="S6Z26yEm5SAEdH0q548Cnt">
+            <label data-page-node-id="4TGMtUMbByoH4iCXsnkknj">授权时间</label>
+            <div class="date-range" data-page-node-id="9eqJQSfHeOdE89M8wlHKhS">
+              <input type="date" id="filterAuthTimeStart" data-page-node-id="QKBG9ESVOa3aXcER956jSw">
+              <span data-page-node-id="UJRVzLrqSDdeAR72q6acLs">至</span>
+              <input type="date" id="filterAuthTimeEnd" data-page-node-id="6QIRBWnMslsoBuXLXBG5Hm">
+            </div>
+          </div>
+        </div>
+        <div class="filter-actions" data-page-node-id="QGrWTAERmWKaHFqw0doqGL">
+          <button class="btn-secondary" id="btnImportHistory" data-page-node-id="btnImportHistory001">导入</button>
+          <button class="btn-secondary" id="btnExportHistory" data-page-node-id="btnExportHistory001">导出</button>
+          <button class="btn-secondary" id="btnResetHistoryFilter" data-page-node-id="eJ7ZjS2Xlew22t8H2XU2e6">重置</button>
+          <button class="btn-primary" id="btnApplyHistoryFilter" data-page-node-id="z6BF7SDCOIZuIMbTYEP4s3">查询</button>
+        </div>
+      </div>
+
+      <div class="history-grid" id="historyGrid" data-page-node-id="3gKFiJFQ6KDPQucBnsOVBV">
+        <div class="empty-state" data-page-node-id="4rDOCmOhEAYCDj1V4dtfvi">
+          <div class="empty-icon" data-page-node-id="3Zb1Hd7TpgMgJelBz9JEw4">
+            <svg viewBox="0 0 64 64" fill="none" data-page-node-id="UbwaFLGKsDmydamGaBguaE"><rect x="8" y="8" width="48" height="48" rx="8" stroke="#475569" stroke-width="1.5" data-page-node-id="nGSRg8Tfbfx1U6sYp9TImb"/><circle cx="24" cy="28" r="4" stroke="#475569" stroke-width="1.5" data-page-node-id="YSDeWsxr5G9R71obo67qOq"/><path d="M8 44l10-10 8 8 10-10 20 20" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="wtPblZ5AwzWWo2KIyAnxNS"/></svg>
+          </div>
+          <h3 data-page-node-id="cqbgIP2soGVdxD0ScUt3DQ">暂无视频</h3>
+          <p data-page-node-id="QyI0nUNB0oFLFgb6WBExPB">上传视频后，这里将展示你的发布内容关联表</p>
+          <button class="btn-primary" onclick="document.querySelector('[data-page=upload]').click()" data-page-node-id="xNG1PzFKtqyJ8zY6g5Co4N">开始上传</button>
+        </div>
+      </div>
+      <div class="history-table-wrap" id="historyTableWrap" style="display:none" data-page-node-id="swUWLZatyClZdqcMCfHqWs">
+        <div class="history-batch-bar" id="historyBatchBar" data-page-node-id="historyBatchBar001">
+          <span class="batch-count" id="historyBatchCount" data-page-node-id="historyBatchCount001">已选 0 个视频</span>
+          <button class="btn-batch-subtitle" id="btnBatchSubtitle" disabled data-page-node-id="btnBatchSubtitle001">批量字幕翻译</button>
+          <span class="batch-hint" data-page-node-id="historyBatchHint001">勾选多条记录后批量翻译字幕，按列表顺序逐个执行，自动按频道切换账号</span>
+        </div>
+        <table class="history-table" id="historyTable" data-page-node-id="19e4e0dzW5kLvA7iWoMJtD">
+          <thead data-page-node-id="AYnApJ8UDpQORMuL8rJ8ET">
+            <tr data-page-node-id="LAjnakp4WW1N4eKedHwlbF">
+              <th class="col-check" data-page-node-id="colCheck001"><input type="checkbox" id="historyCheckAll" title="全选/全不选（仅含有视频ID的行）" data-page-node-id="historyCheckAll001"></th>
+              <th class="col-content-id" data-page-node-id="Y0DUgp84WEqN8vrFQSUB8N">内容ID</th>
+              <th class="col-collection" data-page-node-id="4vVEmy9eqb6NHf9DFxOAC8">合集组名</th>
+              <th class="col-owner" data-page-node-id="HgucLbAd2dXwD5YpUtAFfM">负责人</th>
+              <th class="col-lang" data-page-node-id="JNDe361ciTELkjN8eIEjha">语言</th>
+              <th class="col-gender" data-page-node-id="9qTk4Ch8kd6cn9xQZTfvHe">性别</th>
+              <th class="col-supply-period" data-page-node-id="fR1lYCTDGgXobnpivVq8Xf">供应商</th>
+              <th class="col-purchase-version" data-page-node-id="W4Mh2gfJpoNB98fz2T0WTA">采买成本</th>
+              <th class="col-produce-platform" data-page-node-id="ot4aV7UmhB8RxYb9pMzhzG">制作平台</th>
+              <th class="col-base-fee" data-page-node-id="H4iGWpUNYRqjpDtFK3TUZD">基础制作费</th>
+              <th class="col-check-fee" data-page-node-id="h7Z0Gt5fNqO5qoE99ypW7F">校验费</th>
+              <th class="col-dub-fee" data-page-node-id="e4kGg3TbEdPvBk5Bv0hpd0">人工配音费</th>
+              <th class="col-ai-dub-unit" data-page-node-id="QRSy0Hzxrh2H4ytqoSEOEv">AI配餐单价</th>
+              <th class="col-ai-dub-fee" data-page-node-id="QTtvZcQjl0Hm1if19VA1Xi">AI配音费</th>
+              <th class="col-video-id" data-page-node-id="AhMydvKKBffW0pjOgDwcZF">关联视频ID</th>
+              <th class="col-auth-time" data-page-node-id="puCN6fIK7UQrqN2gKcTNVy">授权时间</th>
+              <th class="col-remark" data-page-node-id="xJRFqKXXWPe68tfHCxBfeE">备注</th>
+              <th class="col-action" data-page-node-id="F6OdusWMKw6l0sMTlONXxn">操作</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody" data-page-node-id="EdyUfrAmR4zJkqJ4ZuuubU"></tbody>
+        </table>
+      </div>
+
+      <!-- 视频编辑弹窗 -->
+      <div class="modal-mask" id="historyEditMask" style="display:none" onclick="if(event.target===this)closeHistoryEditModal()" data-page-node-id="xrsWJcbL6sJJX4QRvAmXXO">
+        <div class="modal-card history-edit-modal" id="historyEditModal" data-page-node-id="9AJhzXiLKNOTkbMit6SKur">
+          <div class="modal-header" data-page-node-id="sC880nI2Ye2D0U9mRjQPh7">
+            <h3 data-page-node-id="IgfNV4CRfdYkCJIVCQjwAR">编辑视频信息</h3>
+            <button class="modal-close" onclick="closeHistoryEditModal()" data-page-node-id="sGWrUjcWIVO2o9L4azJPh1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="C1rsTIpPdKDfYEFOYAGI3o"><line x1="18" y1="6" x2="6" y2="18" data-page-node-id="wRlwaRgN5LW0iYTwHJwlK7"/><line x1="6" y1="6" x2="18" y2="18" data-page-node-id="TrlIDugspjFXEteimtXE1d"/></svg></button>
+          </div>
+          <div class="modal-body" data-page-node-id="tQF3aeNAQyC6pNHxleztIG">
+            <div class="form-grid" data-page-node-id="LOAzjPh3TZYCkTctcSXCi2">
+              <div class="field-group" data-page-node-id="mMTQP1znfiNv6w01hTvjK0">
+                <div class="field-label" data-page-node-id="FEAuzpzyZCaDlSPB9GTEvr">内容ID</div>
+                <input class="field-readonly" id="heContentId" readonly tabindex="-1" data-page-node-id="3jbYSoxU5XHOuhbE0rb8hm">
+              </div>
+              <div class="field-group" data-page-node-id="2juBc92yPGXTY1GbnujDTS">
+                <div class="field-label" data-page-node-id="Vff1xWiEj4sUf7aUhqUov3">关联视频ID</div>
+                <input class="field-readonly" id="heVideoId" readonly tabindex="-1" data-page-node-id="PFGZHk6jNOZF0WZxNLZN8P">
+              </div>
+              <div class="field-group" data-page-node-id="TCzDF6MAkmghng3FlWVAXB">
+                <div class="field-label" data-page-node-id="pR2b5cFwZnsMNPKEXsKBxx">合集组名</div>
+                <input class="field-input" id="heCollectionName" placeholder="输入合集组名" data-page-node-id="zMR5GZLk2r3WqLYAMtTNBp">
+              </div>
+              <div class="field-group" data-page-node-id="O38K4QzTMIzgk4oYE7YVms">
+                <div class="field-label" data-page-node-id="IAjf9wGoj4liSKNdXacOa2">负责人</div>
+                <input class="field-input" id="heOwner" placeholder="输入负责人" data-page-node-id="YjLR3gPi99Ds5YykCBZ8bV">
+              </div>
+              <div class="field-group" data-page-node-id="bwLn4X0zeC2LeeE9WBtbdU">
+                <div class="field-label" data-page-node-id="975zKMMevoXwDTJAskSiQn">语言</div>
+                <input class="field-input" id="heLanguage" placeholder="输入语言" data-page-node-id="WveY6q5BErQvNbTOuBNCRH">
+              </div>
+              <div class="field-group" data-page-node-id="QarkmIIFTNPRXB0GeQJahe">
+                <div class="field-label" data-page-node-id="GN7IDMw8C8Hep3z2pNgTFE">性别</div>
+                <input class="field-input" id="heGender" placeholder="输入性别" data-page-node-id="Lt5vxObsoniPPlS70LisBJ">
+              </div>
+              <div class="field-group" data-page-node-id="6ojF1dJgqnJPE93JKTu2vq">
+                <div class="field-label" data-page-node-id="6vhIwfZeejG3FHXupnbpIh">供应商</div>
+                <select class="field-input" id="heSupplier" data-page-node-id="heSupplier001">
+                  <option value="">请选择</option>
+                </select>
+              </div>
+              <div class="field-group" data-page-node-id="t4Xk11dRMjApuT9lJ7wdWQ">
+                <div class="field-label" data-page-node-id="M8R49UnvjDFo0rkczB96Et">采买成本</div>
+                <input class="field-input" id="hePurchaseVersion" placeholder="输入采买成本" data-page-node-id="sUY3DzTpZvxhpFjTZv4NZr">
+              </div>
+              <div class="field-group" data-page-node-id="8eeSjYX9HhSlN9zWi1U5gt">
+                <div class="field-label" data-page-node-id="wiTd48qFElAOqHcsegcSGd">制作平台</div>
+                <input class="field-input" id="heProducePlatform" placeholder="输入制作平台" data-page-node-id="W9lsin4flaNlNAjp9rGnP8">
+              </div>
+              <div class="field-group" data-page-node-id="GVBjR2HNCBwoyNHv20fLYP">
+                <div class="field-label" data-page-node-id="OuWIR45M0ycHllk2ksVWI3">基础制作费</div>
+                <input class="field-input" id="heBaseFee" placeholder="输入基础制作费" data-page-node-id="NryhwTMGiO9C1uAXixcGll">
+              </div>
+              <div class="field-group" data-page-node-id="qNvIZ6HeNTEH64Sd5RAXbP">
+                <div class="field-label" data-page-node-id="sAwDke9kLRqTINvGhw9DAM">校验费</div>
+                <input class="field-input" id="heCheckFee" placeholder="输入校验费" data-page-node-id="92nUX1LEiQi175HxNUMKP7">
+              </div>
+              <div class="field-group" data-page-node-id="9moMcvpe8oyKq1iAyEea3I">
+                <div class="field-label" data-page-node-id="NjEazKpC3zMEhW5ZAoc933">人工配音费</div>
+                <input class="field-input" id="heDubFee" placeholder="输入人工配音费" data-page-node-id="SHesd3Go9msrZPydXHYLd3">
+              </div>
+              <div class="field-group" data-page-node-id="zMBJQ3Gf7SIByyEAdHPVni">
+                <div class="field-label" data-page-node-id="A4KGovDDkzi2DUBR56ihFf">AI配餐单价</div>
+                <input class="field-input" id="heAiDubUnit" placeholder="输入AI配餐单价" data-page-node-id="egYE1SiYZhvb7rOxYsl8DU">
+              </div>
+              <div class="field-group" data-page-node-id="md47Hlt87Ly8Z8GAyJMZD8">
+                <div class="field-label" data-page-node-id="lYcmjOQg2lO1VNbPco1Y4v">AI配音费</div>
+                <input class="field-input" id="heAiDubFee" placeholder="输入AI配音费" data-page-node-id="lC6OcfKsLZS0Zt0a6tk8wV">
+              </div>
+              <div class="field-group" data-page-node-id="UrWshf8Gd5CEVe4xiSs6hq">
+                <div class="field-label" data-page-node-id="TazkXhjDM8Xrtpnj31ep9i">授权时间</div>
+                <input class="field-input" id="heAuthTime" placeholder="输入授权时间" data-page-node-id="FHEOLkqUXpiP1nWA5NTiKT">
+              </div>
+              <div class="field-group field-group-full" data-page-node-id="AOSFj7lFqFYyK1VE9V4DCe">
+                <div class="field-label" data-page-node-id="7I1nkzDI1gw5GHFvOJvtHj">备注</div>
+                <textarea class="field-input" id="heRemark" rows="2" placeholder="输入备注"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer" data-page-node-id="3F3MWJ7qH3nj8kKCjj02Qo">
+            <button class="btn-secondary" onclick="closeHistoryEditModal()" data-page-node-id="uRzemONAbdDhczScagd7ua">取消</button>
+            <button class="btn-primary" id="btnSaveHistoryEdit" data-page-node-id="M1lnEmFQpfkECIcuGYtaB2">保存修改</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== YT视频列表页面 ========== -->
+    <section class="page" id="page-ytvideos" data-page-node-id="pageYtVideos001">
+      <div class="toolbar" data-page-node-id="ytvToolbar001">
+        <div class="toolbar-left" data-page-node-id="ytvToolbarLeft001">
+          <h2 data-page-node-id="ytvTitle001">YT视频列表</h2>
+        </div>
+        <div class="toolbar-right" data-page-node-id="ytvToolbarRight001">
+          <span class="translation-count-hint" id="ytvCountHint" data-page-node-id="ytvCountHint001"></span>
+          <button class="btn-secondary" id="ytvRefreshBtn" type="button" data-page-node-id="ytvRefreshBtn001">刷新</button>
+        </div>
+      </div>
+      <div class="history-filter ytv-filter-bar" id="ytvFilterBar">
+        <div class="filter-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="filter-field">
+            <label>频道名称</label>
+            <select id="ytvFilterChannelTitle">
+              <option value="">全部频道</option>
+            </select>
+          </div>
+          <div class="filter-field">
+            <label>频道ID</label>
+            <select id="ytvFilterChannelId">
+              <option value="">全部频道ID</option>
+            </select>
+          </div>
+          <div class="filter-field">
+            <label>归属人</label>
+            <select id="ytvFilterOwner">
+              <option value="">全部归属人</option>
+            </select>
+          </div>
+          <div class="filter-field">
+            <label>合集组</label>
+            <select id="ytvFilterCollection">
+              <option value="">全部合集组</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="history-table-wrap" data-page-node-id="ytvTableWrap001">
+        <table class="history-table" id="ytvTable" data-page-node-id="ytvTable001">
+          <thead data-page-node-id="ytvThead001">
+            <tr data-page-node-id="ytvTr001">
+              <th data-page-node-id="ytvThChTitle001">频道名称</th>
+              <th data-page-node-id="ytvThChId001">频道ID</th>
+              <th class="col-video-id" data-page-node-id="ytvThVid001">视频ID</th>
+              <th class="col-owner" data-page-node-id="ytvThOwner001">归属人</th>
+              <th data-page-node-id="ytvThColl001">关联合集组</th>
+              <th data-page-node-id="ytvThTitle001">视频标题</th>
+              <th data-page-node-id="ytvThDesc001">视频简介</th>
+              <th data-page-node-id="ytvThThumb001">视频封面</th>
+              <th class="col-action" data-page-node-id="ytvThAct001">操作</th>
+            </tr>
+          </thead>
+          <tbody id="ytvTableBody" data-page-node-id="ytvTbody001"></tbody>
+        </table>
+        <div class="empty-state" id="ytvEmpty" data-page-node-id="ytvEmpty001" style="display:none">
+          <h3 data-page-node-id="ytvEmptyTitle001">暂无视频记录</h3>
+          <p data-page-node-id="ytvEmptyDesc001">发布过的视频会出现在这里（来源：发布任务 / 上传记录，实时信息取自 YouTube）</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- YT视频编辑弹窗 -->
+    <div class="modal-mask" id="ytvEditMask" style="display:none">
+      <div class="modal-card ytv-edit-card">
+        <div class="modal-header">
+          <h3>编辑视频信息</h3>
+          <button class="modal-close" id="ytvEditCloseBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="ytv-edit-warn" id="ytvEditOwnerWarn" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span id="ytvEditOwnerWarnText">此视频不属于当前授权频道，保存修改将被 YouTube 拒绝。请先在「频道管理」中切换到该视频所属频道。</span>
+        </div>
+        <div class="modal-body ytv-edit-body">
+          <input type="hidden" id="ytvEditVideoId">
+          <div class="field-group">
+            <div class="field-label">视频标题 <span class="ytv-counter" id="ytvTitleCount">0 / 100</span></div>
+            <input class="field-input" id="ytvEditTitleInput" type="text" maxlength="100" placeholder="输入视频标题">
+          </div>
+          <div class="field-group">
+            <div class="field-label">视频简介 <span class="ytv-counter" id="ytvDescCount">0 / 5000</span></div>
+            <textarea class="field-input ytv-desc-input" id="ytvEditDescInput" rows="6" maxlength="5000" placeholder="输入视频简介"></textarea>
+          </div>
+          <div class="field-group">
+            <div class="field-label">视频封面 <span class="ytv-counter" id="ytvThumbHint">不选则保持现有封面</span></div>
+            <div class="ytv-thumb-row">
+              <div class="ytv-thumb-current" id="ytvEditThumbPreview">
+                <img id="ytvEditThumbImg" src="" alt="封面预览">
+              </div>
+              <label class="ytv-thumb-upload" id="ytvThumbUploadBtn">
+                <input type="file" id="ytvEditThumbFile" accept="image/jpeg,image/png,image/gif,image/bmp,image/webp" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span id="ytvThumbUploadText">更换封面</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="ytv-edit-footer">
+          <button class="btn-secondary" id="ytvEditCancelBtn" type="button">取 消</button>
+          <button class="btn-primary" id="ytvEditSaveBtn" type="button">保存并同步到 YouTube</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 指令库页面 ========== -->
+    <section class="page" id="page-instructions">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <h2>指令库</h2>
+        </div>
+        <div class="toolbar-right">
+          <span class="translation-count-hint" id="insCountHint"></span>
+          <button class="btn-secondary" id="insRefreshBtn" type="button">刷新</button>
+          <button class="btn-primary" id="insAddBtn" type="button">新增指令</button>
+        </div>
+      </div>
+
+      <div class="ins-tabs" id="insTabs">
+        <button class="ins-tab active" data-ins-tab="title" type="button">标题指令</button>
+        <button class="ins-tab" data-ins-tab="description" type="button">简介指令</button>
+        <button class="ins-tab" data-ins-tab="thumbnail" type="button">封面指令</button>
+      </div>
+
+      <div class="ins-panel">
+        <div class="ins-tip" id="insTip"></div>
+        <div class="ins-list" id="insList"></div>
+        <div class="empty-state" id="insEmpty" style="display:none">
+          <h3>暂无指令</h3>
+          <p>点击右上角「新增指令」创建本类型的第一条指令模板</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 指令编辑弹窗 -->
+    <div class="modal-mask" id="insEditMask" style="display:none">
+      <div class="modal-card ins-edit-card">
+        <div class="modal-header">
+          <h3 id="insEditTitle">新增指令</h3>
+          <button class="modal-close" id="insEditCloseBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="modal-body ins-edit-body">
+          <input type="hidden" id="insEditId">
+          <input type="hidden" id="insEditTab">
+          <div class="field-group">
+            <div class="field-label">指令标题 <span class="required">*</span></div>
+            <input class="field-input" id="insEditName" type="text" maxlength="100" placeholder="如：英语标题生成指令">
+          </div>
+          <div class="field-group">
+            <div class="field-label">模型选择</div>
+            <select id="insEditModel"></select>
+          </div>
+          <div class="field-group">
+            <div class="field-label">适用频道 <span class="ytv-counter" id="insChHint">不选则适用于全部频道</span></div>
+            <button type="button" class="ins-channel-trigger" id="insChTrigger">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <span id="insChTriggerText">全部频道（不限制）</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" class="ins-chev"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <div class="ins-chips" id="insChChips" style="display:none"></div>
+          </div>
+          <div class="field-group">
+            <div class="field-label">指令内容 <span class="ytv-counter" id="insContentCount">0 字符</span></div>
+            <div class="ins-macro-bar" id="insMacroBar"></div>
+            <div class="ins-content-wrap">
+              <div class="ins-content-highlight" id="insContentHighlight" aria-hidden="true"></div>
+              <textarea class="field-input ins-content-input" id="insEditContent" rows="10" spellcheck="false" placeholder="输入指令内容，可点击上方宏参按钮插入占位符"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="ins-edit-footer">
+          <button class="btn-secondary" id="insEditCancelBtn" type="button">取 消</button>
+          <button class="btn-primary" id="insEditSaveBtn" type="button">保 存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 适用频道选择抽屉 -->
+    <div class="ins-drawer-mask" id="insChDrawerMask" style="display:none">
+      <div class="ins-drawer" id="insChDrawer">
+        <div class="ins-drawer-head">
+          <h3>选择适用频道</h3>
+          <button class="modal-close" id="insChDrawerClose" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="ins-drawer-tools">
+          <input class="ins-drawer-search" id="insChDrawerSearch" type="text" placeholder="搜索频道名 / ID">
+          <div class="ins-drawer-btns">
+            <button class="ins-drawer-tool" id="insChDrawerAll" type="button">全选</button>
+            <button class="ins-drawer-tool" id="insChDrawerNone" type="button">清空</button>
+            <button class="ins-drawer-tool" id="insChDrawerInvert" type="button">反选</button>
+          </div>
+        </div>
+        <div class="ins-drawer-summary" id="insChDrawerSummary">已选 0 / 共 0</div>
+        <div class="ins-drawer-list" id="insChDrawerList"></div>
+        <div class="ins-drawer-foot">
+          <button class="btn-secondary" id="insChDrawerCancel" type="button">取 消</button>
+          <button class="btn-primary" id="insChDrawerConfirm" type="button">确 定</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 设置页面 ========== -->
+    <section class="page" id="page-settings" data-page-node-id="nVD4w3a6e1zjZM8NcdafdU">
+      <div class="toolbar" data-page-node-id="xWi7M4FsgH7P87cJnQAI7f">
+        <h2 data-page-node-id="JuhQjrj4UwLaCzSHuMSN8X">设置</h2>
+      </div>
+      <div class="settings-content" data-page-node-id="UX3GAsKhlYJnsMHPAJlHiM">
+        <div class="form-section" data-page-node-id="hKeS0xl0QX3DogN2VXuXEx">
+          <div class="section-header" data-page-node-id="7wfWgsIMBoeneOsJricuNm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="1CCLonHRRqM7ktY3fLpE3E"><rect x="3" y="11" width="18" height="11" rx="2" data-page-node-id="yNAf3DCItWyWAYymUOGj9z"/><path d="M7 11V7a5 5 0 0 1 10 0v4" data-page-node-id="qd1b5QX2fVmlljz70hgJ4w"/></svg>
+            <span data-page-node-id="OQW9Xume9sPsuN7YywNQyJ">Google API 凭据</span>
+          </div>
+          <div class="field" data-page-node-id="FDNH6ebs5ou1CCMqSXBy42">
+            <div class="field-label" data-page-node-id="qJN38DbgQbG9VYnVLhrFhN">Client ID</div>
+            <input type="text" id="settingClientId" placeholder="从 Google Cloud Console 获取" data-page-node-id="iIFowDbtzApqkCqssBnf15">
+          </div>
+          <div class="field" data-page-node-id="qO6bGGRBp0rUGc9DTEyiUn">
+            <div class="field-label" data-page-node-id="NEDV2aVYlGgsKF4CrWF9ap">Client Secret</div>
+            <div class="copy-input" data-page-node-id="JKLHQgg6DlmTJPybhE8N8i">
+              <input type="password" id="settingClientSecret" placeholder="从 Google Cloud Console 获取" data-page-node-id="5zHOHOres0kBytDwFaSpF4">
+              <button class="btn-copy" id="btnToggleSecret" type="button" onclick="toggleSecretVisibility()" title="显示/隐藏" data-page-node-id="QwbAWJyZQqbV3DBD6ehyHE">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="NsRAGOZ6usSRuRaj9k5ECS"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" data-page-node-id="vjay1DlY1r8DlJ0vPIgGkX"/><circle cx="12" cy="12" r="3" data-page-node-id="TUjkzpAQuKDjPZDysjDsJS"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="field" data-page-node-id="Lb3RIkyzFhOOcDESzzluDH">
+            <div class="field-label" data-page-node-id="8bQsrjH2z70fy7UMuzMlR6">重定向 URI</div>
+            <div class="copy-input" data-page-node-id="WIGwjA6yRDgkqnOsa6iV5p">
+              <input type="text" value="http://localhost:3000/oauth2callback" id="redirectUri" data-page-node-id="A8TVsMpZqhUsgd2GlneHn8">
+              <button class="btn-copy" onclick="navigator.clipboard.writeText(this.previousElementSibling.value);showToast('已复制到剪贴板','success')" data-page-node-id="ZSjva5JH6Uf1cNFbHzJCcg">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="CPHrRN0LFbzu1DZyhkH1Mp"><rect x="9" y="9" width="13" height="13" rx="2" data-page-node-id="DvCw4Gbgo1Lg00Xl4r8DwZ"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" data-page-node-id="AMxMTl2NhSm6X6gotbgfqC"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="settings-actions" style="display:flex;gap:12px;margin-top:16px;align-items:center" data-page-node-id="bh5eEvRfDAnkfUx5v4yWsJ">
+            <button class="btn-primary" id="btnSaveConfig" data-page-node-id="iW7pF9RqoWZKFedYyk9Nju">保存到服务器</button>
+            <span class="config-status" id="configStatus" style="font-size:13px;color:var(--muted)" data-page-node-id="IrNtnESFWEJ9duVDzSE1ZF">未保存</span>
+          </div>
+          <p class="section-note" style="margin-top:12px" data-page-node-id="4o2awun0Rb0FQisAeb9Q9N">凭据需要保存到服务器 .env 文件，OAuth 授权才能生效。重定向 URI 必须与 Google Cloud Console 里登记的完全一致（含端口与 /oauth2callback 路径），改完需重启服务。</p>
+        </div>
+
+        <div class="form-section" data-page-node-id="WhHSMC9UDrChLkkKQF3JIY">
+          <div class="section-header" data-page-node-id="zBRNth1wATK5mWDd8Ir8NN">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="3dWSzKfXCrFS013rYdLR3O"><circle cx="12" cy="12" r="10" data-page-node-id="YXevuR9GCsHb9fWgKGotBR"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" data-page-node-id="1DnKxpljJEAohYdSO80OJN"/></svg>
+            <span data-page-node-id="RGFTwT5axIJYTDQwmMkrFU">网络代理</span>
+          </div>
+          <div class="field" data-page-node-id="aWILcgED86kBbNrVHF2mlC">
+            <div class="field-label" data-page-node-id="pKOCMNntDycnAi0g3KihrJ">代理地址</div>
+            <input type="text" id="settingProxyUrl" placeholder="http://127.0.0.1:7890" data-page-node-id="Etqr6dUbEQpJcJOgb1HHgR">
+          </div>
+          <div class="settings-actions" style="display:flex;gap:12px;margin-top:16px;align-items:center;flex-wrap:wrap" data-page-node-id="oRPyJi0rlrtbepXL1XIWG0">
+            <button class="btn-primary" id="btnSaveProxy" data-page-node-id="n3JEZCHei6E8CKE6U9p14O">保存代理</button>
+            <button class="btn-secondary" id="btnTestNetwork" style="background:rgba(255,255,255,0.08);color:var(--text);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 16px;cursor:pointer;font-size:13px" data-page-node-id="91EbaHaSUy6wQ9vMwj4DAG">测试网络连通性</button>
+            <span id="networkTestResult" style="font-size:13px;color:var(--muted)" data-page-node-id="lfsG7wyUbOc6f9tFH2lSDd"></span>
+          </div>
+          <p class="section-note" style="margin-top:12px" data-page-node-id="eBaYYAmgUfuXMTCXTW5OCu">
+            Mac 终端默认不走系统代理，如无法访问 Google 请在此填写本地代理地址。<br data-page-node-id="ABF9ZHsdFghBvIVaOELObD">
+            常见端口：Clash 7890 / V2Ray 1087 / Surge 6152
+          </p>
+        </div>
+
+        <div class="form-section" data-page-node-id="aiConfigSection01">
+          <div class="section-header" data-page-node-id="aiConfigHeader01">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="aiConfigIcon01"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z" data-page-node-id="aiConfigIconPath1"/><path d="M18 16l.9 2.1L21 19l-2.1.9L18 22l-.9-2.1L15 19l2.1-.9L18 16z" data-page-node-id="aiConfigIconPath2"/></svg>
+            <span data-page-node-id="aiConfigTitle01">AI 标题生成</span>
+          </div>
+          <div class="field" data-page-node-id="aiCfgBaseUrlField">
+            <div class="field-label" data-page-node-id="aiCfgBaseUrlLabel">接口地址（Base URL）</div>
+            <input type="text" id="settingAiBaseUrl" placeholder="https://api.deepseek.com" data-page-node-id="aiCfgBaseUrlInput">
+          </div>
+          <div class="field" data-page-node-id="aiCfgApiKeyField">
+            <div class="field-label" data-page-node-id="aiCfgApiKeyLabel">API Key</div>
+            <div class="copy-input" data-page-node-id="aiCfgApiKeyWrap">
+              <input type="password" id="settingAiApiKey" placeholder="sk-... 留空表示不修改已保存的密钥" data-page-node-id="aiCfgApiKeyInput">
+              <button class="btn-copy" id="btnToggleAiKey" type="button" title="显示/隐藏" onclick="toggleAiKeyVisibility()" data-page-node-id="btnToggleAiKey01">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="aiKeyEyeIcon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" data-page-node-id="aiKeyEyePath1"/><circle cx="12" cy="12" r="3" data-page-node-id="aiKeyEyePath2"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="field" data-page-node-id="aiCfgModelField">
+            <div class="field-label" data-page-node-id="aiCfgModelLabel">模型名称</div>
+            <input type="text" id="settingAiModel" placeholder="deepseek-chat" data-page-node-id="aiCfgModelInput">
+          </div>
+          <div class="field" data-page-node-id="aiCfgImageModelField01">
+            <div class="field-label" data-page-node-id="aiCfgImageModelLabel01">图片生成模型</div>
+            <input type="text" id="settingAiImageModel" placeholder="留空=不启用 AI 生成封面，如 Kwai-Kolors/Kolors" data-page-node-id="aiCfgImageModelInput01">
+            <span class="field-hint" data-page-node-id="aiCfgImageModelHint01">用于上传弹窗「AI生成封面」，需该服务支持 OpenAI 兼容 images 接口（SiliconFlow / 智谱等）。留空则隐藏该能力的可用性，接口会提示未配置。</span>
+          </div>
+          <div class="settings-actions" style="display:flex;gap:12px;margin-top:16px;align-items:center;flex-wrap:wrap" data-page-node-id="aiCfgActions01">
+            <button class="btn-primary" id="btnSaveAiConfig" data-page-node-id="btnSaveAiConfig01">保存 AI 配置</button>
+            <button class="btn-secondary" id="btnTestAi" style="background:rgba(255,255,255,0.08);color:var(--text);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 16px;cursor:pointer;font-size:13px" data-page-node-id="btnTestAi01">测试连接</button>
+            <span class="config-status" id="aiConfigStatus" style="font-size:13px;color:var(--muted)" data-page-node-id="aiConfigStatus01">未配置</span>
+          </div>
+          <p class="section-note" style="margin-top:12px" data-page-node-id="aiCfgNote01">
+            用于上传第 2 步「AI 一键生成」视频标题。默认接 DeepSeek，也可填任意 OpenAI 兼容服务的 Base URL 与模型名（Kimi / 智谱 / SiliconFlow 等）。<br data-page-node-id="aiCfgNoteBr01">
+            密钥保存到服务器 .env（AI_BASE_URL / AI_API_KEY / AI_MODEL），不会进入 git；国内直连，不走代理。
+          </p>
+        </div>
+
+        <div class="form-section" data-page-node-id="descTplSection01">
+          <div class="section-header" data-page-node-id="descTplHeader01">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="descTplIcon01"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" data-page-node-id="descTplIconPath1"/><polyline points="14 2 14 8 20 8" data-page-node-id="descTplIconPath2"/><line x1="16" y1="13" x2="8" y2="13" data-page-node-id="descTplIconPath3"/><line x1="16" y1="17" x2="8" y2="17" data-page-node-id="descTplIconPath4"/></svg>
+            <span data-page-node-id="descTplTitle01">默认视频说明</span>
+          </div>
+          <div class="field" data-page-node-id="descTplChannelField01">
+            <div class="field-label" data-page-node-id="descTplChannelLabel01">应用范围</div>
+            <select id="descTplChannel" data-page-node-id="descTplChannelSelect01">
+              <option value="" data-page-node-id="descTplOptGlobal01">全局默认（未单独设置的频道都用这份）</option>
+            </select>
+            <span class="field-hint" data-page-node-id="descTplChannelHint01">可给单个频道单独配一套说明；留空的频道自动用全局默认。</span>
+          </div>
+          <div class="field" data-page-node-id="descTplTextField01">
+            <div class="field-label" data-page-node-id="descTplTextLabel01">说明模板</div>
+            <textarea id="descTplText" rows="9" placeholder="上传时若未填写说明，就自动套用这里的内容" data-page-node-id="descTplTextArea01"></textarea>
+            <span class="field-hint" data-page-node-id="descTplTextHint01">可用变量：<code data-page-node-id="descTplVar1">{title}</code> 影片名称、<code data-page-node-id="descTplVar2">{channelTitle}</code> 频道名称、<code data-page-node-id="descTplVar3">{channelUrl}</code> 频道链接、<code data-page-node-id="descTplVar4">{collectionGroup}</code> 合集组、<code data-page-node-id="descTplVar5">{language}</code> 语言、<code data-page-node-id="descTplVar6">{type}</code> 类型、<code data-page-node-id="descTplVar7">{date}</code> 日期。最多 5000 字。</span>
+          </div>
+          <div class="settings-actions" style="display:flex;gap:12px;margin-top:16px;align-items:center;flex-wrap:wrap" data-page-node-id="descTplActions01">
+            <button class="btn-primary" id="btnSaveDescTpl" data-page-node-id="btnSaveDescTpl01">保存说明模板</button>
+            <button class="btn-secondary" id="btnPreviewDescTpl" style="background:rgba(255,255,255,0.08);color:var(--text);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 16px;cursor:pointer;font-size:13px" data-page-node-id="btnPreviewDescTpl01">预览效果</button>
+            <span class="config-status" id="descTplStatus" style="font-size:13px;color:var(--muted)" data-page-node-id="descTplStatus01">未配置</span>
+          </div>
+          <p class="section-note" style="margin-top:12px" data-page-node-id="descTplNote01">
+            YouTube 的「上传默认设置 → 说明」没有读写接口，拉不到也改不了；所以默认说明由本系统在上传时直接写入 <code data-page-node-id="descTplNoteCode1">snippet.description</code>。留空表示不自动填写。
+          </p>
+        </div>
+
+        <div class="form-section" data-page-node-id="jUw1iIxMUDUig34jURCv1C">
+          <div class="section-header" data-page-node-id="1DE4lLMUa22h8bGk5lKltc">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="CAjo18qgDTIird8Rs6S3Lk"><circle cx="12" cy="12" r="10" data-page-node-id="BVjIL1iFdoHNcRZABk7H5H"/><line x1="12" y1="16" x2="12" y2="12" data-page-node-id="F6SrAgegGuZbxRiJRvCEgA"/><line x1="12" y1="8" x2="12.01" y2="8" data-page-node-id="D57P3wAdqQMjFnjuWEXS1b"/></svg>
+            <span data-page-node-id="eTLXyx0HxHWnJDZ8buFwaR">配额概览</span>
+          </div>
+          <div class="stats-row" data-page-node-id="3iEg6B933FHIjaU96hClmO">
+            <div class="stat-card" data-page-node-id="OQF4rXG6AFJse2e95bCda1">
+              <span class="stat-value" data-page-node-id="6NNXYfa1BSHDQNlGsNrqSS">10,000</span>
+              <span class="stat-label" data-page-node-id="RzYbLsWCotMh7N0GrEMY14">每日配额（单位）</span>
+            </div>
+            <div class="stat-card" data-page-node-id="bgHeipdw4CAh3ShBvcTPqW">
+              <span class="stat-value" data-page-node-id="TGkwFFq5LBhl2o8YwgiAZT">1,600</span>
+              <span class="stat-label" data-page-node-id="EDTzNDZ1CVAgyvZpCUEkAZ">单次上传消耗</span>
+            </div>
+            <div class="stat-card" data-page-node-id="VqA6KMKfHeHcquB1MHwSdZ">
+              <span class="stat-value" data-page-node-id="2VsADZHdr1Edvbug6zZsIg">≈ 6</span>
+              <span class="stat-label" data-page-node-id="3VwbNHGrNzHSbj7WbGUlHS">每日可上传</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 翻译合成视频 · 合集列表 ========== -->
+    <section class="page active" id="page-translation" data-page-node-id="PbF9x67aLVAamdvGFAOpCd">
+      <div class="toolbar" data-page-node-id="aLVPusHtXGbalo7wlWjaNZ">
+        <div class="toolbar-left" data-page-node-id="pVoQIdETOwVCyqfhsltlqd">
+          <h2 data-page-node-id="GA5FnjGj1EcTfN3TeV1cSD">翻译合成视频</h2>
+        </div>
+        <div class="toolbar-right" data-page-node-id="06rTNeo3EbsEBdmMNlkTnj">
+          <span class="translation-count-hint" id="translationCountHint" data-page-node-id="eEELeZ0DMrScpkP8XE8skR"></span>
+          <button class="btn-primary" id="selfAddBtn" type="button" style="display:none" data-page-node-id="tsSelfAddBtn001">新增内容</button>
+        </div>
+      </div>
+
+      <!-- 来源 Tab：翻译系统 / 自建内容 -->
+      <div class="ins-tabs ts-tabs" id="tsTabs" data-page-node-id="tsTabs001">
+        <button class="ins-tab active" data-ts-tab="system" type="button" data-page-node-id="tsTabSystem001">翻译系统</button>
+        <button class="ins-tab" data-ts-tab="self" type="button" data-page-node-id="tsTabSelf001">自建内容</button>
+      </div>
+
+      <!-- 筛选栏：合集名称 / 合集组名称 -->
+      <div class="history-filter translation-filter" id="translationFilter" data-page-node-id="tsFilterBar001">
+        <div class="filter-grid" data-page-node-id="tsFilterGrid001">
+          <div class="filter-field" data-page-node-id="tsFilterNameField001">
+            <label data-page-node-id="tsFilterNameLabel001">合集名称</label>
+            <input type="text" id="tsFilterName" placeholder="请输入合集名称" data-page-node-id="tsFilterNameInput001">
+          </div>
+          <div class="filter-field" data-page-node-id="tsFilterGroupField001">
+            <label data-page-node-id="tsFilterGroupLabel001">合集组名称</label>
+            <select id="tsFilterGroup" data-page-node-id="tsFilterGroupSel001">
+              <option value="" data-page-node-id="tsFilterGroupOptAll">全部</option>
+            </select>
+          </div>
+          <div class="filter-field filter-actions" data-page-node-id="tsFilterActions001">
+            <button type="button" class="btn-secondary" id="tsFilterReset" data-page-node-id="tsFilterResetBtn001">重 置</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 翻译系统 · 空态 -->
+      <div class="translation-empty" id="translationEmpty" data-ts-block="system" data-page-node-id="8wWBAtB1Mvt2flLpCu3s7N">
+        <div class="empty-state" data-page-node-id="BRlwWHwRucPutDZHTvSDGe">
+          <div class="empty-icon" data-page-node-id="kG6icMaUUulh6fiEHcw31Y">
+            <svg viewBox="0 0 64 64" fill="none" data-page-node-id="nzlKcgjH6jSJkFCcvr4Zhi"><path d="M5 24h20M15 24V10M8 10h14" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="5Ng9XQorEWSA9gAOkX8PAM"/><path d="M2 42h20M12 42V28M5 28h14" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="nbDcSz1YXNu6Hhpz6uW3ta"/><path d="M44 8v40M40 12h8" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="IhRPU0At5H5OiZwxGvLg13"/></svg>
+          </div>
+          <h3 data-page-node-id="iA7lIJ2zKG4Xg5VctR0TFr">暂无翻译合成合集</h3>
+          <p data-page-node-id="u9KJ0iOcE29EjCnPR2TYlW">翻译合成的视频合集将展示在这里</p>
+        </div>
+      </div>
+
+      <!-- 自建内容 · 空态 -->
+      <div class="translation-empty" id="selfEmpty" data-ts-block="self" style="display:none" data-page-node-id="tsSelfEmpty001">
+        <div class="empty-state" data-page-node-id="tsSelfEmptyState001">
+          <div class="empty-icon" data-page-node-id="tsSelfEmptyIcon001">
+            <svg viewBox="0 0 64 64" fill="none" data-page-node-id="tsSelfEmptySvg001"><path d="M5 24h20M15 24V10M8 10h14" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="tsSelfEmptyP01"/><path d="M2 42h20M12 42V28M5 28h14" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="tsSelfEmptyP02"/><path d="M44 8v40M40 12h8" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="tsSelfEmptyP03"/></svg>
+          </div>
+          <h3 data-page-node-id="tsSelfEmptyTitle001">暂无自建内容</h3>
+          <p data-page-node-id="tsSelfEmptyDesc001">点击右上角「新增内容」创建自建合集，可自行上传视频并选择语言</p>
+        </div>
+      </div>
+
+      <div class="translation-table-wrap" id="translationTableWrap" data-ts-block="system" style="display:none" data-page-node-id="V7ao4g5kGpG24hthQGXwVH">
+        <table class="translation-table" id="translationTable" data-page-node-id="M3rJeO9SxbkOpwuIQHcVh1">
+          <thead data-page-node-id="yv0fMzXAxu342IeX6bxCS6">
+            <tr data-page-node-id="0D6JtUgtScwASxxDeRD6u6">
+              <th class="col-id" data-page-node-id="EX8jcXACXcjVAyGREUHSE7">ID</th>
+              <th class="col-name" data-page-node-id="EZwmf8M9CPXeRnTGhnNrI9">合集名称</th>
+              <th class="col-linked" data-page-node-id="kLmNoPqRsTuVwXyZ012345">关联合集组</th>
+              <th class="col-intro" data-page-node-id="cccAbIu4ZCfBoXkQvKh1by">简介</th>
+              <th class="col-operator" data-page-node-id="tsListOperator001">操作人</th>
+              <th class="col-created" data-page-node-id="0fy2sqNaG987oAhf3mfYay">创建时间</th>
+              <th class="col-actions" data-page-node-id="tsListActions001">操作</th>
+            </tr>
+          </thead>
+          <tbody id="translationTableBody" data-page-node-id="ih0m7cBeV7otMtgr35kQ8D"></tbody>
+        </table>
+      </div>
+
+      <!-- 自建内容 · 列表 -->
+      <div class="translation-table-wrap" id="selfTableWrap" data-ts-block="self" style="display:none" data-page-node-id="tsSelfWrap001">
+        <table class="translation-table" id="selfTable" data-page-node-id="tsSelfTable001">
+          <thead data-page-node-id="tsSelfThead001">
+            <tr data-page-node-id="tsSelfTheadRow001">
+              <th class="col-id" data-page-node-id="tsSelfThId001">ID</th>
+              <th class="col-name" data-page-node-id="tsSelfThName001">合集名称</th>
+              <th class="col-linked" data-page-node-id="tsSelfThLinked001">关联合集组</th>
+              <th class="col-intro" data-page-node-id="tsSelfThIntro001">简介</th>
+              <th class="col-operator" data-page-node-id="tsSelfThOperator001">操作人</th>
+              <th class="col-created" data-page-node-id="tsSelfThCreated001">创建时间</th>
+              <th class="col-actions" data-page-node-id="tsSelfThActions001">操作</th>
+            </tr>
+          </thead>
+          <tbody id="selfTableBody" data-page-node-id="tsSelfTbody001"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 发布任务列表 ========== -->
+    <section class="page" id="page-pubtasks" data-page-node-id="pagePubTasks001">
+      <div class="toolbar" data-page-node-id="ptToolbar001">
+        <div class="toolbar-left" data-page-node-id="ptToolbarLeft001">
+          <h2 data-page-node-id="ptTitle001">发布任务</h2>
+        </div>
+        <div class="toolbar-right" data-page-node-id="ptToolbarRight001">
+          <span class="translation-count-hint" id="pubTaskCountHint" data-page-node-id="ptCountHint001"></span>
+        </div>
+      </div>
+
+      <!-- 筛选栏：时间范围 / 操作人 / 频道 / 合集组名称 / 语言 -->
+      <div class="history-filter pub-task-filter" id="pubTaskFilter" data-page-node-id="ptFilterBar001">
+        <div class="filter-grid" data-page-node-id="ptFilterGrid001">
+          <div class="filter-field" data-page-node-id="ptFilterDateField001">
+            <label data-page-node-id="ptFilterDateLabel001">创建时间</label>
+            <div class="pt-date-range" data-page-node-id="ptDateRange001">
+              <input type="date" id="ptFilterDateFrom" title="开始日期" data-page-node-id="ptDateFrom001">
+              <span class="pt-date-sep" data-page-node-id="ptDateSep001">至</span>
+              <input type="date" id="ptFilterDateTo" title="结束日期" data-page-node-id="ptDateTo001">
+            </div>
+          </div>
+          <div class="filter-field" data-page-node-id="ptFilterVidField001">
+            <label data-page-node-id="ptFilterVidLabel001">视频ID</label>
+            <input type="text" id="ptFilterVideoId" placeholder="请输入视频ID" data-page-node-id="ptFilterVidInput001">
+          </div>
+          <div class="filter-field" data-page-node-id="ptFilterOpField001">
+            <label data-page-node-id="ptFilterOpLabel001">操作人</label>
+            <select id="ptFilterOperator" data-page-node-id="ptFilterOpSel001">
+              <option value="" data-page-node-id="ptFilterOpOptAll">操作人(全部)</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="ptFilterChField001">
+            <label data-page-node-id="ptFilterChLabel001">频道</label>
+            <select id="ptFilterChannel" data-page-node-id="ptFilterChSel001">
+              <option value="" data-page-node-id="ptFilterChOptAll">频道(全部)</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="ptFilterGrpField001">
+            <label data-page-node-id="ptFilterGrpLabel001">合集组名称</label>
+            <select id="ptFilterGroup" data-page-node-id="ptFilterGrpSel001">
+              <option value="" data-page-node-id="ptFilterGrpOptAll">合集组(全部)</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="ptFilterLangField001">
+            <label data-page-node-id="ptFilterLangLabel001">语言</label>
+            <select id="ptFilterLang" data-page-node-id="ptFilterLangSel001">
+              <option value="" data-page-node-id="ptFilterLangOptAll">语言(全部)</option>
+            </select>
+          </div>
+          <div class="filter-field" data-page-node-id="ptFilterStatusField001">
+            <label data-page-node-id="ptFilterStatusLabel001">发布状态</label>
+            <select id="ptFilterStatus" data-page-node-id="ptFilterStatusSel001">
+              <option value="" data-page-node-id="ptFilterStatusOptAll">状态(全部)</option>
+              <option value="排队中" data-page-node-id="ptFilterStatusOptQ">排队中</option>
+              <option value="处理中" data-page-node-id="ptFilterStatusOptP">处理中</option>
+              <option value="已完成" data-page-node-id="ptFilterStatusOptD">已完成</option>
+              <option value="失败" data-page-node-id="ptFilterStatusOptF">失败</option>
+            </select>
+          </div>
+          <div class="filter-field filter-actions" data-page-node-id="ptFilterActions001">
+            <button type="button" class="btn-secondary" id="ptFilterReset" data-page-node-id="ptFilterResetBtn001">重 置</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="translation-empty" id="pubTaskEmpty" data-page-node-id="ptEmpty001">
+        <div class="empty-state" data-page-node-id="ptEmptyState001">
+          <div class="empty-icon" data-page-node-id="ptEmptyIcon001">
+            <svg viewBox="0 0 64 64" fill="none" data-page-node-id="ptEmptySvg001"><path d="M5 24h20M15 24V10M8 10h14" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="ptEmptySvgP01"/><path d="M2 42h20M12 42V28M5 28h14" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="ptEmptySvgP02"/><path d="M44 8v40M40 12h8" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="ptEmptySvgP03"/></svg>
+          </div>
+          <h3 data-page-node-id="ptEmptyTitle001">暂无发布任务</h3>
+          <p data-page-node-id="ptEmptyDesc001">在「翻译合成视频」详情页点「上传YT」创建的发布任务会展示在这里</p>
+        </div>
+      </div>
+
+      <div class="translation-table-wrap pub-task-table-wrap" id="pubTaskTableWrap" style="display:none" data-page-node-id="ptWrap001">
+        <table class="translation-table pub-task-table" id="pubTaskTable" data-page-node-id="ptTable001">
+          <thead data-page-node-id="ptThead001">
+            <tr data-page-node-id="ptTheadRow001">
+              <th class="col-title" data-page-node-id="ptThTitle001">视频标题</th>
+              <th class="col-video-id" data-page-node-id="ptThVideoId001">视频ID</th>
+              <th class="col-channel" data-page-node-id="ptThChannel001">频道名称</th>
+              <th class="col-linked" data-page-node-id="ptThLinked001">合集组名称</th>
+              <th class="col-lang" data-page-node-id="ptThLang001">语言</th>
+              <th class="col-operator" data-page-node-id="ptThOperator001">操作人</th>
+              <th class="col-created" data-page-node-id="ptThCreated001">创建时间</th>
+              <th class="col-status" data-page-node-id="ptThStatus001">发布状态</th>
+              <th class="col-actions" data-page-node-id="ptThActions001">操作</th>
+            </tr>
+          </thead>
+          <tbody id="pubTaskTableBody" data-page-node-id="ptTbody001"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 发布任务 · 查看发布信息弹窗（已移除） -->
+
+    <!-- ========== 翻译合成视频 · 详情页 ========== -->
+    <section class="page" id="page-translation-detail" data-page-node-id="fXYCWfVCA69WWco6S1COJJ">
+      <div class="toolbar" data-page-node-id="tseQzn5RO0QBzPUWypXjdt">
+        <div class="toolbar-left" data-page-node-id="N1AEm9T3kdHtme8Smg9zqv">
+          <button class="btn-back" id="translationBtnBack" data-page-node-id="so0VK3XzlLTddN1KdyPUTd">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="87uU1OpJviE0fCBXkkh42R"><polyline points="15 18 9 12 15 6" data-page-node-id="jupl3Sjy5X0i2bcPYYK2PG"/></svg>
+          </button>
+          <h2 id="translationDetailTitle" data-page-node-id="cZLFPKBmuO6aCJk54wwy6m">合集详情</h2>
+        </div>
+        <div class="toolbar-right" data-page-node-id="CQDlLpJ7FJW0AfxxSbDZ4B">
+          <span class="translation-detail-sub" id="translationDetailSub" data-page-node-id="jhS2EP3bOpWsBU8YMOPMhf"></span>
+        </div>
+      </div>
+
+      <div class="translation-detail-table-wrap" id="translationDetailTableWrap" data-page-node-id="p5F69Fgt2icqBff3SrjnGJ">
+        <table class="translation-table translation-detail-table" id="translationDetailTable" data-page-node-id="0mPbrg5NJ8DDls0FiEi4Am">
+          <thead data-page-node-id="XaXGhSGkThRSc9HnakGGoC">
+            <tr data-page-node-id="J8G9EewcnPvYPFm0UmGzVY">
+              <th class="col-linked" data-page-node-id="detailLinkedCol001">关联合集组</th>
+              <th class="col-lang" data-page-node-id="MkIARdDkUPz719gSIUnl7M">语言</th>
+              <th class="col-template" data-page-node-id="3tHaKosvm6XIYVXa6jYsav">模版</th>
+              <th class="col-type" data-page-node-id="VeeG6F20wMQm8Wv1wUDlAP">类型</th>
+              <th class="col-progress" data-page-node-id="dmQ4OxcR0LCkpHUi4juOyE">进度</th>
+              <th class="col-created" data-page-node-id="cnuDnBjWHhjEtXfLtAJgBj">合成时间</th>
+              <th class="col-actions" data-page-node-id="ySGGsYGkG02juMdesFwMUr">操作</th>
+            </tr>
+          </thead>
+          <tbody id="translationDetailTableBody" data-page-node-id="hhveNOw40G8rbBkZRRbQ1G"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 自建内容 · 详情页 ========== -->
+    <section class="page" id="page-self-detail" data-page-node-id="tsSelfDetailPage001">
+      <div class="toolbar" data-page-node-id="tsSelfDetailToolbar001">
+        <div class="toolbar-left" data-page-node-id="tsSelfDetailLeft001">
+          <button class="btn-back" id="selfDetailBtnBack" type="button" data-page-node-id="tsSelfDetailBack001">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="tsSelfDetailBackSvg001"><polyline points="15 18 9 12 15 6" data-page-node-id="tsSelfDetailBackP01"/></svg>
+          </button>
+          <h2 id="selfDetailTitle" data-page-node-id="tsSelfDetailTitle001">自建内容详情</h2>
+        </div>
+        <div class="toolbar-right" data-page-node-id="tsSelfDetailRight001">
+          <span class="translation-detail-sub" id="selfDetailSub" data-page-node-id="tsSelfDetailSub001"></span>
+          <button class="btn-primary" id="selfDetailUploadBtn" type="button" data-page-node-id="tsSelfDetailUploadBtn001">上传视频</button>
+        </div>
+      </div>
+
+      <div class="translation-empty" id="selfDetailEmpty" style="display:none" data-page-node-id="tsSelfDetailEmpty001">
+        <div class="empty-state" data-page-node-id="tsSelfDetailEmptyState001">
+          <div class="empty-icon" data-page-node-id="tsSelfDetailEmptyIcon001">
+            <svg viewBox="0 0 64 64" fill="none" data-page-node-id="tsSelfDetailEmptySvg001"><path d="M5 24h20M15 24V10M8 10h14" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="tsSelfDetailEmptyP01"/><path d="M2 42h20M12 42V28M5 28h14" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="tsSelfDetailEmptyP02"/><path d="M44 8v40M40 12h8" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="tsSelfDetailEmptyP03"/></svg>
+          </div>
+          <h3 data-page-node-id="tsSelfDetailEmptyTitle001">还没有上传视频</h3>
+          <p data-page-node-id="tsSelfDetailEmptyDesc001">点击右上角「上传视频」，选择文件并指定语言后即可发布到 YouTube</p>
+        </div>
+      </div>
+
+      <div class="translation-detail-table-wrap" id="selfDetailTableWrap" style="display:none" data-page-node-id="tsSelfDetailWrap001">
+        <table class="translation-table translation-detail-table" id="selfDetailTable" data-page-node-id="tsSelfDetailTable001">
+          <thead data-page-node-id="tsSelfDetailThead001">
+            <tr data-page-node-id="tsSelfDetailTheadRow001">
+              <th class="col-linked" data-page-node-id="tsSelfDetailThLinked001">关联合集组</th>
+              <th class="col-lang" data-page-node-id="tsSelfDetailThLang001">语言</th>
+              <th class="col-filename" data-page-node-id="tsSelfDetailThFile001">视频文件</th>
+              <th class="col-created" data-page-node-id="tsSelfDetailThCreated001">上传时间</th>
+              <th class="col-actions" data-page-node-id="tsSelfDetailThActions001">操作</th>
+            </tr>
+          </thead>
+          <tbody id="selfDetailTableBody" data-page-node-id="tsSelfDetailTbody001"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 处理检查结果面板（固定在底部） -->
+    <div class="processing-panel" id="processingPanel" style="display:none" data-page-node-id="mspPWl7kNhAZILzc0G0DA0">
+      <div class="processing-panel-inner" data-page-node-id="OYSHTm5DtErECD7NEsQlNp">
+        <div class="processing-panel-top" data-page-node-id="wYQvwpff5kWQAxfM8XqpPY">
+          <div class="processing-panel-status" data-page-node-id="SXQlS6E5KwLmXv30yoM9uv">
+            <span class="processing-status-icon" id="processingStatusIcon" data-page-node-id="RJqV4KbWECEJ7fqdcyCjRy">⏳</span>
+            <span class="processing-status-title" id="processingStatusTitle" data-page-node-id="KWJPX8L4EMZWhDd3XP079A">处理检查中...</span>
+            <span class="processing-percent-badge" id="processingPercentBadge" data-page-node-id="tUkQet0vnNzjYjtacGiZvY">0%</span>
+          </div>
+          <div class="processing-panel-actions" data-page-node-id="Cs0gAaXrIh3kbbtrVCUtza">
+            <a id="processingVideoLink" href="#" target="_blank" class="processing-watch-btn" style="display:none" data-page-node-id="xiPvvdD782JqLXmGGVq8gF">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" data-page-node-id="Wm4IIyogfQt956Cc9S5kil"><polygon points="5 3 19 12 5 21 5 3" data-page-node-id="OwvQohtYikLCohHpMguNng"/></svg>
+              观看
+            </a>
+            <button class="processing-copy-btn" id="processingCopyBtn" title="复制链接" style="display:none" data-page-node-id="zrv4F5ZqJoMSNSFQSScIf2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="yqqVCHv9jbQ4JdXwBMD6XV"><rect x="9" y="9" width="13" height="13" rx="2" data-page-node-id="y1U617frLqMwasiAdPqf67"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" data-page-node-id="Itz5vK8vELOsJzO4IGNr6h"/></svg>
+            </button>
+            <button class="processing-expand-btn" id="processingExpandBtn" title="展开/收起详情" data-page-node-id="0MxXWnQWLmSDaJ6URMfl7n">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="FBf0Ql0x3xz9itaryHjv4B"><polyline points="6 9 12 15 18 9" data-page-node-id="FxWZotCHCv97bMJAahDhxa"/></svg>
+            </button>
+            <button class="processing-close-btn" id="processingCloseBtn" title="关闭" data-page-node-id="dB5JOJ4XgvCT1aUnVQ2pNr">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="uQh45QiAnqsU5YAG71ved3"><line x1="18" y1="6" x2="6" y2="18" data-page-node-id="e8H5VrYgDmYziup0DF1EXU"/><line x1="6" y1="6" x2="18" y2="18" data-page-node-id="4rQqIQG3FiJXnDFDvAaC2q"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="processing-panel-progress" id="processingPanelProgress" data-page-node-id="7zOjPjbjXB119A6KBE9rOm">
+          <div class="progress-bar-track" data-page-node-id="10HFJlPScMvF8yIy0iMPze">
+            <div class="progress-bar-fill" id="progressBarFill" style="width:0%" data-page-node-id="QxA6SaZ1aB0HdDOfwEHlDa"></div>
+          </div>
+        </div>
+        <div class="processing-panel-detail" id="processingPanelDetail" style="display:none" data-page-node-id="FjaPB9m749yHQaqa5BxDwe">
+          <div class="processing-issues" id="processingIssues" data-page-node-id="RptMTp10mYqKujvWCGjrnb"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ==================== 频道编辑弹窗 ==================== -->
+
+<!-- 翻译合成合集 · 编辑关联合集弹窗 -->
+<div class="modal-mask" id="translationEditMask" style="display:none" data-page-node-id="tsEditMask001">
+  <div class="modal-card translation-edit-modal" data-page-node-id="tsEditCard001">
+    <div class="modal-header" data-page-node-id="tsEditHeader001">
+      <h3 id="translationEditTitle" data-page-node-id="tsEditTitle001">编辑关联合集</h3>
+      <button class="modal-close" id="translationEditClose" type="button" data-page-node-id="tsEditCloseBtn001">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="tsEditCloseSvg001"><line x1="18" y1="6" x2="6" y2="18" data-page-node-id="tsEditCloseLine01"/><line x1="6" y1="6" x2="18" y2="18" data-page-node-id="tsEditCloseLine02"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" data-page-node-id="tsEditBody001">
+      <form id="translationEditForm" autocomplete="off" data-page-node-id="tsEditForm001">
+        <div class="translation-edit-summary" data-page-node-id="tsEditSummary001">
+          <div class="translation-edit-summary-name" id="translationEditName" data-page-node-id="tsEditName001">—</div>
+          <div class="translation-edit-summary-sub" id="translationEditSub" data-page-node-id="tsEditSub001">—</div>
+        </div>
+        <div class="field" data-page-node-id="tsEditLinkedField001">
+          <div class="field-label" data-page-node-id="tsEditLinkedLabel001">关联合集</div>
+          <select id="translationEditLinked" data-page-node-id="tsEditLinkedSel001"></select>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer" data-page-node-id="tsEditFooter001">
+      <button class="btn-secondary" id="translationEditCancel" type="button" data-page-node-id="tsEditCancelBtn001">取 消</button>
+      <button class="btn-primary" id="translationEditSave" type="button" data-page-node-id="tsEditSaveBtn001">确 定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 自建内容 · 新增 / 编辑弹窗 -->
+<div class="modal-mask" id="selfEditMask" style="display:none" data-page-node-id="tsSelfEditMask001">
+  <div class="modal-card translation-edit-modal self-edit-modal" data-page-node-id="tsSelfEditCard001">
+    <div class="modal-header" data-page-node-id="tsSelfEditHeader001">
+      <h3 id="selfEditTitle" data-page-node-id="tsSelfEditTitle001">新增自建内容</h3>
+      <button class="modal-close" id="selfEditCloseBtn" type="button" data-page-node-id="tsSelfEditCloseBtn001">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="tsSelfEditCloseSvg001"><line x1="18" y1="6" x2="6" y2="18" data-page-node-id="tsSelfEditCloseL01"/><line x1="6" y1="6" x2="18" y2="18" data-page-node-id="tsSelfEditCloseL02"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" data-page-node-id="tsSelfEditBody001">
+      <form id="selfEditForm" autocomplete="off" data-page-node-id="tsSelfEditForm001">
+        <input type="hidden" id="selfEditId" data-page-node-id="tsSelfEditId001">
+        <div class="field" data-page-node-id="tsSelfEditGroupField001">
+          <div class="field-label" data-page-node-id="tsSelfEditGroupLabel001">关联合集组 <span class="required" data-page-node-id="tsSelfEditGroupReq001">*</span></div>
+          <select id="selfEditGroup" data-page-node-id="tsSelfEditGroupSel001"></select>
+        </div>
+        <div class="field" data-page-node-id="tsSelfEditNameField001">
+          <div class="field-label" data-page-node-id="tsSelfEditNameLabel001">合集名称 <span class="required" data-page-node-id="tsSelfEditNameReq001">*</span></div>
+          <input type="text" id="selfEditName" maxlength="60" placeholder="请填写合集名称" data-page-node-id="tsSelfEditNameInput001">
+        </div>
+        <div class="field" data-page-node-id="tsSelfEditIntroField001">
+          <div class="field-label" data-page-node-id="tsSelfEditIntroLabel001">简介</div>
+          <textarea id="selfEditIntro" rows="4" maxlength="500" placeholder="简单描述这个合集的内容方向（选填）" data-page-node-id="tsSelfEditIntroInput001"></textarea>
+          <span class="field-hint" data-page-node-id="tsSelfEditIntroHint001">用于 AI 生成标题 / 简介 / 封面时作为上下文</span>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer" data-page-node-id="tsSelfEditFooter001">
+      <button class="btn-secondary" id="selfEditCancelBtn" type="button" data-page-node-id="tsSelfEditCancelBtn001">取 消</button>
+      <button class="btn-primary" id="selfEditSaveBtn" type="button" data-page-node-id="tsSelfEditSaveBtn001">确 定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 自建内容 · 上传视频弹窗（必须选择语言） -->
+<div class="modal-mask" id="selfVideoMask" style="display:none" data-page-node-id="tsSelfVideoMask001">
+  <div class="modal-card self-video-modal" data-page-node-id="tsSelfVideoCard001">
+    <div class="modal-header" data-page-node-id="tsSelfVideoHeader001">
+      <h3 id="selfVideoTitle" data-page-node-id="tsSelfVideoTitle001">上传视频</h3>
+      <button class="modal-close" id="selfVideoCloseBtn" type="button" data-page-node-id="tsSelfVideoCloseBtn001">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="tsSelfVideoCloseSvg001"><line x1="18" y1="6" x2="6" y2="18" data-page-node-id="tsSelfVideoCloseL01"/><line x1="6" y1="6" x2="18" y2="18" data-page-node-id="tsSelfVideoCloseL02"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" data-page-node-id="tsSelfVideoBody001">
+      <div class="field" data-page-node-id="tsSelfVideoLangField001">
+        <div class="field-label" data-page-node-id="tsSelfVideoLangLabel001">语言 <span class="required" data-page-node-id="tsSelfVideoLangReq001">*</span></div>
+        <select id="selfVideoLang" data-page-node-id="tsSelfVideoLangSel001"></select>
+        <span class="field-hint" data-page-node-id="tsSelfVideoLangHint001">发布时会写入发布任务的「语言」字段，并参与文件名生成</span>
+      </div>
+      <div class="field self-video-drop-field" id="selfVideoDropField" data-page-node-id="tsSelfVideoDropField001">
+        <div class="field-label" data-page-node-id="tsSelfVideoFileLabel001">视频文件 <span class="required" data-page-node-id="tsSelfVideoFileReq001">*</span></div>
+        <input type="file" id="selfVideoFileInput" accept=".mp4,.mov,.m4v,.webm,.avi,.mkv,.flv,.wmv,.mpg,.mpeg,.ts" hidden data-page-node-id="tsSelfVideoFileInput001">
+        <div class="uyt-thumb-empty self-video-empty" id="selfVideoEmpty" title="点击从本地选择视频文件" data-page-node-id="tsSelfVideoEmpty001">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-page-node-id="tsSelfVideoEmptySvg001"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" data-page-node-id="tsSelfVideoEmptyP01"/><polyline points="17 8 12 3 7 8" data-page-node-id="tsSelfVideoEmptyP02"/><line x1="12" y1="3" x2="12" y2="15" data-page-node-id="tsSelfVideoEmptyP03"/></svg>
+          <span data-page-node-id="tsSelfVideoEmptyTxt001">点击选择视频</span>
+          <span class="uyt-thumb-empty-hint" data-page-node-id="tsSelfVideoEmptyHint001">或将视频拖到此处 · 支持 mp4 / mov / webm / mkv 等</span>
+        </div>
+        <div class="self-video-selected" id="selfVideoSelected" style="display:none" data-page-node-id="tsSelfVideoSelected001">
+          <span class="self-video-name" id="selfVideoName" data-page-node-id="tsSelfVideoName001">—</span>
+          <span class="self-video-size" id="selfVideoSize" data-page-node-id="tsSelfVideoSize001"></span>
+          <button type="button" class="thumbnail-remove-btn" id="selfVideoRemoveBtn" data-page-node-id="tsSelfVideoRemoveBtn001">移除</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" data-page-node-id="tsSelfVideoFooter001">
+      <span class="uyt-task-hint" data-page-node-id="tsSelfVideoHint001">开始后窗口自动关闭，大文件在后台继续上传，进度见右下角「上传进度」</span>
+      <button class="btn-secondary" id="selfVideoCancelBtn" type="button" data-page-node-id="tsSelfVideoCancelBtn001">取 消</button>
+      <button class="btn-primary" id="selfVideoSubmitBtn" type="button" data-page-node-id="tsSelfVideoSubmitBtn001">开始上传</button>
+    </div>
+  </div>
+</div>
+
+<!-- 翻译合成 · 上传YT（单步发布）弹窗 -->
+<div class="modal-mask" id="uploadYtMask" style="display:none" data-page-node-id="uytMask001">
+  <div class="modal-card upload-yt-modal" data-page-node-id="uytCard001">
+    <div class="modal-header" data-page-node-id="uytHeader001">
+      <h3 id="uploadYtTitle" data-page-node-id="uytTitle001">上传视频至 YouTube</h3>
+      <button class="modal-close" id="uploadYtClose" type="button" data-page-node-id="uytCloseBtn001">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="uytCloseSvg001"><line x1="18" y1="6" x2="6" y2="18" data-page-node-id="uytCloseLine01"/><line x1="6" y1="6" x2="18" y2="18" data-page-node-id="uytCloseLine02"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" data-page-node-id="uytBody001">
+      <!-- 发布配置 -->
+      <div class="form-section uyt-section" data-page-node-id="uytSecCfg001">
+        <div class="section-header" data-page-node-id="uytSecCfgHead001">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="uytCfgSvg001"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" data-page-node-id="uytCfgSvgP01"/><circle cx="9" cy="7" r="4" data-page-node-id="uytCfgSvgP02"/><path d="M23 21v-2a4 4 0 0 0-3-3.87" data-page-node-id="uytCfgSvgP03"/><path d="M16 3.13a4 4 0 0 1 0 7.75" data-page-node-id="uytCfgSvgP04"/></svg>
+          <span data-page-node-id="uytCfgTitle001">发布配置</span>
+        </div>
+        <div class="field" data-page-node-id="uytChField001">
+          <div class="field-label" data-page-node-id="uytChLabel001">发布频道 <span class="required" data-page-node-id="uytChReq001">*</span></div>
+          <select id="uytChannel" data-page-node-id="uytChSel001">
+            <option value="" data-page-node-id="uytChOptDef001">选择频道</option>
+          </select>
+        </div>
+        <div class="uyt-info-grid" data-page-node-id="uytInfoGrid001">
+          <div class="uyt-info-item" data-page-node-id="uytInfoName001">
+            <span class="uyt-info-k" data-page-node-id="uytInfoNameK">合集名称</span>
+            <span class="uyt-info-v" id="uytInfoName" data-page-node-id="uytInfoNameV">—</span>
+          </div>
+          <div class="uyt-info-item" data-page-node-id="uytInfoGroup001">
+            <span class="uyt-info-k" data-page-node-id="uytInfoGroupK">合集组</span>
+            <span class="uyt-info-v" id="uytInfoGroup" data-page-node-id="uytInfoGroupV">—</span>
+          </div>
+          <div class="uyt-info-item" data-page-node-id="uytInfoLang001">
+            <span class="uyt-info-k" data-page-node-id="uytInfoLangK">语言</span>
+            <span class="uyt-info-v" id="uytInfoLang" data-page-node-id="uytInfoLangV">—</span>
+          </div>
+          <div class="uyt-info-item" data-page-node-id="uytInfoType001">
+            <span class="uyt-info-k" data-page-node-id="uytInfoTypeK">类型</span>
+            <span class="uyt-info-v" id="uytInfoType" data-page-node-id="uytInfoTypeV">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 基础信息 -->
+      <div class="form-section uyt-section" data-page-node-id="uytSecBase001">
+        <div class="section-header" data-page-node-id="uytSecBaseHead001">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="uytBaseSvg001"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" data-page-node-id="uytBaseSvgP01"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" data-page-node-id="uytBaseSvgP02"/></svg>
+          <span data-page-node-id="uytBaseTitle001">基础信息</span>
+        </div>
+        <div class="field" data-page-node-id="uytTitleField001">
+          <div class="field-label" data-page-node-id="uytTitleLabel001">视频标题 <span class="required" data-page-node-id="uytTitleReq001">*</span>
+            <button type="button" class="field-link-btn" id="uytAiGenTitle" title="按「指令库 → 标题指令」中匹配当前频道的模板生成标题" data-page-node-id="uytAiGenTitle001">AI生成</button>
+          </div>
+          <div class="field-input-wrap" data-page-node-id="uytTitleWrap001">
+            <input type="text" id="uytTitle" maxlength="100" placeholder="为你的视频起一个吸引人的标题" data-page-node-id="uytTitleInput001">
+            <span class="field-counter" id="uytTitleCount" data-page-node-id="uytTitleCount001">0/100</span>
+          </div>
+        </div>
+        <div class="field" data-page-node-id="uytDescField001">
+          <div class="field-label" data-page-node-id="uytDescLabel001">视频描述
+            <button type="button" class="field-link-btn" id="uytAiGenDesc" title="按「指令库 → 简介指令」中匹配当前频道的模板生成描述">AI生成</button>
+          </div>
+          <div class="field-input-wrap" data-page-node-id="uytDescWrap001">
+            <textarea id="uytDesc" rows="4" maxlength="5000" placeholder="详细描述视频内容，可使用 #话题标签" data-page-node-id="uytDescInput001"></textarea>
+            <span class="field-counter" id="uytDescCount" data-page-node-id="uytDescCount001">0/5000</span>
+          </div>
+        </div>
+        <div class="field uyt-thumb-field" id="uytThumbField" data-page-node-id="uytThumbField001">
+          <div class="field-label" data-page-node-id="uytThumbLabel001">
+            缩略图
+            <button type="button" class="field-link-btn" id="uytAiGenThumb" title="按「指令库 → 封面指令」中匹配当前频道的模板生成封面" data-page-node-id="uytAiGenThumb001">AI生成</button>
+            <span class="field-hint-inline" data-page-node-id="uytThumbHint001">（可选）推荐 1280x720，最大 10MB</span>
+          </div>
+          <input type="file" id="uytThumbFileInput" accept=".jpg,.jpeg,.png,.gif,.bmp,.webp" hidden data-page-node-id="uytThumbFileInput001">
+          <div class="uyt-thumb-empty" id="uytThumbEmpty" title="点击从本地选择封面图片" data-page-node-id="uytThumbEmpty001">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-page-node-id="uytThumbEmptySvg001"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" data-page-node-id="uytThumbEmptyP01"/><polyline points="17 8 12 3 7 8" data-page-node-id="uytThumbEmptyP02"/><line x1="12" y1="3" x2="12" y2="15" data-page-node-id="uytThumbEmptyP03"/></svg>
+            <span data-page-node-id="uytThumbEmptyTxt001">点击上传封面</span>
+            <span class="uyt-thumb-empty-hint" data-page-node-id="uytThumbEmptyHint001">或将图片拖到此处 · 推荐 1280x720，最大 10MB</span>
+          </div>
+          <div class="uyt-thumb-preview" id="uytThumbPreviewArea" style="display:none" data-page-node-id="uytThumbPreview001">
+            <img id="uytThumbPreviewImg" src="" alt="缩略图预览" data-page-node-id="uytThumbPreviewImg001">
+            <div class="uyt-thumb-meta" data-page-node-id="uytThumbMeta001">
+              <span class="uyt-thumb-name" id="uytThumbFileName" data-page-node-id="uytThumbFileName001">—</span>
+              <button type="button" class="thumbnail-remove-btn" id="uytThumbRemove" data-page-node-id="uytThumbRemoveBtn001">移除</button>
+            </div>
+          </div>
+        </div>
+        <div class="field" data-page-node-id="uytPrivacyField001">
+          <div class="field-label" data-page-node-id="uytPrivacyLabel001">隐私设置 <span class="required" data-page-node-id="uytPrivacyReq001">*</span></div>
+          <div class="radio-group" id="uytPrivacyGroup" data-page-node-id="uytPrivacyGroup001">
+            <label class="radio-card" data-value="public" data-page-node-id="uytPubCard001">
+              <div class="radio-icon" data-page-node-id="uytPubIcon001"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="uytPubSvg001"><circle cx="12" cy="12" r="10" data-page-node-id="uytPubSvgC001"/></svg></div>
+              <div class="radio-text" data-page-node-id="uytPubText001"><strong data-page-node-id="uytPubStrong001">公开</strong><span data-page-node-id="uytPubSpan001">所有人可见</span></div>
+            </label>
+            <label class="radio-card" data-value="unlisted" data-page-node-id="uytUnlCard001">
+              <div class="radio-icon" data-page-node-id="uytUnlIcon001"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="uytUnlSvg001"><path d="M1 1l22 22" data-page-node-id="uytUnlSvgP01"/><path d="M17.94 18A10 10 0 0 1 2 12c1.53-3.15 5.84-8 10-8 2.8 0 5.47 2.05 7.46 4.5" data-page-node-id="uytUnlSvgP02"/><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" data-page-node-id="uytUnlSvgP03"/></svg></div>
+              <div class="radio-text" data-page-node-id="uytUnlText001"><strong data-page-node-id="uytUnlStrong001">不公开</strong><span data-page-node-id="uytUnlSpan001">有链接可见</span></div>
+            </label>
+            <label class="radio-card active" data-value="private" data-page-node-id="uytPvtCard001">
+              <div class="radio-icon" data-page-node-id="uytPvtIcon001"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="uytPvtSvg001"><rect x="3" y="11" width="18" height="11" rx="2" data-page-node-id="uytPvtSvgR001"/><path d="M7 11V7a5 5 0 0 1 10 0v4" data-page-node-id="uytPvtSvgP001"/></svg></div>
+              <div class="radio-text" data-page-node-id="uytPvtText001"><strong data-page-node-id="uytPvtStrong001">私享</strong><span data-page-node-id="uytPvtSpan001">仅自己可见</span></div>
+            </label>
+          </div>
+        </div>
+        <div class="field" data-page-node-id="uytPubAtField001">
+          <div class="field-label" data-page-node-id="uytPubAtLabel001">定时发布</div>
+          <input type="datetime-local" id="uytPublishAt" data-page-node-id="uytPubAtInput001">
+          <span class="field-hint" data-page-node-id="uytPubAtHint001">仅私享视频支持定时发布，填写后自动按「私享」提交</span>
+        </div>
+        <div class="field" data-page-node-id="uytOptField001">
+          <div class="field-label" data-page-node-id="uytOptLabel001">其他选项</div>
+          <div class="switch-list" data-page-node-id="uytSwitchList001">
+            <label class="switch-item" data-page-node-id="uytSwEmb001">
+              <span data-page-node-id="uytSwEmbTxt001">允许嵌入</span>
+              <div class="switch-track" data-page-node-id="uytSwEmbTrack001">
+                <input type="checkbox" id="uytEmbeddable" checked data-page-node-id="uytSwEmbInput001">
+                <div class="switch-thumb" data-page-node-id="uytSwEmbThumb001"></div>
+              </div>
+            </label>
+            <label class="switch-item" data-page-node-id="uytSwNotify001">
+              <span data-page-node-id="uytSwNotifyTxt001">通知订阅者</span>
+              <div class="switch-track" data-page-node-id="uytSwNotifyTrack001">
+                <input type="checkbox" id="uytNotifySubscribers" checked data-page-node-id="uytSwNotifyInput001">
+                <div class="switch-thumb" data-page-node-id="uytSwNotifyThumb001"></div>
+              </div>
+            </label>
+            <label class="switch-item" data-page-node-id="uytSwKids001">
+              <span data-page-node-id="uytSwKidsTxt001">面向儿童</span>
+              <div class="switch-track" data-page-node-id="uytSwKidsTrack001">
+                <input type="checkbox" id="uytMadeForKids" data-page-node-id="uytSwKidsInput001">
+                <div class="switch-thumb" data-page-node-id="uytSwKidsThumb001"></div>
+              </div>
+            </label>
+            <label class="switch-item" data-page-node-id="uytSwAi001">
+              <span data-page-node-id="uytSwAiTxt001">含 AI 合成内容</span>
+              <div class="switch-track" data-page-node-id="uytSwAiTrack001">
+                <input type="checkbox" id="uytSynthetic" data-page-node-id="uytSwAiInput001">
+                <div class="switch-thumb" data-page-node-id="uytSwAiThumb001"></div>
+              </div>
+            </label>
+            <label class="switch-item" data-page-node-id="uytSw18x001">
+              <span data-page-node-id="uytSw18xTxt001">仅限 18 岁以上观看</span>
+              <div class="switch-track" data-page-node-id="uytSw18xTrack001">
+                <input type="checkbox" id="uytAgeRestricted" data-page-node-id="uytSw18xInput001">
+                <div class="switch-thumb" data-page-node-id="uytSw18xThumb001"></div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" data-page-node-id="uytFooter001">
+      <span class="uyt-task-hint" data-page-node-id="uytTaskHint001">点击创建后任务在后台执行，无需等待</span>
+      <button class="btn-secondary" id="uploadYtCancel" type="button" data-page-node-id="uytCancelBtn001">取 消</button>
+      <button class="btn-primary" id="uploadYtSubmit" type="button" data-page-node-id="uytSubmitBtn001">创建发布任务</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="channelEditModal" style="display:none" data-page-node-id="kbCVETu8OUkUaXagCyCthQ">
+  <div class="modal-card channel-edit-modal" data-page-node-id="05aySpQRy9Q051K7QwB59B">
+    <div class="modal-header" data-page-node-id="87usDooUQmgohS4PQjBTaa">
+      <h3 id="channelEditTitle" data-page-node-id="6gcJjUJkIaPB64y0QrXTaq">编辑频道信息</h3>
+      <button class="modal-close" id="channelEditClose" type="button" data-page-node-id="maWcXTWYInaHfoonZeyYdk">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="T2FfpIxgo5c8v8qgbhLkzA"><line x1="18" y1="6" x2="6" y2="18" data-page-node-id="mRhuUoHLVjOn2SqoiznICH"/><line x1="6" y1="6" x2="18" y2="18" data-page-node-id="U9hstI6HYJJ7CBDvmoDJBk"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" data-page-node-id="aAFANwkmAb3ZKHLlODTS5y">
+      <form id="channelEditForm" class="channel-edit-form" autocomplete="off" data-page-node-id="PEFdPBCk0K63drEWCQEczp">
+        <div class="channel-edit-summary" data-page-node-id="SRx7BBK8EzpB5aNvN9hfiE">
+          <div class="channel-edit-avatar" id="channelEditAvatar" data-page-node-id="sH5MpAtvVK4nt4c55gfB7d"></div>
+          <div class="channel-edit-summary-info" data-page-node-id="tEVzHPflSI7h45wmFLNDba">
+            <div class="channel-edit-summary-title" id="channelEditSummaryTitle" data-page-node-id="DhquXfmzCt5genwyHw1ynp">—</div>
+            <div class="channel-edit-summary-sub" id="channelEditSummarySub" data-page-node-id="fGBwiHcVsA3GS1omjFK71m">—</div>
+          </div>
+        </div>
+
+        <div class="form-grid" data-page-node-id="dw4zuRORpN6wWcRpwziwsU">
+          <div class="field" data-page-node-id="2OFzIELwKFqKNbZkvMHltO">
+            <div class="field-label" data-page-node-id="dRvtGFAoHV6IzcwjqyLcBS">归属人 <span class="required" data-page-node-id="Rx2bjmV0ZdAxH4RaJfCR3a">*</span></div>
+            <div class="inline-add-wrap" data-page-node-id="8F9JdDdhzpOnGbVlvvAEiA">
+              <select id="editOwner" data-field="owner" required data-page-node-id="X1F8TqG4Oz2WbjwesIOYKR"></select>
+              <button type="button" class="inline-add-btn" data-target="owner" data-page-node-id="79LP85PzWJ8KGUHLfIUMpe">+</button>
+            </div>
+          </div>
+          <div class="field" data-page-node-id="CPnc1o5JUoZeuSvdVYKn8E">
+            <div class="field-label" data-page-node-id="KsmfiObrsiFLt9oey0GmtG">ChannelID <span class="required" data-page-node-id="qKWn0X02aEehcGuiP3WIFB">*</span></div>
+            <input type="text" id="editChannelId" data-field="channelId" placeholder="UC 开头的 24 位频道 ID" maxlength="30" required data-page-node-id="OMKHrpOS9zz8SoSNPzYQvE">
+          </div>
+
+          <div class="field" data-page-node-id="FaQ6M9sVzgsVeEEfoW8Ps1">
+            <div class="field-label" data-page-node-id="8IJFHaq8HcOs815IZozuIA">语言 <span class="required" data-page-node-id="5RN7vAmIGUdopvrJODpOwQ">*</span></div>
+            <select id="editLanguage" data-field="language" required data-page-node-id="QPkUgCHdQfAWJ8T2LLpcaW"></select>
+          </div>
+          <div class="field" data-page-node-id="KwIjjllmFkwNdGJyAyDiCv">
+            <div class="field-label" data-page-node-id="cFBXo6NCNIFrir1r537tU2">频道名称</div>
+            <input type="text" id="editChannelName" data-field="channelName" placeholder="自定义展示名称（可空）" maxlength="100" data-page-node-id="zg9VLDHSob8qdo4hj3bkhT">
+          </div>
+
+          <div class="field" data-page-node-id="qvePIEnU91GRSDJyRAMpMZ">
+            <div class="field-label" data-page-node-id="HOUTv3uzjmzXZHXRtp1JMF">所属公司 <span class="required" data-page-node-id="VXW6dFe3K532VO8XrSxwEC">*</span></div>
+            <div class="inline-add-wrap" data-page-node-id="YIRu0ow8ov0iChncgZDW7f">
+              <select id="editCompany" data-field="company" required data-page-node-id="hDcgV6Xci9JmbX6PxwknAm"></select>
+              <button type="button" class="inline-add-btn" data-target="company" data-page-node-id="FpB69Tv9TV8qJupPVClnyW">+</button>
+            </div>
+            <span class="field-hint" id="companyAddHint" style="display:none" data-page-node-id="91OmEP1D4mBVEvs4zFBS04">点 + 新增公司</span>
+          </div>
+          <div class="field" data-page-node-id="RoAhMo4EJAyJfSjLN9yfGP">
+            <div class="field-label" data-page-node-id="m54vesWVcJ4aAAUKCdi6xT">小组 <span class="required" data-page-node-id="Ex5PNx3CHx4OLW8mSZ6fUO">*</span></div>
+            <div class="inline-add-wrap" data-page-node-id="LEMdKSiuj04w9YRTzQKFO4">
+              <select id="editGroup" data-field="group" required data-page-node-id="2VG5vtcsrDmStKy2fhSlRG"></select>
+              <button type="button" class="inline-add-btn" data-target="group" data-page-node-id="DI0pFHwDEIWmhPaVEbOe5G">+</button>
+            </div>
+          </div>
+          <div class="field" data-page-node-id="sM3eDcQdyYPkp16Q9ChEu2">
+            <div class="field-label" data-page-node-id="UvmMd59e4cVPwCtZT3rvZ3">男女频 <span class="required" data-page-node-id="uJ85U1vGoQif6N3KjS3rOR">*</span></div>
+            <select id="editGender" data-field="gender" required data-page-node-id="UqCOrOpFuCB7CJWVIrCKNZ"></select>
+          </div>
+
+          <div class="field" data-page-node-id="5cuyZp9lX0T3ofrsDYzE4L">
+            <div class="field-label" data-page-node-id="nY3L6lw6Ae3gMVZlX3mBBg">频道类型 <span class="required" data-page-node-id="FKaHmCWYjYQCKSm9ZV6cuV">*</span></div>
+            <select id="editChannelType" data-field="channelType" required data-page-node-id="WdJEXuxZDokEcFJ4asi0ZW"></select>
+          </div>
+          <div class="field" data-page-node-id="OLZdn4H6BrlmczSwyHyq9E">
+            <div class="field-label" data-page-node-id="FugGQtGVZCG6RIkuLxYurV">运营模式 <span class="required" data-page-node-id="jkuXJPXW2h7Nng5GARZYyo">*</span></div>
+            <select id="editOperationMode" data-field="operationMode" required data-page-node-id="uhIpelYpcJuSEdjjGidYMJ"></select>
+          </div>
+
+          <div class="field" data-page-node-id="supplierField01">
+            <div class="field-label">供应商</div>
+            <select id="editSupplier" data-field="supplier"></select>
+          </div>
+          <div class="field" data-page-node-id="copyrightTypeField01">
+            <div class="field-label">版权类型</div>
+            <select id="editCopyrightType" data-field="copyrightType"></select>
+          </div>
+
+          <div class="field" data-page-node-id="B5vz7iCpZEztPpoJyhlcK4">
+            <div class="field-label" data-page-node-id="YBVfC5C9jIWRvTNVVTINtC">真人剧/漫剧 <span class="required" data-page-node-id="zziouKkprLBlLCDuTbxGw1">*</span></div>
+            <select id="editDramaType" data-field="dramaType" required data-page-node-id="A7kGrSs53JYDRL9BKq4ImS"></select>
+          </div>
+          <div class="field" data-page-node-id="IZy2yDbT7U6m8nfvAdJKqp">
+            <div class="field-label" data-page-node-id="PLFjSzIVy0deAoexsTPUcm">是否过获利 <span class="required" data-page-node-id="EQqFYZyIqGQKIylukDboEj">*</span></div>
+            <select id="editMonetized" data-field="monetized" required data-page-node-id="gL4RLgBn3sIjlrYOx6RAI8"></select>
+          </div>
+
+          <div class="field" data-page-node-id="sBAdcJD8xGaVBTYw4xmTne">
+            <div class="field-label" data-page-node-id="p2HZ09qFFdk1sXBufWQDl7">挂靠方 <span class="required" data-page-node-id="3EIs4HsSc0G5tSxXvqrega">*</span></div>
+            <select id="editRanking" data-field="ranking" required data-page-node-id="TCWR68HUMXj7dVnGAaTKrT"></select>
+          </div>
+          <div class="field" data-page-node-id="bF1yRiPHK9hy7FhK4x9cF0">
+            <div class="field-label" data-page-node-id="h36Ma7vFM0YVdWeGQCHRH8">运营频道状态 <span class="required" data-page-node-id="NhWB7D7LSOCPGsCK8lnL40">*</span></div>
+            <select id="editStatus" data-field="status" required data-page-node-id="ZBrgxPER08kvZHbCJNB5xc"></select>
+          </div>
+        </div>
+
+        <div class="field" data-page-node-id="hmaJnxiejRo2YDumi8hRHl">
+          <div class="field-label" data-page-node-id="i5c7AG8wZVY7A8GSnGqaxz">备注</div>
+          <textarea id="editRemark" data-field="remark" rows="3" maxlength="500" placeholder="可填写其他说明信息"></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer" data-page-node-id="WrSIH00gmKhnou18IEvRgM">
+      <button class="btn-secondary" id="channelEditCancel" type="button" data-page-node-id="DVkxwCXHlu2TPjFOxoO3YE">取 消</button>
+      <button class="btn-primary" id="channelEditSave" type="button" data-page-node-id="MdRtXchFEwh4YXEJoArB5h">确 定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 内联新增小弹窗（归属人 / 公司） -->
+<div class="modal-mask" id="inlineAddModal" style="display:none" data-page-node-id="rJMJHH7TKdxkCAb9by0OCj">
+  <div class="modal-card inline-add-modal" data-page-node-id="9pmdTUmDoG15dqoSqSnCgX">
+    <div class="modal-header" data-page-node-id="Cpt93w5r0g0M0iWYSHyVWq">
+      <h3 id="inlineAddTitle" data-page-node-id="ABh0ooTnhCaTlBPkuyC7GW">新增</h3>
+      <button class="modal-close" id="inlineAddClose" type="button" data-page-node-id="XI4E4Aw7ROPc61750d4yRD">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="be2W80mmqbQ4ySROoqYnGo"><line x1="18" y1="6" x2="6" y2="18" data-page-node-id="jtbUXDyCS7iOD4GjrcD8sK"/><line x1="6" y1="6" x2="18" y2="18" data-page-node-id="25C2j44kSLNYHqtYVp3M3K"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" data-page-node-id="Ygjvq6OqVWyyDMzN2NiJ6M">
+      <div class="field" data-page-node-id="X3f8ycNs1e8EkC9oonH2jp">
+        <div class="field-label" id="inlineAddLabel" data-page-node-id="hLBtsPZr2iBheq7Lz3Q35r">名称</div>
+        <input type="text" id="inlineAddInput" maxlength="30" placeholder="请输入名称" data-page-node-id="8YQFhY6D7n4fqj1lcy0yg5">
+      </div>
+    </div>
+    <div class="modal-footer" data-page-node-id="Zz4sGOdYk4AfC7gfFXxDCx">
+      <button class="btn-secondary" id="inlineAddCancel" type="button" data-page-node-id="D5O6ape2gIUb6YClYpMLGx">取 消</button>
+      <button class="btn-primary" id="inlineAddSave" type="button" data-page-node-id="IoGOZSz2JnJ4Ap3zew4oAC">确 定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 字典管理弹窗 -->
+<div class="modal-mask" id="dictModal" style="display:none" data-page-node-id="cunnTRKmuGjkzMgHo3uslo">
+  <div class="modal-card dict-modal" data-page-node-id="ro2Cah14vjGhYUdEctUM8h">
+    <div class="modal-header" data-page-node-id="YKgtaq4iKnIoCAUOxLMRmX">
+      <h3 data-page-node-id="mTLX4tMvmBqhQbnwyTHRF5">字典管理</h3>
+      <button class="modal-close" id="dictClose" type="button" data-page-node-id="SedqNWuqgWx6FzVx0VT0ve">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="80kpoQFwBZrvecuJQSIY9k"><line x1="18" y1="6" x2="6" y2="18" data-page-node-id="HYeYAum6wn5JclrsSnHtbI"/><line x1="6" y1="6" x2="18" y2="18" data-page-node-id="LvZXbxRbNDbUUJE7Hnaxqt"/></svg>
+      </button>
+    </div>
+    <div class="modal-body dict-body" id="dictBody" data-page-node-id="WPy7WtXzzpfqfYKVADT53i"></div>
+    <div class="modal-footer" data-page-node-id="GlrM9yyroD4NBO3pBSDgIb">
+      <button class="btn-secondary" id="dictCancel" type="button" data-page-node-id="NNKOoAaYwcyiLekeTkUCv4">取 消</button>
+      <button class="btn-primary" id="dictSave" type="button" data-page-node-id="nNGFll29t4Qu6PoQd90AtP">保存修改</button>
+    </div>
+  </div>
+</div>
+
+<!-- 合成视频预览弹窗 -->
+<div class="modal-mask" id="videoPreviewMask" style="display:none" data-page-node-id="BGuQ5RVqyT8shbUdUZ5iMG">
+  <div class="modal-card video-preview-modal" id="videoPreviewModal" data-page-node-id="obAbSHt3OSLHsWYul2bhNt">
+    <div class="modal-header" data-page-node-id="Qlj0QzK4cCUkHVwQgWcF9K">
+      <h3 id="videoPreviewTitle" data-page-node-id="GH5riwG3sun5FshkDsusXg">视频预览</h3>
+      <button class="modal-close" id="videoPreviewClose" type="button" aria-label="关闭" data-page-node-id="MB7xBmtaZyh9GzJLDifa3n">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="wb1ksGA6jgzFPBKBvMtAHT"><line x1="18" y1="6" x2="6" y2="18" data-page-node-id="1Vnuts3D9s84DEvLkyzD6A"/><line x1="6" y1="6" x2="18" y2="18" data-page-node-id="RyFFG1KjeIxFsGsDIqEIVh"/></svg>
+      </button>
+    </div>
+    <div class="modal-body video-preview-body" data-page-node-id="JeVFv7AzQpWXUOXUa07qxz">
+      <div class="video-preview-player" data-page-node-id="JPAOhAqSp5hVQVKGywTSeN">
+        <video id="videoPreviewPlayer" controls autoplay playsinline data-page-node-id="wQyaY6BPLGffa2MeAoUzpL"></video>
+      </div>
+      <div class="video-preview-meta" id="videoPreviewMeta" data-page-node-id="lb1ItxQO7mR12hBfNXwiLA"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="historyImportMask" style="display:none" onclick="if(event.target===this)closeHistoryImportModal()" data-page-node-id="historyImportMask001">
+  <div class="modal-card history-import-modal" id="historyImportModal" data-page-node-id="historyImportModal001">
+    <div class="modal-header" data-page-node-id="historyImportHeader001">
+      <h3 data-page-node-id="historyImportTitle001">导入发布内容关联数据</h3>
+      <button class="modal-close" id="historyImportClose" type="button" onclick="closeHistoryImportModal()" aria-label="关闭" data-page-node-id="historyImportClose001">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="historyImportCloseSvg001"><line x1="18" y1="6" x2="6" y2="18" data-page-node-id="historyImportCloseSvgLine1"/><line x1="6" y1="6" x2="18" y2="18" data-page-node-id="historyImportCloseSvgLine2"/></svg>
+      </button>
+    </div>
+    <div class="modal-body history-import-body" data-page-node-id="historyImportBody001">
+      <div class="import-file-info" id="importFileInfo" data-page-node-id="importFileInfo001">
+        <div class="import-file-row" data-page-node-id="importFileNameRow001">
+          <span class="import-file-label" data-page-node-id="importFileLabel001">文件：</span>
+          <span id="importFileName" class="import-file-value" data-page-node-id="importFileName001">—</span>
+        </div>
+        <div class="import-file-row" data-page-node-id="importFileCountRow001">
+          <span class="import-file-label" data-page-node-id="importFileCountLabel001">记录数：</span>
+          <span id="importFileCount" class="import-file-value" data-page-node-id="importFileCount001">—</span>
+        </div>
+      </div>
+      <div class="import-strategy" data-page-node-id="importStrategy001">
+        <div class="import-strategy-title" data-page-node-id="importStrategyTitle001">导入策略</div>
+        <label class="import-strategy-option" data-page-node-id="importStrategyOpt1">
+          <input type="radio" name="importStrategy" value="merge" checked data-page-node-id="importStrategyRadio1">
+          <div class="import-strategy-text" data-page-node-id="importStrategyText1">
+            <div class="import-strategy-name" data-page-node-id="importStrategyName1">合并（按内容ID 去重，导入数据优先）</div>
+            <div class="import-strategy-desc" data-page-node-id="importStrategyDesc1">现有记录中内容ID 相同的将被导入数据覆盖，其他记录保留</div>
+          </div>
+        </label>
+        <label class="import-strategy-option" data-page-node-id="importStrategyOpt2">
+          <input type="radio" name="importStrategy" value="append" data-page-node-id="importStrategyRadio2">
+          <div class="import-strategy-text" data-page-node-id="importStrategyText2">
+            <div class="import-strategy-name" data-page-node-id="importStrategyName2">仅新增（跳过内容ID 重复的）</div>
+            <div class="import-strategy-desc" data-page-node-id="importStrategyDesc2">只插入内容ID 尚未存在的新记录，重复的记录保留现有数据</div>
+          </div>
+        </label>
+      </div>
+      <div class="import-preview" data-page-node-id="importPreview001">
+        <div class="import-preview-title" data-page-node-id="importPreviewTitle001">数据预览（前 3 条）</div>
+        <ul class="import-preview-list" id="importPreviewList" data-page-node-id="importPreviewList001"></ul>
+      </div>
+    </div>
+    <div class="modal-footer" data-page-node-id="historyImportFooter001">
+      <button class="btn-secondary" id="btnCancelImport" type="button" onclick="closeHistoryImportModal()" data-page-node-id="btnCancelImport001">取消</button>
+      <button class="btn-primary" id="btnConfirmImport" type="button" data-page-node-id="btnConfirmImport001">确认导入</button>
+    </div>
+  </div>
+</div>
+
+<div class="upload-toast" id="uploadToast" style="display:none" data-page-node-id="uploadToast001">
+  <div class="upload-toast-header" data-page-node-id="uploadToastHeader001">
+    <span class="upload-toast-title" data-page-node-id="uploadToastTitle001">上传进度</span>
+    <div class="upload-toast-actions" data-page-node-id="uploadToastActions001">
+      <button class="upload-toast-toggle" id="uploadToastToggle" aria-label="收起" data-page-node-id="uploadToastToggle001">▲</button>
+      <button class="upload-toast-close" id="uploadToastClose" aria-label="关闭" data-page-node-id="uploadToastClose001">✕</button>
+    </div>
+  </div>
+  <div class="upload-toast-body" id="uploadToastBody" data-page-node-id="uploadToastBody001">
+    <ul class="upload-toast-list" id="uploadToastList" data-page-node-id="uploadToastList001"></ul>
+  </div>
+</div>
+
+<!-- 面板被关闭后，仍有任务在后台跑时的重新打开入口 -->
+<button class="upload-toast-reopen" id="uploadToastReopen" type="button" style="display:none" data-page-node-id="uploadToastReopen001">
+  <span class="upload-toast-reopen-dot" data-page-node-id="uploadToastReopenDot001"></span>
+  上传进度 <span id="uploadToastReopenCount" data-page-node-id="uploadToastReopenCount001">0</span>
+</button>
+
+<!-- ========== 字幕翻译抽屉（右侧全屏） ========== -->
+<div class="sub-drawer-mask" id="subtitleDrawerMask" style="display:none" onclick="if(event.target===this)closeSubtitleDrawer()" data-page-node-id="subDrawerMask001">
+  <aside class="sub-drawer" id="subtitleDrawer" data-page-node-id="subDrawer001">
+    <header class="sub-drawer-header" data-page-node-id="subDrawerHeader001">
+      <div data-page-node-id="subDrawerTitleWrap001">
+        <h3 data-page-node-id="subDrawerTitle001">字幕操作台</h3>
+        <p class="sub-drawer-sub" id="subtitleDrawerSub" data-page-node-id="subDrawerSub001">—</p>
+      </div>
+      <div class="sub-drawer-actions" data-page-node-id="subDrawerActions001">
+        <button class="modal-close" type="button" onclick="closeSubtitleDrawer()" aria-label="关闭" data-page-node-id="subDrawerClose001"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="subDrawerCloseIcon001"><line x1="18" y1="6" x2="6" y2="18" data-page-node-id="subDrawerCloseL1"/><line x1="6" y1="6" x2="18" y2="18" data-page-node-id="subDrawerCloseL2"/></svg></button>
+      </div>
+    </header>
+
+    <div class="sub-drawer-body" data-page-node-id="subDrawerBody001">
+      <!-- 左列：设置 -->
+      <div class="sub-col sub-col-config" data-page-node-id="subColConfig001">
+
+        <!-- 服务状态：平时不占位（这个页面本身就是操作台），只有连不上/启动中才出现 -->
+        <div class="sub-status" id="subtitleStatus" style="display:none" data-page-node-id="subStatus001">
+          <span class="dot" data-page-node-id="subStatusDot001"></span>
+          <div class="sub-status-text" data-page-node-id="subStatusText001">
+            <span id="subtitleStatusTitle" data-page-node-id="subStatusTitle001">正在检测字幕操作台…</span>
+            <div class="sub-status-hint" id="subtitleStatusHint" data-page-node-id="subStatusHint001"></div>
+          </div>
+          <div class="sub-status-actions" data-page-node-id="subStatusActions001">
+            <button type="button" id="subtitleConsoleAction" data-page-node-id="subConsoleAction001">启动字幕操作台</button>
+            <button type="button" id="subtitleRecheck" data-page-node-id="subRecheck001">重新检测</button>
+          </div>
+        </div>
+
+        <!-- 目标语言（第一步） -->
+        <div class="sub-card" data-page-node-id="subCardLang001">
+          <h4 data-page-node-id="subCardLangTitle001">
+            <span class="sub-step-no" data-page-node-id="subStepNo2">1</span>目标语言
+            <span class="sub-lang-count" id="subtitleLangCount" data-page-node-id="subLangCount001">已选 0 种</span>
+          </h4>
+          <div class="sub-lang-tools" data-page-node-id="subLangTools001">
+            <button type="button" id="subtitleLangCommon" data-page-node-id="subLangCommon001">常用组合：en,es,pt,id,th,vi</button>
+            <button type="button" id="subtitleLangAll" data-page-node-id="subLangAll001">全选</button>
+            <button type="button" id="subtitleLangClear" data-page-node-id="subLangClear001">清空</button>
+          </div>
+          <!-- 语言模板：保存当前勾选为命名模板 / 选模板快速勾选 -->
+          <div class="sub-lang-tpl" data-page-node-id="subLangTpl001">
+            <select class="sub-tpl-select" id="subtitleTplSelect" title="选择模板快速勾选语言" data-page-node-id="subTplSelect001">
+              <option value="">选择语言模板…</option>
+            </select>
+            <button type="button" id="subtitleTplApply" data-page-node-id="subTplApply001" title="勾选模板里的全部语言">应用</button>
+            <input type="text" class="sub-tpl-name" id="subtitleTplName" placeholder="模板名称" maxlength="20" data-page-node-id="subTplName001">
+            <button type="button" id="subtitleTplSave" data-page-node-id="subTplSave001" title="把当前勾选的语言保存为模板">保存模板</button>
+            <button type="button" id="subtitleTplDelete" data-page-node-id="subTplDelete001" title="删除选中的模板">删除</button>
+          </div>
+          <div class="sub-lang-grid" id="subtitleLangGrid" data-page-node-id="subLangGrid001"></div>
+          <p class="sub-hint" data-page-node-id="subLangHint001">标准流程：先用 YouTube「自动翻译」生成所选语言的字幕，再把标题/说明交给 LLM 翻译并自动填写保存。已填写过的语言自动跳过，无需任何额外选项。灰色带「源」标记的是该视频本身的语言，不参与翻译。</p>
+        </div>
+
+        <!-- 批量队列（批量模式，第二步） -->
+        <div class="sub-card" id="subtitleBatchCard" style="display:none" data-page-node-id="subCardBatch001">
+          <h4 data-page-node-id="subCardBatchTitle001">
+            <span class="sub-step-no" data-page-node-id="subStepNoBatch1">2</span>待处理视频
+            <span class="sub-lang-count" id="subtitleBatchProgress" data-page-node-id="subBatchProgress001">共 0 个</span>
+          </h4>
+          <div class="sub-queue" id="subtitleQueue" data-page-node-id="subQueue001"></div>
+          <p class="sub-hint" data-page-node-id="subBatchHint001">按列表顺序逐个执行；每条自动带视频ID和频道ID，操作台按频道归属切换账号后执行。没有频道ID的记录用当前账号。</p>
+        </div>
+
+        <!-- 视频地址（单条模式，第二步） -->
+        <div class="sub-card" id="subtitleCardUrl" data-page-node-id="subCardUrl001">
+          <h4 data-page-node-id="subCardUrlTitle001"><span class="sub-step-no" data-page-node-id="subStepNo1">2</span>视频地址</h4>
+          <input type="text" class="sub-input" id="subtitleUrl" placeholder="https://www.youtube.com/watch?v=... 或 youtu.be/... 或 11 位视频 ID" data-page-node-id="subUrlInput001">
+          <p class="sub-hint" data-page-node-id="subUrlHint001">默认取自该行的「关联视频ID」，可手动改成其它视频地址。支持 watch / youtu.be / shorts / Studio 链接，或直接填 11 位视频 ID。</p>
+        </div>
+
+        <!-- 目标账号（单条模式，第三步） -->
+        <div class="sub-card" id="subtitleCardAccount" data-page-node-id="subCardAccount001">
+          <h4 data-page-node-id="subCardAccountTitle001"><span class="sub-step-no" data-page-node-id="subStepNo3">3</span>目标账号（可选）</h4>
+          <input type="text" class="sub-input" id="subtitleChannel" placeholder="频道 ID（可选，UC 开头）：自动路由到该频道的归属账号" style="margin-bottom:10px" data-page-node-id="subChannelInput001">
+          <div class="sub-row" data-page-node-id="subAccountRow001">
+            <select class="sub-select" id="subtitleAccount" data-page-node-id="subAccountSelect001">
+              <option value="" data-page-node-id="subAccountOptCurrent">当前账号（不切换）</option>
+            </select>
+            <button type="button" id="subtitleReloadAccounts" data-page-node-id="subReloadAccounts001">刷新账号列表</button>
+          </div>
+          <p class="sub-hint" id="subtitleAccountHint" data-page-node-id="subAccountHint001">正在加载可切换账号（拉起浏览器约 5-10 秒）…</p>
+          <p class="sub-hint" data-page-node-id="subAccountHint002">填了「频道 ID」时按 channel_map.json 自动切到归属账号；选了下拉账号时下拉优先。两者都不填 = 用当前账号。</p>
+        </div>
+      </div>
+
+      <!-- 右列：执行 + 日志 -->
+      <div class="sub-col sub-col-run" data-page-node-id="subColRun001">
+        <div class="sub-card sub-card-run" data-page-node-id="subCardRun001">
+          <div class="sub-run-bar" data-page-node-id="subRunBar001">
+            <button class="btn-primary" type="button" id="subtitleStart" data-page-node-id="subStart001">开始执行</button>
+            <button class="btn-secondary" type="button" id="subtitleStop" disabled data-page-node-id="subStop001">停止</button>
+            <button class="btn-secondary" type="button" id="subtitleLogin" data-page-node-id="subLogin001">打开浏览器登录</button>
+            <button class="btn-secondary" type="button" id="subtitleDoctor" data-page-node-id="subDoctor001">自检配置</button>
+            <span class="sub-run-state" id="subtitleRunState" data-page-node-id="subRunState001"><span class="sub-dot"></span>空闲</span>
+          </div>
+          <div class="sub-cmd" id="subtitleCmd" data-page-node-id="subCmd001">—</div>
+          <div class="sub-log" id="subtitleLog" data-page-node-id="subLog001"><div class="lg-empty">尚未执行任务。填写视频地址、勾选语言后点击「开始执行」。<br>首次使用请先在操作台完成浏览器登录（见上方「打开浏览器登录」）。</div></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script src="./js/demo-mock.js?v=demo1"></script>
+<script src="./js/app.js?v=20261020a"></script>
+<script>
+  if(location.protocol === 'file:'){
+    document.getElementById('fileWarning').style.display = 'block';
+  }
+</script>
+</body>
+</html>

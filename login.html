@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登录 — YouTube Creator Studio</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{font-size:16px;-webkit-font-smoothing:antialiased}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    background:#0b0f19;
+    color:#f1f5f9;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .bg-grid{
+    position:fixed;inset:0;
+    background-image:
+      linear-gradient(rgba(59,130,246,.03) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(59,130,246,.03) 1px,transparent 1px);
+    background-size:40px 40px;
+    pointer-events:none;
+  }
+  .login-container{
+    position:relative;
+    width:380px;
+    padding:40px 36px 36px;
+    background:#111827;
+    border:1px solid #1e293b;
+    border-radius:12px;
+    box-shadow:0 8px 32px rgba(0,0,0,.4);
+    animation:fadeIn .35s ease;
+  }
+  .login-header{text-align:center;margin-bottom:32px}
+  .login-logo{
+    display:inline-flex;
+    margin-bottom:16px;
+  }
+  .login-logo svg{width:36px;height:36px}
+  .login-header h1{font-size:18px;font-weight:700;margin-bottom:6px}
+  .login-header p{font-size:13px;color:#64748b}
+  .field{margin-bottom:18px}
+  .field label{
+    display:block;
+    font-size:12px;font-weight:600;
+    color:#94a3b8;
+    margin-bottom:6px;
+  }
+  .field input{
+    width:100%;
+    padding:10px 14px;
+    background:#0e1320;
+    border:1px solid #1e293b;
+    border-radius:8px;
+    color:#f1f5f9;
+    font-size:14px;
+    font-family:inherit;
+    outline:none;
+    transition:all .15s ease;
+  }
+  .field input:focus{
+    border-color:#3b82f6;
+    box-shadow:0 0 0 3px rgba(59,130,246,.15);
+  }
+  .field input::placeholder{color:#475569}
+  .error-msg{
+    font-size:12px;
+    color:#ef4444;
+    margin-bottom:12px;
+    min-height:18px;
+    display:none;
+  }
+  .error-msg.active{display:block}
+  .btn-login{
+    width:100%;
+    padding:11px 0;
+    background:#3b82f6;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .btn-login:hover{background:#2563eb}
+  .btn-login:disabled{opacity:.5;cursor:not-allowed}
+  .btn-login .spinner{
+    display:none;
+    width:16px;height:16px;
+    border:2px solid rgba(255,255,255,.3);
+    border-top-color:#fff;
+    border-radius:50%;
+    animation:spin .6s linear infinite;
+    margin-left:8px;
+  }
+  .btn-login.loading .spinner{display:inline-block}
+  .login-footer{
+    text-align:center;
+    margin-top:20px;
+    font-size:11px;
+    color:#475569;
+  }
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+<script src="./js/demo-mock.js?v=demo1"></script>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="login-container">
+  <div class="login-header">
+    <div class="login-logo">
+      <svg viewBox="0 0 36 36"><rect width="36" height="36" rx="8" fill="#ff0000"/><polygon points="14,10 26,18 14,26" fill="#fff"/></svg>
+    </div>
+    <h1>Creator Studio</h1>
+    <p>登录以管理你的 YouTube 频道</p>
+  </div>
+  <div class="field">
+    <label for="username">用户名</label>
+    <input type="text" id="username" placeholder="请输入用户名" autocomplete="username" autofocus>
+  </div>
+  <div class="field">
+    <label for="password">密码</label>
+    <input type="password" id="password" placeholder="请输入密码" autocomplete="current-password">
+  </div>
+  <p class="error-msg" id="errorMsg"></p>
+  <button class="btn-login" id="btnLogin">
+    登 录
+    <span class="spinner"></span>
+  </button>
+  <div class="login-footer">YouTube Creator Studio — 视频管理中心</div>
+</div>
+
+<script>
+const $ = (sel) => document.querySelector(sel);
+
+$('#btnLogin').addEventListener('click', handleLogin);
+$('#password').addEventListener('keydown', e => { if(e.key==='Enter') handleLogin(); });
+
+async function handleLogin() {
+  const username = $('#username').value.trim();
+  const password = $('#password').value;
+
+  if (!username || !password) {
+    showError('请输入用户名和密码');
+    return;
+  }
+
+  setLoading(true);
+  hideError();
+
+  try {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      window.location.href = './index.html';
+    } else {
+      showError(data.error || '登录失败');
+    }
+  } catch (err) {
+    showError('网络错误，请稍后重试');
+  } finally {
+    setLoading(false);
+  }
+}
+
+function setLoading(loading) {
+  const btn = $('#btnLogin');
+  btn.disabled = loading;
+  if (loading) {
+    btn.classList.add('loading');
+    btn.innerHTML = '登录中<span class="spinner"></span>';
+  } else {
+    btn.classList.remove('loading');
+    btn.innerHTML = '登录<span class="spinner"></span>';
+  }
+}
+
+function showError(msg) {
+  const el = $('#errorMsg');
+  el.textContent = msg;
+  el.classList.add('active');
+}
+
+function hideError() {
+  $('#errorMsg').classList.remove('active');
+}
+</script>
+</body>
+</html>
