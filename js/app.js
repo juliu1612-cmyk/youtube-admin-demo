@@ -8035,7 +8035,8 @@ let _coverLibUploading = false;
 let _coverPickScope = '';    // 正在为哪个入口选参考图
 let _coverPickFolder = '';   // 弹窗内当前文件夹
 let _coverPickTemp = null;   // 弹窗内临时选中 {file,name,url}
-let _coverNameMode = 'new';  // new | rename
+let _coverNameMode = 'new';  // new | sub | rename
+let _coverExpanded = {};   // 一级文件夹展开状态（id -> bool）
 let _coverRefs = coverLoadRefs();
 
 function coverEsc(s) {
@@ -8107,27 +8108,63 @@ function coverCurFolder() {
   return _coverFolders.find(f => f.id === _coverCurId) || null;
 }
 
+// 一级文件夹（parentId 为空）
+function coverTopFolders() {
+  return _coverFolders.filter(f => !f.parentId);
+}
+// 某个一级文件夹下的二级子文件夹
+function coverChildrenOf(id) {
+  return _coverFolders.filter(f => f.parentId === id);
+}
+// 一级文件夹的图片总数（含子文件夹）
+function coverFolderTotal(f) {
+  const own = f.count || (Array.isArray(f.images) ? f.images.length : 0);
+  return coverChildrenOf(f.id).reduce((n, c) => n + (c.count || (Array.isArray(c.images) ? c.images.length : 0)), own);
+}
+
 // ─── 渲染：文件夹列表 ───────────────────────
 function coverRenderFolders() {
   const box = $('#coverLibFolders');
   const empty = $('#coverLibFolderEmpty');
   const hint = $('#coverLibHint');
   const total = _coverFolders.reduce((n, f) => n + (f.count || 0), 0);
+  const tops = coverTopFolders();
   if (hint) {
     hint.textContent = _coverFolders.length
-      ? `${_coverFolders.length} 个文件夹 · ${total} 张图片`
+      ? `${tops.length} 个一级文件夹 · ${_coverFolders.length - tops.length} 个子文件夹 · ${total} 张图片`
       : '';
   }
   if (empty) empty.style.display = _coverFolders.length ? 'none' : 'block';
   if (!box) return;
-  box.innerHTML = _coverFolders.map(f => {
+  const html = tops.map(f => {
+    const kids = coverChildrenOf(f.id);
     const active = f.id === _coverCurId ? ' active' : '';
-    return `<div class="coverlib-folder${active}" data-folder-id="${coverEsc(f.id)}" title="${coverEsc(f.name)}">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    const open = _coverExpanded[f.id] !== false; // 默认展开
+    const caret = kids.length
+      ? `<button class="coverlib-caret${open ? ' open' : ''}" type="button" data-toggle="${coverEsc(f.id)}" title="展开/收起">
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+         </button>`
+      : '<span class="coverlib-caret placeholder"></span>';
+    let out = `<div class="coverlib-folder coverlib-folder-lv1${active}" data-folder-id="${coverEsc(f.id)}" title="${coverEsc(f.name)}">
+      ${caret}
+      <svg class="coverlib-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
       <span class="coverlib-folder-name">${coverEsc(f.name || f.id)}</span>
-      <span class="coverlib-folder-count">${f.count || 0}</span>
+      <span class="coverlib-folder-count">${coverFolderTotal(f)}</span>
+      <button class="coverlib-add-sub" type="button" data-add-sub="${coverEsc(f.id)}" title="新建子文件夹">+</button>
     </div>`;
+    if (kids.length && open) {
+      out += kids.map(c => {
+        const cActive = c.id === _coverCurId ? ' active' : '';
+        return `<div class="coverlib-folder coverlib-folder-lv2${cActive}" data-folder-id="${coverEsc(c.id)}" title="${coverEsc(c.name)}">
+          <svg class="coverlib-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <span class="coverlib-folder-name">${coverEsc(c.name || c.id)}</span>
+          <span class="coverlib-folder-count">${c.count || 0}</span>
+        </div>`;
+      }).join('');
+    }
+    return out;
   }).join('');
+  box.innerHTML = html;
 }
 
 // ─── 渲染：图片网格 ─────────────────────────
@@ -8138,11 +8175,19 @@ function coverRenderImages() {
   const f = coverCurFolder();
   const btns = ['#coverLibRenameBtn', '#coverLibDelFolderBtn', '#coverLibUploadBtn'];
   btns.forEach(sel => { const b = $(sel); if (b) b.disabled = !f; });
+  // 只能给一级文件夹建子文件夹
+  const subBtn = $('#coverLibSubBtn');
+  if (subBtn) subBtn.disabled = !f || !!f.parentId;
 
   if (title) {
-    title.textContent = f
-      ? `${f.name}${f.count ? `（${f.count} 张）` : ''}`
-      : (_coverFolders.length ? '请选择左侧文件夹' : '还没有文件夹');
+    if (f) {
+      const parent = f.parentId ? _coverFolders.find(x => x.id === f.parentId) : null;
+      const path = parent ? `${parent.name} / ${f.name}` : f.name;
+      title.textContent = `${path}${f.count ? `（${f.count} 张）` : ''}`;
+      title.title = path;
+    } else {
+      title.textContent = _coverFolders.length ? '请选择左侧文件夹' : '还没有文件夹';
+    }
   }
   if (!grid) return;
   if (!f || !Array.isArray(f.images) || !f.images.length) {
@@ -8241,7 +8286,7 @@ function coverUploadFiles(fileList) {
 }
 
 // ─── 文件夹命名弹窗（新建 / 重命名） ──────────
-function coverOpenNameDialog(mode) {
+function coverOpenNameDialog(mode, parentId) {
   const f = coverCurFolder();
   if (mode === 'rename' && !f) return;
   _coverNameMode = mode;
@@ -8249,7 +8294,23 @@ function coverOpenNameDialog(mode) {
   const title = $('#coverNameTitle');
   const input = $('#coverNameInput');
   if (!mask || !input) return;
-  if (title) title.textContent = mode === 'rename' ? '重命名文件夹' : '新建文件夹';
+  // 目标上级：sub 模式用传入的（或当前一级文件夹），new 模式默认不设
+  let pId = '';
+  if (mode === 'sub') {
+    pId = parentId || (f && !f.parentId ? f.id : (f && f.parentId ? f.parentId : ''));
+    if (!pId) { showToast('请先选中一个一级文件夹', 'warning'); return; }
+  }
+  const pSel = $('#coverParentSel');
+  const pLabel = $('#coverParentLabel');
+  const showSel = (mode !== 'rename');
+  if (pSel) {
+    pSel.style.display = showSel ? 'block' : 'none';
+    pSel.innerHTML = '<option value="">（不设上级 · 作为一级文件夹）</option>' +
+      coverTopFolders().map(t => `<option value="${coverEsc(t.id)}">${coverEsc(t.name)}</option>`).join('');
+    pSel.value = pId || '';
+  }
+  if (pLabel) pLabel.style.display = showSel ? 'block' : 'none';
+  if (title) title.textContent = mode === 'rename' ? '重命名文件夹' : (mode === 'sub' ? '新建子文件夹' : '新建文件夹');
   input.value = mode === 'rename' ? (f.name || '') : '';
   mask.style.display = 'flex';
   setTimeout(() => { input.focus(); input.select(); }, 30);
@@ -8273,13 +8334,18 @@ async function coverSubmitName() {
       });
       showToast('已重命名', 'success');
     } else {
+      const pSel = $('#coverParentSel');
+      const parentId = pSel && pSel.style.display !== 'none' ? String(pSel.value || '') : '';
       const data = await coverApi('/api/cover-library/folders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name })
+        body: JSON.stringify({ name, parentId })
       });
-      if (data.folder && data.folder.id) _coverCurId = data.folder.id;
-      showToast('文件夹已创建，可以批量上传图片了', 'success');
+      if (data.folder && data.folder.id) {
+        _coverCurId = data.folder.id;
+        if (data.folder.parentId) _coverExpanded[data.folder.parentId] = true;
+      }
+      showToast(parentId ? '子文件夹已创建，可以批量上传图片了' : '文件夹已创建，可以批量上传图片了', 'success');
     }
     coverCloseNameDialog();
     await loadCoverLibrary(true);
@@ -8292,14 +8358,19 @@ async function coverDeleteFolder() {
   const f = coverCurFolder();
   if (!f) return;
   const n = f.count || 0;
-  const ok = window.confirm(`删除文件夹「${f.name}」${n ? `及其中 ${n} 张图片` : ''}？此操作不可撤销。`);
+  const kids = coverChildrenOf(f.id);
+  const cascade = kids.length ? `
+同时会删除它的 ${kids.length} 个子文件夹：${kids.map(k => k.name).join('、')}` : '';
+  const ok = window.confirm(`删除文件夹「${f.name}」${n ? `及其中 ${n} 张图片` : ''}？${cascade}
+此操作不可撤销。`);
   if (!ok) return;
   try {
     await coverApi(`/api/cover-library/folders/${encodeURIComponent(f.id)}`, { method: 'DELETE' });
     // 该文件夹里的图可能被当成参考图，一并清掉失效引用
+    const gone = [f.id].concat(kids.map(k => k.id));
     Object.keys(_coverRefs).forEach(scope => {
       const rel = _coverRefs[scope] && _coverRefs[scope].file;
-      if (rel && rel.indexOf(`covers/${f.id}/`) === 0) coverSetRef(scope, null);
+      if (rel && gone.some(gid => rel.indexOf(`covers/${gid}/`) === 0)) coverSetRef(scope, null);
     });
     _coverCurId = '';
     showToast('文件夹已删除', 'success');
@@ -8353,10 +8424,15 @@ function coverRenderPickFolders() {
     return;
   }
   sel.disabled = false;
-  sel.innerHTML = _coverFolders.map(f =>
-    `<option value="${coverEsc(f.id)}">${coverEsc(f.name)}（${f.count || 0}）</option>`
-  ).join('');
-  sel.value = _coverPickFolder || _coverFolders[0].id;
+  sel.innerHTML = coverTopFolders().map(t => {
+    const self = `<option value="${coverEsc(t.id)}">${coverEsc(t.name)}（${t.count || 0}）</option>`;
+    const kids = coverChildrenOf(t.id);
+    if (!kids.length) return self;
+    return `<optgroup label="${coverEsc(t.name)}">${self}${kids.map(c =>
+      `<option value="${coverEsc(c.id)}">&nbsp;&nbsp;└ ${coverEsc(c.name)}（${c.count || 0}）</option>`
+    ).join('')}</optgroup>`;
+  }).join('');
+  sel.value = _coverPickFolder || (_coverFolders[0] && _coverFolders[0].id);
 }
 function coverRenderPickGrid() {
   const grid = $('#coverPickGrid');
@@ -8398,6 +8474,8 @@ function bindCoverLibrary() {
   if (newBtn) newBtn.addEventListener('click', () => coverOpenNameDialog('new'));
   const renameBtn = $('#coverLibRenameBtn');
   if (renameBtn) renameBtn.addEventListener('click', () => coverOpenNameDialog('rename'));
+  const subBtn = $('#coverLibSubBtn');
+  if (subBtn) subBtn.addEventListener('click', () => coverOpenNameDialog('sub'));
   const delBtn = $('#coverLibDelFolderBtn');
   if (delBtn) delBtn.addEventListener('click', coverDeleteFolder);
   const upBtn = $('#coverLibUploadBtn');
@@ -8439,6 +8517,22 @@ function bindCoverLibrary() {
   // 文件夹点击
   const folderBox = $('#coverLibFolders');
   if (folderBox) folderBox.addEventListener('click', e => {
+    // 展开 / 收起子文件夹
+    const caret = e.target.closest && e.target.closest('[data-toggle]');
+    if (caret) {
+      e.stopPropagation();
+      const tid = caret.dataset.toggle || '';
+      _coverExpanded[tid] = (_coverExpanded[tid] === false);
+      coverRenderFolders();
+      return;
+    }
+    // 直接在一级文件夹下新建子文件夹
+    const addSub = e.target.closest && e.target.closest('[data-add-sub]');
+    if (addSub) {
+      e.stopPropagation();
+      coverOpenNameDialog('sub', addSub.dataset.addSub);
+      return;
+    }
     const item = e.target.closest && e.target.closest('.coverlib-folder');
     if (!item) return;
     const id = item.dataset.folderId || '';

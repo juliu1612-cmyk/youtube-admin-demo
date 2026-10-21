@@ -2769,7 +2769,7 @@ body.has-processing-panel main{padding-bottom:70px}
   padding:16px 28px 28px;
 }
 .coverlib-side{
-  width:250px;flex:none;
+  width:296px;flex:none;
   background:var(--bg-card);border:1px solid var(--border);
   border-radius:var(--radius-lg);overflow:hidden;
   display:flex;flex-direction:column;max-height:calc(100vh - 220px);
@@ -2780,9 +2780,9 @@ body.has-processing-panel main{padding-bottom:70px}
 }
 .coverlib-folders{overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:4px}
 .coverlib-folder{
-  display:flex;align-items:center;gap:8px;
-  padding:9px 10px;border-radius:var(--radius);cursor:pointer;
-  font-size:13px;color:var(--text-secondary);transition:var(--transition);
+  display:flex;align-items:center;gap:6px;
+  padding:8px 8px;border-radius:var(--radius);cursor:pointer;
+  font-size:12.5px;color:var(--text-secondary);transition:var(--transition);
   border:1px solid transparent;min-width:0;
 }
 .coverlib-folder:hover{background:var(--bg-hover);color:var(--text-primary)}
@@ -2794,8 +2794,9 @@ body.has-processing-panel main{padding-bottom:70px}
   flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 .coverlib-folder-count{
-  flex:none;font-size:11px;color:var(--text-muted);
-  background:var(--bg-input);border-radius:999px;padding:1px 7px;
+  flex:none;font-size:10.5px;color:var(--text-muted);
+  background:var(--bg-input);border-radius:999px;padding:1px 6px;
+  min-width:20px;text-align:center;
 }
 .coverlib-folder.active .coverlib-folder-count{color:var(--accent-light)}
 .coverlib-main{
@@ -2906,3 +2907,37 @@ body.has-processing-panel main{padding-bottom:70px}
   background:var(--accent);border-color:var(--accent);color:#fff;
 }
 .field-ref-btn.active:hover{background:#2563eb;border-color:#2563eb}
+
+/* 封面库两个弹窗：必须盖在发布/上传弹窗（z-index:1000，DOM 靠后）之上 */
+#coverPickMask, #coverNameMask { z-index: 1300; }
+
+/* ─── 封面库：二级文件夹 ───────────────────── */
+.coverlib-folder-lv2{
+  margin-left:16px;padding:7px 8px;font-size:12px;
+  border-left:1px solid var(--border-light);
+  border-radius:0 var(--radius) var(--radius) 0;
+}
+.coverlib-folder-lv2.active{border-left-color:rgba(59,130,246,.55)}
+.coverlib-caret{
+  width:16px;height:16px;flex:none;display:inline-flex;align-items:center;justify-content:center;
+  background:transparent;border:none;cursor:pointer;color:var(--text-muted);padding:0;
+  transition:transform var(--transition);
+}
+.coverlib-caret svg{width:11px;height:11px}
+.coverlib-caret:hover{color:var(--accent-light)}
+.coverlib-caret.open{transform:rotate(90deg)}
+.coverlib-caret.placeholder{width:16px;height:16px;flex:none}
+.coverlib-ico{width:14px;height:14px;flex:none}
+.coverlib-add-sub{
+  flex:none;width:18px;height:18px;line-height:1;padding:0;
+  border:1px solid var(--border);border-radius:4px;cursor:pointer;
+  background:transparent;color:var(--text-muted);font-size:13px;
+  opacity:0;transition:var(--transition);
+}
+.coverlib-folder:hover .coverlib-add-sub{opacity:1}
+.coverlib-add-sub:hover{border-color:var(--accent);color:var(--accent-light);background:var(--accent-subtle)}
+#coverParentSel{
+  width:100%;padding:8px 10px;border-radius:var(--radius);
+  background:var(--bg-input);border:1px solid var(--border);
+  color:var(--text-primary);font-size:13px;
+}

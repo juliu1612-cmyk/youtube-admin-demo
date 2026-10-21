@@ -146,22 +146,21 @@
     }
   }
 
-  /* ---------- 封面库：示例文件夹 + canvas 现画的示例图片 ---------- */
+  /* ---------- 封面库：示例文件夹（两级）+ canvas 现画的示例图片 ---------- */
   var DEMO_COVER_FOLDERS = [
-    { id: 'FdemoCity01', name: '都市爽剧 · 竖版封面' },
-    { id: 'FdemoGuzh02', name: '古装虐恋 · 封面素材' },
-    { id: 'FdemoMixx03', name: '通用底图 / 配色参考' }
+    { id: 'FdemoCity01', name: '都市爽剧 · 竖版封面', parentId: '' },
+    { id: 'FdemoCity11', name: '爆款标题版式', parentId: 'FdemoCity01' },
+    { id: 'FdemoCity12', name: '霓虹夜景素材', parentId: 'FdemoCity01' },
+    { id: 'FdemoGuzh02', name: '古装虐恋 · 封面素材', parentId: '' },
+    { id: 'FdemoMixx03', name: '通用底图 / 配色参考', parentId: '' }
   ];
-  var DEMO_COVER_PALETTES = [
-    ['#1e3a8a', '#f97316'],
-    ['#7c2d12', '#e11d48'],
-    ['#0f766e', '#facc15']
-  ];
-  var DEMO_COVER_LABELS = [
-    ['逆袭总裁 EP01', '豪门隐婚 EP03', '闪婚老公是首富', '都市夜景 · 霓虹'],
-    ['冷宫弃妃 EP01', '摄政王的掌心宠', '重生之嫡女有毒', '宫墙 · 暖红调'],
-    ['配色参考 · 冷暖对比', '构图参考 · 三分法', '光影参考 · 逆光']
-  ];
+  var DEMO_COVER_DESIGN = {
+    FdemoCity01: { pal: ['#1e3a8a', '#f97316'], labels: ['逆袭总裁 EP01', '豪门隐婚 EP03', '闪婚老公是首富'] },
+    FdemoCity11: { pal: ['#0b3b8f', '#fbbf24'], labels: ['爆款版式 A', '爆款版式 B', '爆款版式 C'] },
+    FdemoCity12: { pal: ['#111827', '#22d3ee'], labels: ['霓虹街景 01', '霓虹街景 02'] },
+    FdemoGuzh02: { pal: ['#7c2d12', '#e11d48'], labels: ['冷宫弃妃 EP01', '摄政王的掌心宠', '重生之嫡女有毒', '宫墙 · 暖红调'] },
+    FdemoMixx03: { pal: ['#0f766e', '#facc15'], labels: ['配色参考 · 冷暖对比', '构图参考 · 三分法', '光影参考 · 逆光'] }
+  };
 
   function demoCoverImage(w, h, pal, label, seed) {
     var c = document.createElement('canvas');
@@ -191,19 +190,21 @@
   var DEMO_COVERS = null;
   function demoCoverLib() {
     if (DEMO_COVERS) return DEMO_COVERS;
-    DEMO_COVERS = DEMO_COVER_FOLDERS.map(function (f, fi) {
-      var pal = DEMO_COVER_PALETTES[fi] || DEMO_COVER_PALETTES[0];
-      var labels = DEMO_COVER_LABELS[fi] || [];
-      var imgs = labels.map(function (nm, i) {
+    DEMO_COVERS = DEMO_COVER_FOLDERS.map(function (f) {
+      var d = DEMO_COVER_DESIGN[f.id] || { pal: ['#334155', '#94a3b8'], labels: ['示例素材'] };
+      var imgs = d.labels.map(function (nm, i) {
         return {
           file: 'covers/' + f.id + '/demo-' + (i + 1) + '.png',
           name: nm + '.png',
-          url: demoCoverImage(640, 360, pal, nm, i),
+          url: demoCoverImage(640, 360, d.pal, nm, i),
           size: 120000 + i * 8137,
           mtime: new Date(Date.now() - (i + 1) * 3600e3).toISOString()
         };
       });
-      return { id: f.id, name: f.name, createdAt: '2026-10-20T08:00:00.000Z', count: imgs.length, images: imgs };
+      return {
+        id: f.id, name: f.name, parentId: f.parentId || '',
+        createdAt: '2026-10-20T08:00:00.000Z', count: imgs.length, images: imgs
+      };
     });
     return DEMO_COVERS;
   }
@@ -460,7 +461,7 @@
       return Promise.resolve(jsonRes({
         success: true,
         folders: lib.map(function (f) {
-          return { id: f.id, name: f.name, createdAt: f.createdAt, count: f.images.length, images: f.images };
+          return { id: f.id, name: f.name, parentId: f.parentId || '', createdAt: f.createdAt, count: f.images.length, images: f.images };
         })
       }));
     }
@@ -468,14 +469,20 @@
       var nb = {};
       try { nb = JSON.parse((init && init.body) || '{}'); } catch (e) { /* noop */ }
       var nname = String(nb.name || '').trim();
+      var npid = String(nb.parentId || '').trim();
       if (!nname) return Promise.resolve(jsonRes({ error: '请填写文件夹名称' }, 400));
       var l1 = demoCoverLib();
-      if (l1.some(function (f) { return f.name === nname; })) {
-        return Promise.resolve(jsonRes({ error: '已存在同名文件夹「' + nname + '」' }, 400));
+      if (l1.some(function (f) { return f.name === nname && (f.parentId || '') === npid; })) {
+        return Promise.resolve(jsonRes({ error: '同一层级已存在同名文件夹「' + nname + '」' }, 400));
       }
-      var nf = { id: 'Fdemo' + Date.now().toString(36), name: nname, createdAt: new Date().toISOString(), count: 0, images: [] };
+      if (npid) {
+        var p = l1.filter(function (f) { return f.id === npid; })[0];
+        if (!p) return Promise.resolve(jsonRes({ error: '上级文件夹不存在' }, 400));
+        if (p.parentId) return Promise.resolve(jsonRes({ error: '封面库最多支持两级文件夹，不能在子文件夹下再建' }, 400));
+      }
+      var nf = { id: 'Fdemo' + Date.now().toString(36), name: nname, parentId: npid, createdAt: new Date().toISOString(), count: 0, images: [] };
       l1.push(nf);
-      return Promise.resolve(jsonRes({ success: true, folder: { id: nf.id, name: nf.name, count: 0, images: [] } }));
+      return Promise.resolve(jsonRes({ success: true, folder: { id: nf.id, name: nf.name, parentId: nf.parentId, count: 0, images: [] } }));
     }
     if (path.indexOf('/api/cover-library/folders/') === 0) {
       var fid2 = decodeURIComponent(path.slice('/api/cover-library/folders/'.length));
@@ -485,13 +492,27 @@
       if (method === 'PUT') {
         var pb = {};
         try { pb = JSON.parse((init && init.body) || '{}'); } catch (e) { /* noop */ }
-        hit2.name = String(pb.name || hit2.name).trim();
-        return Promise.resolve(jsonRes({ success: true, folder: { id: hit2.id, name: hit2.name, count: hit2.images.length } }));
+        var pname = String(pb.name || hit2.name).trim();
+        if (l2.some(function (f) { return f.id !== hit2.id && f.name === pname && (f.parentId || '') === (hit2.parentId || ''); })) {
+          return Promise.resolve(jsonRes({ error: '同一层级已存在同名文件夹「' + pname + '」' }, 400));
+        }
+        hit2.name = pname;
+        return Promise.resolve(jsonRes({ success: true, folder: { id: hit2.id, name: hit2.name, parentId: hit2.parentId || '', count: hit2.images.length } }));
       }
       if (method === 'DELETE') {
-        var idx = l2.indexOf(hit2);
-        if (idx >= 0) l2.splice(idx, 1);
-        return Promise.resolve(jsonRes({ success: true }));
+        // 级联删除子文件夹
+        var gone = [hit2.id];
+        var grew = true;
+        while (grew) {
+          grew = false;
+          l2.forEach(function (f) {
+            if (f.parentId && gone.indexOf(f.parentId) >= 0 && gone.indexOf(f.id) < 0) { gone.push(f.id); grew = true; }
+          });
+        }
+        for (var gi = l2.length - 1; gi >= 0; gi--) {
+          if (gone.indexOf(l2[gi].id) >= 0) l2.splice(gi, 1);
+        }
+        return Promise.resolve(jsonRes({ success: true, deletedFolders: gone.length }));
       }
     }
     if (path === '/api/cover-library/images' && method === 'DELETE') {
