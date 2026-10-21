@@ -12,21 +12,21 @@
       title: '演示频道 · 都市剧场',
       thumbnail: '',
       createdAt: '2026-08-01T09:00:00.000Z',
-      meta: { owner: '演示归属人A', channelName: '演示频道·都市剧场', language: '中文（简体）', company: '演示文化传媒', gender: '男频', channelType: '一轮大号', operationMode: '自运营', supplier: '演示供应商A', copyrightType: '独家买断', dramaType: '真人剧', monetized: 'YPP', ranking: 'YB', status: '运营中', remark: '演示数据，未绑定真实授权', group: '一组', updatedAt: '2026-10-20T05:00:00.000Z' }
+      meta: { owner: '演示归属人A', channelName: '演示频道·都市剧场', language: '中文（简体）', company: '演示文化传媒', gender: '男频', channelType: '一轮大号', operationMode: '自运营', supplier: '演示供应商A', copyrightType: '独家买断', dramaType: '真人剧', monetized: 'YPP', ranking: 'YB', status: '运营中', remark: '演示数据，未绑定真实授权', descTemplate: '【{channelTitle}】{title}\\n\\n合集组：{collectionGroup} · 语言：{language}\\n\\n{channelTitle} 每日更新，感谢订阅支持！\\n频道主页：{channelUrl}\\n\\n#短剧 #{channelTitle} #追剧', group: '一组', updatedAt: '2026-10-20T05:00:00.000Z' }
     },
     {
       id: 'UCdemo00000000000000000B2',
       title: '演示频道 · 海外短剧',
       thumbnail: '',
       createdAt: '2026-08-12T09:00:00.000Z',
-      meta: { owner: '演示归属人B', channelName: '演示频道·海外短剧', language: '英文', company: '演示文化传媒', gender: '女频', channelType: '垂直号（大女主）', operationMode: '代运营（演示B）', supplier: '演示供应商B', copyrightType: '分账授权', dramaType: '漫剧', monetized: '孵化', ranking: '演示 PRETTY', status: '暂停', remark: '', group: '二组', updatedAt: '2026-10-18T05:00:00.000Z' }
+      meta: { owner: '演示归属人B', channelName: '演示频道·海外短剧', language: '英文', company: '演示文化传媒', gender: '女频', channelType: '垂直号（大女主）', operationMode: '代运营（演示B）', supplier: '演示供应商B', copyrightType: '分账授权', dramaType: '漫剧', monetized: '孵化', ranking: '演示 PRETTY', status: '暂停', remark: '', descTemplate: '{title}\\n\\nWatch the full series on {channelTitle}.\\nCollection: {collectionGroup} · Language: {language}\\nChannel: {channelUrl}\\n\\n#shorts #drama #{collectionGroup}', group: '二组', updatedAt: '2026-10-18T05:00:00.000Z' }
     },
     {
       id: 'UCdemo00000000000000000C3',
       title: 'Demo English Channel',
       thumbnail: '',
       createdAt: '2026-09-01T09:00:00.000Z',
-      meta: { owner: '演示归属人A', channelName: 'Demo English Channel', language: '英文', company: '演示海外事业部', gender: '无性别', channelType: '测试号', operationMode: '代运营（演示C）', supplier: '演示供应商A', copyrightType: '独家买断', dramaType: '真人剧/漫剧', monetized: 'YPP', ranking: '演示 MZ', status: '养号', remark: 'Demo data, not linked to any real authorization', group: '一组', updatedAt: '2026-10-15T05:00:00.000Z' }
+      meta: { owner: '演示归属人A', channelName: 'Demo English Channel', language: '英文', company: '演示海外事业部', gender: '无性别', channelType: '测试号', operationMode: '代运营（演示C）', supplier: '演示供应商A', copyrightType: '独家买断', dramaType: '真人剧/漫剧', monetized: 'YPP', ranking: '演示 MZ', status: '养号', remark: 'Demo data, not linked to any real authorization', descTemplate: '', group: '一组', updatedAt: '2026-10-15T05:00:00.000Z' }
     }
   ];
 

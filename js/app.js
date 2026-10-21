@@ -617,9 +617,9 @@ function goToStep(n) {
     buildReview();
   }
 
-  // 进入第 2 步：自动用当前发布频道的「关于」简介填充视频描述
+  // 进入第 2 步：优先用该频道设置的「视频简介模版」填充视频描述，没设置才退回频道「关于」简介
   if (n === 2) {
-    autoFillChannelDescription();
+    autoFillStep2Description();
   }
 
   // Scroll top
@@ -719,9 +719,12 @@ function bindFormValidation() {
 // ─── 频道「关于」简介自动填充视频描述 ────────────
 // 记录上次自动填充的来源，用于判断用户是否改动过、是否需要随频道切换重新填充
 let channelDescState = { channelId: null, text: '' };
+// 上次由「视频简介模版」自动填入的内容（用于判断用户是否手改过）
+let _mainAutoDesc = '';
 // 请求序号：接口约 1.8s 才返回，用它丢弃过期响应，防止慢响应覆盖用户新输入
 let channelDescToken = 0;
 const DESC_HINT_DEFAULT = '进入第 2 步时会自动填入当前发布频道的「关于」简介，可随意修改';
+const DESC_HINT_TPL = '已套用该频道在「社媒账号采集表」里设置的「视频简介模版」，可随意修改';
 
 function setDescriptionValue(text) {
   const el = $('#description');
@@ -793,6 +796,45 @@ function autoFillChannelDescription() {
   if (!isUntouched) return;
   if (el.value.trim() && channelDescState.channelId && activeId && channelDescState.channelId === activeId) return;
   fillChannelDescription({ silent: true });
+}
+
+// 主上传弹窗的模版变量上下文（与快传弹窗 uytBuildDescCtx 口径一致）
+function buildMainDescCtx(channelId) {
+  const src = getSelectedSourceContext();
+  const ch = (state.channels || []).find(c => c.id === channelId);
+  const titleEl = $('#title');
+  return {
+    channelId: channelId || '',
+    title: titleEl ? String(titleEl.value || '').trim() : '',
+    channelTitle: ch ? (ch.title || (ch.meta && ch.meta.channelName) || '') : '',
+    collectionGroup: (src && (src.linkedCollection || src.collectionName)) || '',
+    language: (src && src.language) || '',
+    type: (src && src.type) || ''
+  };
+}
+
+// 进入第 2 步：优先套用频道上设置的「视频简介模版」；频道没设置才退回「频道关于简介」
+function autoFillStep2Description() {
+  const el = $('#description');
+  if (!el) return;
+  const activeId = state.activeChannelId || ($('#targetChannel') && $('#targetChannel').value) || '';
+  // 用户已手改过 → 不动
+  const untouched = !el.value.trim()
+    || el.value === channelDescState.text
+    || el.value === _mainAutoDesc;
+  if (!untouched) return;
+
+  const tpl = resolveDescTemplateFor(activeId);
+  const rendered = renderDescTemplateClient(tpl, buildMainDescCtx(activeId));
+  if (rendered && rendered.trim()) {
+    _mainAutoDesc = setDescriptionValue(rendered);
+    // 已用模版填充，清掉「频道简介」的来源标记，避免之后被它覆盖
+    channelDescState = { channelId: null, text: '' };
+    setDescHint(DESC_HINT_TPL);
+    return;
+  }
+  setDescHint(DESC_HINT_DEFAULT);
+  autoFillChannelDescription();
 }
 
 function bindChannelDesc() {
@@ -1282,6 +1324,12 @@ function renderChannelsPage() {
     if (!val) return '<span class="td-empty">—</span>';
     return escapeHtml(val);
   }
+  // 视频简介模版：表格里不铺全文，只标「已设置 N 字」，鼠标悬停看全文
+  function descTplTag(val) {
+    const s = String(val || '').trim();
+    if (!s) return '<span class="td-empty">—</span>';
+    return `<span class="table-tag success">已设置 · ${s.length} 字</span>`;
+  }
 
   tbody.innerHTML = filtered.map(c => {
     const m = c.meta || {};
@@ -1307,6 +1355,7 @@ function renderChannelsPage() {
       <td>${rankTag(m.ranking)}</td>
       <td>${statusTag(m.status)}</td>
       <td><span class="td-channel-remark">${tdText(m.remark)}</span></td>
+      <td><span class="td-desctpl" title="${escapeHtml(m.descTemplate || '')}">${descTplTag(m.descTemplate)}</span></td>
       <td>
         <button class="table-action-btn" data-edit-cid="${c.id}">编辑</button>
         <button class="table-action-btn danger" data-remove-cid="${c.id}">移除</button>
@@ -1399,6 +1448,7 @@ async function openChannelEditModal(channelId, options = {}) {
   // 文本字段
   $('#editChannelName').value = meta.channelName || '';
   $('#editRemark').value = meta.remark || '';
+  $('#editDescTemplate').value = meta.descTemplate || '';
 
   $('#channelEditModal').style.display = 'flex';
 
@@ -1642,7 +1692,8 @@ async function saveChannelEdit() {
     monetized: $('#editMonetized').value,
     ranking: $('#editRanking').value,
     status: $('#editStatus').value,
-    remark: $('#editRemark').value.trim()
+    remark: $('#editRemark').value.trim(),
+    descTemplate: $('#editDescTemplate').value
   };
 
   try {
@@ -2515,7 +2566,12 @@ async function handleSubmit() {
     ageRestricted: $('#ageRestricted').checked
   };
 
-  const desc = $('#description').value.trim();
+  // 说明：手填优先；留空则套用该频道的「视频简介模版」（保证重试时结果一致）
+  let desc = $('#description').value.trim();
+  if (!desc) {
+    const cid = state.activeChannelId || ($('#targetChannel') && $('#targetChannel').value) || '';
+    desc = renderDescTemplateClient(resolveDescTemplateFor(cid), buildMainDescCtx(cid));
+  }
   if (desc) body.description = desc;
   if (publishAtIso) body.publishAt = publishAtIso;
 
@@ -2622,6 +2678,8 @@ function resetAll() {
   $('#description').value = '';
   $('#descCount').textContent = '0/5000';
   channelDescState = { channelId: null, text: '' };
+  _mainAutoDesc = '';
+  setDescHint(DESC_HINT_DEFAULT);
   $('#publishAt').value = '';
   $('#embeddable').checked = true;
   $('#notifySubscribers').checked = true;
@@ -2667,6 +2725,8 @@ function resetAllExceptProcessing() {
   $('#description').value = '';
   $('#descCount').textContent = '0/5000';
   channelDescState = { channelId: null, text: '' };
+  _mainAutoDesc = '';
+  setDescHint(DESC_HINT_DEFAULT);
   $('#publishAt').value = '';
   $('#embeddable').checked = true;
   $('#notifySubscribers').checked = true;
@@ -2800,6 +2860,11 @@ async function saveAiConfig() {
 let _descTemplates = { default: '', byChannel: {} };
 
 function resolveDescTemplateFor(channelId) {
+  // 1) 频道列表里维护的「视频简介模版」优先（用户在社媒账号采集表里直接填）
+  const ch = (state.channels || []).find(c => c.id === channelId);
+  const fromChannel = ch && ch.meta ? String(ch.meta.descTemplate || '').trim() : '';
+  if (fromChannel) return fromChannel;
+  // 2) 退回「系统设置 → 默认视频说明模板」（按频道 / 全局默认）
   const per = channelId ? _descTemplates.byChannel[channelId] : '';
   return (per && String(per).trim()) ? String(per) : (_descTemplates.default || '');
 }

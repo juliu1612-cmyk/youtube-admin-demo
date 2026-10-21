@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache" data-page-node-id="KTB9nog34dVMTyI6KzyhZO">
 <meta http-equiv="Expires" content="0" data-page-node-id="NAXDVA9FEyCdFmpnLdPy9a">
 <title>YouTube Studio — 视频上传</title>
-<link rel="stylesheet" href="./css/style.css?v=20261020b" data-page-node-id="WsExLEeRHJJ5lmtEOpYs5D">
+<link rel="stylesheet" href="./css/style.css?v=20261020c" data-page-node-id="WsExLEeRHJJ5lmtEOpYs5D">
 <style>
   /* Critical: prevent broken layout when CSS fails or page is opened via file:// */
   html{font-size:16px;-webkit-font-smoothing:antialiased}
@@ -542,6 +542,7 @@
                 <th class="col-rank" data-page-node-id="LkGENIkKzcI8xbt4vLadL1">挂靠方</th>
                 <th class="col-status" data-page-node-id="Bs0zgNBCgAZeQxY3QymUlm">运营频道状态</th>
                 <th class="col-remark" data-page-node-id="Z9qaC1YUynMWSW5MCq6SK8">备注</th>
+                <th class="col-desctpl" data-page-node-id="descTplCol01">视频简介模版</th>
                 <th class="col-actions" data-page-node-id="iIzw8x1E8qlwDP4SbIIFVd">操作</th>
               </tr>
             </thead>
@@ -1764,6 +1765,15 @@
           <div class="field-label" data-page-node-id="i5c7AG8wZVY7A8GSnGqaxz">备注</div>
           <textarea id="editRemark" data-field="remark" rows="3" maxlength="500" placeholder="可填写其他说明信息"></textarea>
         </div>
+
+        <div class="field" data-page-node-id="descTplField01">
+          <div class="field-label" data-page-node-id="descTplLabel01">视频简介模版</div>
+          <textarea id="editDescTemplate" data-field="descTemplate" rows="6" maxlength="5000"
+            placeholder="留空则不自动填写。上传视频时会自动填入这里的内容作为视频简介"></textarea>
+          <span class="field-hint" id="descTplVarsHint" data-page-node-id="descTplHint01">
+            可用变量：{title} 视频标题 · {channelTitle} 频道名称 · {channelUrl} 频道链接 · {collectionGroup} 合集组 · {language} 语言 · {type} 类型 · {date} 日期
+          </span>
+        </div>
       </form>
     </div>
     <div class="modal-footer" data-page-node-id="WrSIH00gmKhnou18IEvRgM">
@@ -2002,8 +2012,8 @@
   </aside>
 </div>
 
-<script src="./js/demo-mock.js?v=demo2"></script>
-<script src="./js/app.js?v=20261020b"></script>
+<script src="./js/demo-mock.js?v=demo3"></script>
+<script src="./js/app.js?v=20261020c"></script>
 <script>
   if(location.protocol === 'file:'){
     document.getElementById('fileWarning').style.display = 'block';
