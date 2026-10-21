@@ -99,7 +99,7 @@ async function checkAdminAuth() {
     const res = await fetch('/api/admin/status');
     const data = await res.json();
     if (!data.loggedIn) {
-      window.location.href = './login.html';
+      window.location.href = '/login.html';
       return;
     }
     // 后台已登录，左下角显示管理员账号信息（与 YouTube 频道授权无关）
@@ -107,7 +107,7 @@ async function checkAdminAuth() {
     $('#adminName').textContent = state.adminUsername;
     $('#adminStatus').textContent = '后台账号 · 已登录';
   } catch {
-    window.location.href = './login.html';
+    window.location.href = '/login.html';
   }
 }
 
@@ -181,7 +181,7 @@ function updateStep1NextButton() {
 async function logout() {
   await fetch('/api/auth/logout', { method: 'POST' });
   await fetch('/api/admin/logout', { method: 'POST' });
-  window.location.href = './login.html';
+  window.location.href = '/login.html';
 }
 
 // ─── 右下角上传进度悬浮面板 ──────────────────────
@@ -917,10 +917,13 @@ function insCollectCtx(scope) {
 
 // 调后端按模板生成
 async function insRunInstruction(tab, collected) {
+  const payload = { tab, ctx: collected.ctx, channelId: collected.channelId };
+  // 封面：带上封面库参考图（相对路径 covers/<folderId>/<file>），由后端转 base64 交给视觉模型
+  if (collected.refImage) payload.refImage = collected.refImage;
   const res = await fetch('/api/instructions/run', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tab, ctx: collected.ctx, channelId: collected.channelId })
+    body: JSON.stringify(payload)
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
@@ -940,11 +943,21 @@ async function insGenAndFill(cfg) {
   _insGenBusy[key] = true;
   if (btn) { btn.disabled = true; btn.classList.add('loading'); btn.textContent = '生成中…'; }
   try {
-    const data = await insRunInstruction(cfg.tab, insCollectCtx(cfg.scope));
+    const collected = insCollectCtx(cfg.scope);
+    // 封面：若该入口已选参考图，带上去参与生成
+    if (cfg.tab === 'thumbnail') {
+      const ref = typeof coverRefOf === 'function' ? coverRefOf(cfg.scope) : null;
+      if (ref && ref.file) collected.refImage = ref.file;
+    }
+    const data = await insRunInstruction(cfg.tab, collected);
     cfg.fill(data);
     const modelTip = data.model ? ` · ${data.model}` : '';
     const tplTip = data.templateName ? ` · 模板「${data.templateName}」` : '';
-    showToast(`已生成${INS_TAB_CN[cfg.tab] || ''}${modelTip}${tplTip}`, 'success');
+    const refTip = (cfg.tab === 'thumbnail' && data.refUsed) ? ' · 已参考封面库图片' : '';
+    showToast(`已生成${INS_TAB_CN[cfg.tab] || ''}${modelTip}${tplTip}${refTip}`, 'success');
+    if (cfg.tab === 'thumbnail' && data.refWarning) {
+      showToast(data.refWarning, 'warning', 7000);
+    }
     if (Array.isArray(data.missing) && data.missing.length) {
       showToast(`宏参未取到值：${data.missing.join('、')}（已原样保留，请检查视频来源与频道）`, 'warning', 6000);
     }
@@ -2866,6 +2879,7 @@ async function loadAiConfig() {
     if ($('#settingAiBaseUrl')) $('#settingAiBaseUrl').value = cfg.baseUrl || '';
     if ($('#settingAiModel')) $('#settingAiModel').value = cfg.model || '';
     if ($('#settingAiImageModel')) $('#settingAiImageModel').value = cfg.imageModel || '';
+    if ($('#settingAiVisionModel')) $('#settingAiVisionModel').value = cfg.visionModel || '';
     // 密钥不回显明文，留空即不修改
     if ($('#settingAiApiKey')) {
       $('#settingAiApiKey').value = '';
@@ -2891,6 +2905,7 @@ async function saveAiConfig() {
     baseUrl: $('#settingAiBaseUrl')?.value.trim() || '',
     model: $('#settingAiModel')?.value.trim() || '',
     imageModel: $('#settingAiImageModel')?.value.trim() || '',
+    visionModel: $('#settingAiVisionModel')?.value.trim() || '',
     apiKey: $('#settingAiApiKey')?.value.trim() || ''
   };
   try {
@@ -5385,7 +5400,7 @@ function runPublishTask(taskId, body, taskTitle, thumbDataUrl) {
       const msg = '后台登录已失效，请刷新页面重新登录后再重试';
       updatePublishTask(taskId, { status: PT_STATUS.FAILED, error: msg });
       showToast('后台登录已失效，页面即将跳转登录页…', 'error');
-      setTimeout(() => { window.location.href = './login.html'; }, 2000);
+      setTimeout(() => { window.location.href = '/login.html'; }, 2000);
       return;
     }
     const data = await res.json().catch(() => ({}));
@@ -7999,4 +8014,536 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', bindInstructions);
 } else {
   bindInstructions();
+}
+
+// ══════════════════════════════════════════════════════════
+//  封面库：文件夹 + 批量上传 + AI 生成封面时选参考图
+//  存储：uploads/covers/<folderId>/<file>，元数据 uploads/covers/_folders.json
+// ══════════════════════════════════════════════════════════
+const COVER_REF_LS_KEY = 'ytAdmin.coverRef.v1';
+const COVER_REF_SCOPES = [
+  ['main', 'btnAiGenThumbRef'],
+  ['uyt', 'uytAiGenThumbRef'],
+  ['ytv', 'ytvAiGenThumbRef']
+];
+
+let _coverFolders = [];      // [{id,name,count,images:[{file,name,url,size,mtime}]}]
+let _coverCurId = '';        // 当前查看的文件夹
+let _coverLibLoaded = false;
+let _coverLibBound = false;
+let _coverLibUploading = false;
+let _coverPickScope = '';    // 正在为哪个入口选参考图
+let _coverPickFolder = '';   // 弹窗内当前文件夹
+let _coverPickTemp = null;   // 弹窗内临时选中 {file,name,url}
+let _coverNameMode = 'new';  // new | rename
+let _coverRefs = coverLoadRefs();
+
+function coverEsc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function coverLoadRefs() {
+  try {
+    const o = JSON.parse(localStorage.getItem(COVER_REF_LS_KEY) || '{}');
+    return (o && typeof o === 'object' && !Array.isArray(o)) ? o : {};
+  } catch (e) { return {}; }
+}
+function coverSaveRefs() {
+  try { localStorage.setItem(COVER_REF_LS_KEY, JSON.stringify(_coverRefs)); } catch (e) { /* 隐私模式忽略 */ }
+}
+function coverRefOf(scope) {
+  const r = _coverRefs[scope];
+  return (r && r.file) ? r : null;
+}
+function coverSetRef(scope, ref) {
+  if (ref && ref.file) {
+    _coverRefs[scope] = { file: ref.file, name: ref.name || '', url: ref.url || '' };
+  } else {
+    delete _coverRefs[scope];
+  }
+  coverSaveRefs();
+  coverUpdateRefButtons();
+}
+function coverUpdateRefButtons() {
+  COVER_REF_SCOPES.forEach(([scope, id]) => {
+    const btn = $('#' + id);
+    if (!btn) return;
+    const r = coverRefOf(scope);
+    btn.classList.toggle('active', !!r);
+    btn.textContent = r ? '参考图 ✓' : '参考图';
+    btn.title = r
+      ? `当前参考图：${r.name || r.file}（点击更换或清除）`
+      : '从封面库选一张图作为参考：AI 会先理解它的构图 / 配色 / 打光 / 风格，再结合指令库生成新封面';
+  });
+}
+
+async function coverApi(url, opts) {
+  const res = await fetch(url, opts);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
+
+// ─── 数据加载 ───────────────────────────────
+async function loadCoverLibrary(silent) {
+  try {
+    const data = await coverApi('/api/cover-library');
+    _coverFolders = Array.isArray(data.folders) ? data.folders : [];
+    _coverLibLoaded = true;
+    if (_coverCurId && !_coverFolders.some(f => f.id === _coverCurId)) _coverCurId = '';
+    if (!_coverCurId && _coverFolders.length) _coverCurId = _coverFolders[0].id;
+    coverRenderFolders();
+    coverRenderImages();
+    return _coverFolders;
+  } catch (e) {
+    if (!silent) showToast('读取封面库失败：' + e.message, 'error');
+    return [];
+  }
+}
+
+function coverCurFolder() {
+  return _coverFolders.find(f => f.id === _coverCurId) || null;
+}
+
+// ─── 渲染：文件夹列表 ───────────────────────
+function coverRenderFolders() {
+  const box = $('#coverLibFolders');
+  const empty = $('#coverLibFolderEmpty');
+  const hint = $('#coverLibHint');
+  const total = _coverFolders.reduce((n, f) => n + (f.count || 0), 0);
+  if (hint) {
+    hint.textContent = _coverFolders.length
+      ? `${_coverFolders.length} 个文件夹 · ${total} 张图片`
+      : '';
+  }
+  if (empty) empty.style.display = _coverFolders.length ? 'none' : 'block';
+  if (!box) return;
+  box.innerHTML = _coverFolders.map(f => {
+    const active = f.id === _coverCurId ? ' active' : '';
+    return `<div class="coverlib-folder${active}" data-folder-id="${coverEsc(f.id)}" title="${coverEsc(f.name)}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      <span class="coverlib-folder-name">${coverEsc(f.name || f.id)}</span>
+      <span class="coverlib-folder-count">${f.count || 0}</span>
+    </div>`;
+  }).join('');
+}
+
+// ─── 渲染：图片网格 ─────────────────────────
+function coverRenderImages() {
+  const grid = $('#coverLibGrid');
+  const empty = $('#coverLibImgEmpty');
+  const title = $('#coverLibCurFolder');
+  const f = coverCurFolder();
+  const btns = ['#coverLibRenameBtn', '#coverLibDelFolderBtn', '#coverLibUploadBtn'];
+  btns.forEach(sel => { const b = $(sel); if (b) b.disabled = !f; });
+
+  if (title) {
+    title.textContent = f
+      ? `${f.name}${f.count ? `（${f.count} 张）` : ''}`
+      : (_coverFolders.length ? '请选择左侧文件夹' : '还没有文件夹');
+  }
+  if (!grid) return;
+  if (!f || !Array.isArray(f.images) || !f.images.length) {
+    grid.innerHTML = '';
+    grid.style.display = 'none';
+    if (empty) {
+      empty.style.display = 'block';
+      empty.querySelector('h3').textContent = f ? '这个文件夹还没有图片' : '先新建一个文件夹';
+      empty.querySelector('p').textContent = f
+        ? '上传封面素材后，AI 生成封面时就能选它作为参考图'
+        : '点击右上角「新建文件夹」，再批量上传图片';
+    }
+    return;
+  }
+  grid.style.display = 'grid';
+  if (empty) empty.style.display = 'none';
+  grid.innerHTML = f.images.map(img => `<div class="coverlib-card" data-file="${coverEsc(img.file)}">
+      <img src="${coverEsc(img.url)}" alt="${coverEsc(img.name)}" loading="lazy">
+      <button class="coverlib-card-del" type="button" data-del="${coverEsc(img.file)}" title="删除这张图">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+      </button>
+      <div class="coverlib-card-meta"><span>${coverEsc(img.name)}</span><span>${coverSizeText(img.size)}</span></div>
+    </div>`).join('');
+}
+
+function coverSizeText(n) {
+  const v = Number(n) || 0;
+  if (!v) return '';
+  if (v < 1024) return v + 'B';
+  if (v < 1024 * 1024) return (v / 1024).toFixed(0) + 'KB';
+  return (v / 1024 / 1024).toFixed(1) + 'MB';
+}
+
+// ─── 批量上传（XHR 才有上传进度） ────────────
+function coverUploadFiles(fileList) {
+  if (_coverLibUploading) { showToast('正在上传，请稍候…', 'warning'); return; }
+  if (!_coverCurId) { showToast('请先选择或新建一个文件夹', 'warning'); return; }
+  let list = Array.from(fileList || []).filter(f =>
+    /^image\//.test(f.type || '') || /\.(jpe?g|png|gif|bmp|webp)$/i.test(f.name || '')
+  );
+  if (!list.length) { showToast('请选择图片文件（jpg / png / gif / bmp / webp）', 'warning'); return; }
+  if (list.length > 50) {
+    showToast('一次最多上传 50 张，已只上传前 50 张', 'warning');
+    list = list.slice(0, 50);
+  }
+  const tooBig = list.filter(f => f.size > 10 * 1024 * 1024);
+  if (tooBig.length) {
+    showToast(`有 ${tooBig.length} 张超过 10MB 已跳过：${tooBig[0].name}`, 'warning', 6000);
+    list = list.filter(f => f.size <= 10 * 1024 * 1024);
+  }
+  if (!list.length) return;
+
+  const bar = $('#coverLibProgress');
+  const btn = $('#coverLibUploadBtn');
+  const fd = new FormData();
+  fd.append('folderId', _coverCurId);   // 必须排在 images 之前：multer 按流顺序解析字段
+  list.forEach(f => fd.append('images', f, f.name));
+
+  _coverLibUploading = true;
+  if (btn) { btn.disabled = true; btn.textContent = '上传中…'; }
+  if (bar) { bar.style.display = 'block'; bar.textContent = `准备上传 ${list.length} 张…`; }
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', '/api/cover-library/upload');
+  xhr.upload.onprogress = e => {
+    if (!bar) return;
+    if (e.lengthComputable) {
+      const pct = Math.round(e.loaded / e.total * 100);
+      bar.textContent = `上传中 ${pct}%（${list.length} 张）`;
+    } else {
+      bar.textContent = `上传中…（${list.length} 张）`;
+    }
+  };
+  xhr.onload = async () => {
+    _coverLibUploading = false;
+    if (btn) { btn.disabled = false; btn.textContent = '批量上传图片'; }
+    let data = {};
+    try { data = JSON.parse(xhr.responseText || '{}'); } catch (e) { /* 非 JSON */ }
+    if (xhr.status >= 200 && xhr.status < 300) {
+      if (bar) bar.textContent = `已上传 ${(data.uploaded || []).length} 张`;
+      showToast(`已上传 ${(data.uploaded || []).length} 张图片`, 'success');
+      await loadCoverLibrary(true);
+      setTimeout(() => { if (bar) bar.style.display = 'none'; }, 2500);
+    } else {
+      if (bar) bar.style.display = 'none';
+      showToast('上传失败：' + (data.error || `HTTP ${xhr.status}`), 'error', 6000);
+    }
+  };
+  xhr.onerror = () => {
+    _coverLibUploading = false;
+    if (btn) { btn.disabled = false; btn.textContent = '批量上传图片'; }
+    if (bar) bar.style.display = 'none';
+    showToast('上传失败：网络错误', 'error');
+  };
+  xhr.send(fd);
+}
+
+// ─── 文件夹命名弹窗（新建 / 重命名） ──────────
+function coverOpenNameDialog(mode) {
+  const f = coverCurFolder();
+  if (mode === 'rename' && !f) return;
+  _coverNameMode = mode;
+  const mask = $('#coverNameMask');
+  const title = $('#coverNameTitle');
+  const input = $('#coverNameInput');
+  if (!mask || !input) return;
+  if (title) title.textContent = mode === 'rename' ? '重命名文件夹' : '新建文件夹';
+  input.value = mode === 'rename' ? (f.name || '') : '';
+  mask.style.display = 'flex';
+  setTimeout(() => { input.focus(); input.select(); }, 30);
+}
+function coverCloseNameDialog() {
+  const mask = $('#coverNameMask');
+  if (mask) mask.style.display = 'none';
+}
+async function coverSubmitName() {
+  const input = $('#coverNameInput');
+  const name = input ? String(input.value || '').trim() : '';
+  if (!name) { showToast('请填写文件夹名称', 'warning'); return; }
+  try {
+    if (_coverNameMode === 'rename') {
+      const f = coverCurFolder();
+      if (!f) return;
+      await coverApi(`/api/cover-library/folders/${encodeURIComponent(f.id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      });
+      showToast('已重命名', 'success');
+    } else {
+      const data = await coverApi('/api/cover-library/folders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      });
+      if (data.folder && data.folder.id) _coverCurId = data.folder.id;
+      showToast('文件夹已创建，可以批量上传图片了', 'success');
+    }
+    coverCloseNameDialog();
+    await loadCoverLibrary(true);
+  } catch (e) {
+    showToast(e.message, 'error', 5000);
+  }
+}
+
+async function coverDeleteFolder() {
+  const f = coverCurFolder();
+  if (!f) return;
+  const n = f.count || 0;
+  const ok = window.confirm(`删除文件夹「${f.name}」${n ? `及其中 ${n} 张图片` : ''}？此操作不可撤销。`);
+  if (!ok) return;
+  try {
+    await coverApi(`/api/cover-library/folders/${encodeURIComponent(f.id)}`, { method: 'DELETE' });
+    // 该文件夹里的图可能被当成参考图，一并清掉失效引用
+    Object.keys(_coverRefs).forEach(scope => {
+      const rel = _coverRefs[scope] && _coverRefs[scope].file;
+      if (rel && rel.indexOf(`covers/${f.id}/`) === 0) coverSetRef(scope, null);
+    });
+    _coverCurId = '';
+    showToast('文件夹已删除', 'success');
+    await loadCoverLibrary(true);
+  } catch (e) {
+    showToast('删除失败：' + e.message, 'error');
+  }
+}
+
+async function coverDeleteImage(file) {
+  if (!file) return;
+  if (!window.confirm('删除这张图片？')) return;
+  try {
+    await coverApi('/api/cover-library/images?file=' + encodeURIComponent(file), { method: 'DELETE' });
+    Object.keys(_coverRefs).forEach(scope => {
+      if (_coverRefs[scope] && _coverRefs[scope].file === file) coverSetRef(scope, null);
+    });
+    showToast('图片已删除', 'success');
+    await loadCoverLibrary(true);
+  } catch (e) {
+    showToast('删除失败：' + e.message, 'error');
+  }
+}
+
+// ─── 参考图选择弹窗 ─────────────────────────
+async function openCoverPicker(scope) {
+  _coverPickScope = scope;
+  await loadCoverLibrary(true);
+  const cur = coverRefOf(scope);
+  _coverPickTemp = cur;
+  const parts = cur && cur.file ? cur.file.split('/') : [];
+  _coverPickFolder = (parts.length === 3 ? parts[1] : '') || _coverCurId
+    || (_coverFolders[0] && _coverFolders[0].id) || '';
+  const mask = $('#coverPickMask');
+  if (!mask) return;
+  coverRenderPickFolders();
+  coverRenderPickGrid();
+  mask.style.display = 'flex';
+}
+function coverClosePicker() {
+  const mask = $('#coverPickMask');
+  if (mask) mask.style.display = 'none';
+  _coverPickScope = '';
+}
+function coverRenderPickFolders() {
+  const sel = $('#coverPickFolderSel');
+  if (!sel) return;
+  if (!_coverFolders.length) {
+    sel.innerHTML = '<option value="">（暂无文件夹）</option>';
+    sel.disabled = true;
+    return;
+  }
+  sel.disabled = false;
+  sel.innerHTML = _coverFolders.map(f =>
+    `<option value="${coverEsc(f.id)}">${coverEsc(f.name)}（${f.count || 0}）</option>`
+  ).join('');
+  sel.value = _coverPickFolder || _coverFolders[0].id;
+}
+function coverRenderPickGrid() {
+  const grid = $('#coverPickGrid');
+  const empty = $('#coverPickEmpty');
+  const hint = $('#coverPickHint');
+  if (!grid) return;
+  const f = _coverFolders.find(x => x.id === _coverPickFolder);
+  const imgs = (f && f.images) || [];
+  if (hint) {
+    hint.textContent = _coverPickTemp && _coverPickTemp.file
+      ? `已选：${_coverPickTemp.name || _coverPickTemp.file}`
+      : '未选参考图';
+  }
+  if (!imgs.length) {
+    grid.innerHTML = '';
+    grid.style.display = 'none';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  grid.style.display = 'grid';
+  if (empty) empty.style.display = 'none';
+  grid.innerHTML = imgs.map(img => {
+    const sel = _coverPickTemp && _coverPickTemp.file === img.file ? ' selected' : '';
+    return `<div class="coverpick-card-item${sel}" data-file="${coverEsc(img.file)}" data-url="${coverEsc(img.url)}" data-name="${coverEsc(img.name)}" title="${coverEsc(img.name)}">
+      <img src="${coverEsc(img.url)}" alt="${coverEsc(img.name)}" loading="lazy">
+    </div>`;
+  }).join('');
+}
+
+// ─── 事件绑定 ───────────────────────────────
+function bindCoverLibrary() {
+  if (_coverLibBound) return;
+  _coverLibBound = true;
+
+  // 页面按钮
+  const refresh = $('#coverLibRefreshBtn');
+  if (refresh) refresh.addEventListener('click', () => loadCoverLibrary(false));
+  const newBtn = $('#coverLibNewFolderBtn');
+  if (newBtn) newBtn.addEventListener('click', () => coverOpenNameDialog('new'));
+  const renameBtn = $('#coverLibRenameBtn');
+  if (renameBtn) renameBtn.addEventListener('click', () => coverOpenNameDialog('rename'));
+  const delBtn = $('#coverLibDelFolderBtn');
+  if (delBtn) delBtn.addEventListener('click', coverDeleteFolder);
+  const upBtn = $('#coverLibUploadBtn');
+  const fileInput = $('#coverLibFileInput');
+  if (upBtn && fileInput) {
+    upBtn.addEventListener('click', () => {
+      if (!_coverCurId) { showToast('请先选择或新建一个文件夹', 'warning'); return; }
+      fileInput.click();
+    });
+    fileInput.addEventListener('change', () => {
+      coverUploadFiles(fileInput.files);
+      fileInput.value = '';
+    });
+  }
+
+  // 拖拽上传（点击整个区域也能选文件）
+  const drop = $('#coverLibDrop');
+  if (drop) {
+    drop.addEventListener('click', e => {
+      if (e.target.closest && e.target.closest('button, input')) return;
+      if (!_coverCurId) { showToast('请先选择或新建一个文件夹', 'warning'); return; }
+      const fi = $('#coverLibFileInput');
+      if (fi) fi.click();
+    });
+    ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => {
+      e.preventDefault(); e.stopPropagation(); drop.classList.add('dragging');
+    }));
+    ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => {
+      e.preventDefault(); e.stopPropagation();
+      if (ev === 'dragleave' && drop.contains(e.relatedTarget)) return;
+      drop.classList.remove('dragging');
+    }));
+    drop.addEventListener('drop', e => {
+      const dt = e.dataTransfer;
+      if (dt && dt.files && dt.files.length) coverUploadFiles(dt.files);
+    });
+  }
+
+  // 文件夹点击
+  const folderBox = $('#coverLibFolders');
+  if (folderBox) folderBox.addEventListener('click', e => {
+    const item = e.target.closest && e.target.closest('.coverlib-folder');
+    if (!item) return;
+    const id = item.dataset.folderId || '';
+    if (!id || id === _coverCurId) return;
+    _coverCurId = id;
+    coverRenderFolders();
+    coverRenderImages();
+  });
+
+  // 删图
+  const grid = $('#coverLibGrid');
+  if (grid) grid.addEventListener('click', e => {
+    const del = e.target.closest && e.target.closest('[data-del]');
+    if (del) { e.stopPropagation(); coverDeleteImage(del.dataset.del); }
+  });
+
+  // 命名弹窗
+  const nameOk = $('#coverNameOkBtn');
+  if (nameOk) nameOk.addEventListener('click', coverSubmitName);
+  const nameCancel = $('#coverNameCancelBtn');
+  if (nameCancel) nameCancel.addEventListener('click', coverCloseNameDialog);
+  const nameClose = $('#coverNameCloseBtn');
+  if (nameClose) nameClose.addEventListener('click', coverCloseNameDialog);
+  const nameMask = $('#coverNameMask');
+  if (nameMask) {
+    nameMask.addEventListener('click', e => { if (e.target === nameMask) coverCloseNameDialog(); });
+    const nameInput = $('#coverNameInput');
+    if (nameInput) nameInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); coverSubmitName(); }
+    });
+  }
+
+  // 三个入口的「参考图」按钮
+  COVER_REF_SCOPES.forEach(([scope, id]) => {
+    const btn = $('#' + id);
+    if (btn) btn.addEventListener('click', () => openCoverPicker(scope));
+  });
+
+  // 参考图弹窗
+  const pickClose = $('#coverPickCloseBtn');
+  if (pickClose) pickClose.addEventListener('click', coverClosePicker);
+  const pickCancel = $('#coverPickCancelBtn');
+  if (pickCancel) pickCancel.addEventListener('click', coverClosePicker);
+  const pickMask = $('#coverPickMask');
+  if (pickMask) pickMask.addEventListener('click', e => { if (e.target === pickMask) coverClosePicker(); });
+  const pickClear = $('#coverPickClearBtn');
+  if (pickClear) pickClear.addEventListener('click', () => {
+    coverSetRef(_coverPickScope, null);
+    showToast('已取消参考图', 'success');
+    coverClosePicker();
+  });
+  const pickOk = $('#coverPickOkBtn');
+  if (pickOk) pickOk.addEventListener('click', () => {
+    if (_coverPickTemp && _coverPickTemp.file) {
+      coverSetRef(_coverPickScope, _coverPickTemp);
+      showToast(`已设参考图：${_coverPickTemp.name || _coverPickTemp.file}`, 'success');
+    } else {
+      coverSetRef(_coverPickScope, null);
+    }
+    coverClosePicker();
+  });
+  const pickFolderSel = $('#coverPickFolderSel');
+  if (pickFolderSel) pickFolderSel.addEventListener('change', () => {
+    _coverPickFolder = pickFolderSel.value;
+    coverRenderPickGrid();
+  });
+  const pickGrid = $('#coverPickGrid');
+  if (pickGrid) {
+    pickGrid.addEventListener('click', e => {
+      const card = e.target.closest && e.target.closest('.coverpick-card-item');
+      if (!card) return;
+      const file = card.dataset.file || '';
+      // 再点一次已选中的图 = 取消选择
+      if (_coverPickTemp && _coverPickTemp.file === file) _coverPickTemp = null;
+      else _coverPickTemp = { file, name: card.dataset.name || '', url: card.dataset.url || '' };
+      coverRenderPickGrid();
+    });
+    pickGrid.addEventListener('dblclick', e => {
+      const card = e.target.closest && e.target.closest('.coverpick-card-item');
+      if (!card) return;
+      _coverPickTemp = { file: card.dataset.file || '', name: card.dataset.name || '', url: card.dataset.url || '' };
+      coverSetRef(_coverPickScope, _coverPickTemp);
+      showToast(`已设参考图：${_coverPickTemp.name || _coverPickTemp.file}`, 'success');
+      coverClosePicker();
+    });
+  }
+
+  // Esc 关闭（命名弹窗优先）
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    const nm = $('#coverNameMask');
+    if (nm && nm.style.display !== 'none') { coverCloseNameDialog(); return; }
+    const pm = $('#coverPickMask');
+    if (pm && pm.style.display !== 'none') coverClosePicker();
+  });
+
+  // 导航进入时加载
+  const nav = $('.nav-item[data-page="coverlib"]');
+  if (nav) nav.addEventListener('click', () => loadCoverLibrary(true));
+
+  coverUpdateRefButtons();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bindCoverLibrary);
+} else {
+  bindCoverLibrary();
 }

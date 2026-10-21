@@ -107,7 +107,6 @@
   @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   @keyframes spin{to{transform:rotate(360deg)}}
 </style>
-<script src="./js/demo-mock.js?v=demo4"></script>
 </head>
 <body>
 <div class="bg-grid"></div>
@@ -163,7 +162,7 @@ async function handleLogin() {
     const data = await res.json();
 
     if (data.success) {
-      window.location.href = './index.html';
+      window.location.href = '/';
     } else {
       showError(data.error || '登录失败');
     }

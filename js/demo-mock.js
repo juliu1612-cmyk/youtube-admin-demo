@@ -146,6 +146,169 @@
     }
   }
 
+  /* ---------- 封面库：示例文件夹 + canvas 现画的示例图片 ---------- */
+  var DEMO_COVER_FOLDERS = [
+    { id: 'FdemoCity01', name: '都市爽剧 · 竖版封面' },
+    { id: 'FdemoGuzh02', name: '古装虐恋 · 封面素材' },
+    { id: 'FdemoMixx03', name: '通用底图 / 配色参考' }
+  ];
+  var DEMO_COVER_PALETTES = [
+    ['#1e3a8a', '#f97316'],
+    ['#7c2d12', '#e11d48'],
+    ['#0f766e', '#facc15']
+  ];
+  var DEMO_COVER_LABELS = [
+    ['逆袭总裁 EP01', '豪门隐婚 EP03', '闪婚老公是首富', '都市夜景 · 霓虹'],
+    ['冷宫弃妃 EP01', '摄政王的掌心宠', '重生之嫡女有毒', '宫墙 · 暖红调'],
+    ['配色参考 · 冷暖对比', '构图参考 · 三分法', '光影参考 · 逆光']
+  ];
+
+  function demoCoverImage(w, h, pal, label, seed) {
+    var c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    var g = c.getContext('2d');
+    var grd = g.createLinearGradient(0, 0, w, h);
+    grd.addColorStop(0, pal[0]);
+    grd.addColorStop(1, pal[1]);
+    g.fillStyle = grd; g.fillRect(0, 0, w, h);
+    // 顶部光晕（模拟打光）
+    var rg = g.createRadialGradient(w * (0.25 + seed * 0.12), h * 0.25, 4, w * (0.25 + seed * 0.12), h * 0.25, w * 0.55);
+    rg.addColorStop(0, 'rgba(255,255,255,.42)');
+    rg.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = rg; g.fillRect(0, 0, w, h);
+    // 人物剪影
+    g.fillStyle = 'rgba(0,0,0,.34)';
+    g.beginPath(); g.ellipse(w * 0.62, h * 0.74, w * 0.13, h * 0.3, 0, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.arc(w * 0.62, h * 0.42, w * 0.075, 0, Math.PI * 2); g.fill();
+    // 底部标题条
+    g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(0, h * 0.78, w, h * 0.22);
+    g.fillStyle = '#fff';
+    g.font = 'bold ' + Math.round(h * 0.075) + 'px "PingFang SC","Microsoft YaHei",sans-serif';
+    g.fillText(String(label).slice(0, 12), w * 0.05, h * 0.9);
+    return c.toDataURL('image/png');
+  }
+
+  var DEMO_COVERS = null;
+  function demoCoverLib() {
+    if (DEMO_COVERS) return DEMO_COVERS;
+    DEMO_COVERS = DEMO_COVER_FOLDERS.map(function (f, fi) {
+      var pal = DEMO_COVER_PALETTES[fi] || DEMO_COVER_PALETTES[0];
+      var labels = DEMO_COVER_LABELS[fi] || [];
+      var imgs = labels.map(function (nm, i) {
+        return {
+          file: 'covers/' + f.id + '/demo-' + (i + 1) + '.png',
+          name: nm + '.png',
+          url: demoCoverImage(640, 360, pal, nm, i),
+          size: 120000 + i * 8137,
+          mtime: new Date(Date.now() - (i + 1) * 3600e3).toISOString()
+        };
+      });
+      return { id: f.id, name: f.name, createdAt: '2026-10-20T08:00:00.000Z', count: imgs.length, images: imgs };
+    });
+    return DEMO_COVERS;
+  }
+
+  function demoCoverFind(file) {
+    var lib = demoCoverLib();
+    for (var i = 0; i < lib.length; i++) {
+      for (var j = 0; j < lib[i].images.length; j++) {
+        if (lib[i].images[j].file === file) return lib[i].images[j];
+      }
+    }
+    return null;
+  }
+
+  var DEMO_STYLE_BRIEF = [
+    'Composition: single centered subject, rule-of-thirds, negative space at the top third',
+    'Subject & emotion: one standing figure, tense posture, face is the visual anchor',
+    'Palette: deep cold blue → warm orange highlight, high contrast, saturated',
+    'Lighting: cinematic key light from upper right, soft rim light on the shoulder',
+    'Style: photorealistic, film grain, shallow depth of field',
+    'Mood: suspenseful, dramatic, urban night'
+  ].join('\n');
+
+  /* 假「图生图」：以参考图为底，取它的主色做调色，再换上新主体与文案 */
+  function demoRefThumbDataUrl(ref, ctx) {
+    return new Promise(function (resolve) {
+      var img = new Image();
+      img.onload = function () {
+        try {
+          var W = 1280, H = 720;
+          var c = document.createElement('canvas'); c.width = W; c.height = H;
+          var g = c.getContext('2d');
+          // ① 参考图铺底 → 沿用它的构图与配色
+          g.drawImage(img, 0, 0, W, H);
+          // ② 取参考图主色做整体调色（模拟「理解」了参考图的色彩）
+          var avg = demoAvgColor(img);
+          var grd = g.createLinearGradient(0, 0, 0, H);
+          grd.addColorStop(0, 'rgba(' + avg[0] + ',' + avg[1] + ',' + avg[2] + ',.34)');
+          grd.addColorStop(1, 'rgba(0,0,0,.58)');
+          g.fillStyle = grd; g.fillRect(0, 0, W, H);
+          // 左侧压暗，保证新文案可读
+          var lg = g.createLinearGradient(0, 0, W * 0.74, 0);
+          lg.addColorStop(0, 'rgba(0,0,0,.80)');
+          lg.addColorStop(0.65, 'rgba(0,0,0,.35)');
+          lg.addColorStop(1, 'rgba(0,0,0,0)');
+          g.fillStyle = lg; g.fillRect(0, 0, W, H);
+          // ③ 生成新主体（换人换动作，不照抄参考图）
+          g.fillStyle = 'rgba(255,255,255,.18)';
+          g.beginPath(); g.ellipse(W * 0.37, H * 0.68, W * 0.14, H * 0.3, 0, 0, Math.PI * 2); g.fill();
+          g.beginPath(); g.arc(W * 0.37, H * 0.33, W * 0.08, 0, Math.PI * 2); g.fill();
+          // ④ 新文案
+          g.fillStyle = '#fff';
+          g.font = 'bold 54px "PingFang SC","Microsoft YaHei",sans-serif';
+          g.fillText('AI 新封面 · 参考生成', 84, 250);
+          g.font = '400 34px "PingFang SC","Microsoft YaHei",sans-serif';
+          g.fillStyle = 'rgba(255,255,255,.88)';
+          g.fillText(String((ctx && (ctx['合集组名称'] || ctx['频道名称'])) || '演示频道').slice(0, 18), 84, 320);
+          g.font = '400 26px "PingFang SC","Microsoft YaHei",sans-serif';
+          g.fillStyle = 'rgba(255,255,255,.6)';
+          g.fillText(String((ctx && ctx['译文标题']) || '').slice(0, 32), 84, 372);
+          // 底部标题带（盖掉参考图原有的标题，形成一张新封面）
+          g.fillStyle = 'rgba(0,0,0,.88)'; g.fillRect(0, H * 0.8, W, H * 0.2);
+          g.fillStyle = '#fbbf24';
+          g.fillRect(0, H * 0.8, 8, H * 0.2);
+          g.fillStyle = '#fff';
+          g.font = 'bold 40px "PingFang SC","Microsoft YaHei",sans-serif';
+          g.fillText('EP01 · ' + String((ctx && (ctx['合集组名称'] || ctx['频道名称'])) || '全集上线').slice(0, 20), 84, H * 0.92);
+          // ⑤ 右下角嵌入参考图 + 「参考」角标，直观展示因果关系
+          var rw = 300, rh = Math.round(rw * img.height / img.width);
+          var rx = W - rw - 60, ry = H - rh - 60;
+          g.save();
+          g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 18;
+          g.fillStyle = '#000'; g.fillRect(rx, ry, rw, rh);
+          g.restore();
+          g.drawImage(img, rx, ry, rw, rh);
+          g.strokeStyle = '#fff'; g.lineWidth = 3; g.strokeRect(rx, ry, rw, rh);
+          g.fillStyle = '#3b82f6';
+          g.fillRect(rx, ry - 34, 96, 34);
+          g.fillStyle = '#fff';
+          g.font = 'bold 20px "PingFang SC","Microsoft YaHei",sans-serif';
+          g.fillText('参考图', rx + 12, ry - 10);
+          resolve(c.toDataURL('image/png'));
+        } catch (e) {
+          resolve(demoThumbDataUrl(ctx));
+        }
+      };
+      img.onerror = function () { resolve(demoThumbDataUrl(ctx)); };
+      img.src = ref.url;
+    });
+  }
+
+  function demoAvgColor(img) {
+    try {
+      var t = document.createElement('canvas');
+      t.width = 8; t.height = 8;
+      var tg = t.getContext('2d');
+      tg.drawImage(img, 0, 0, 8, 8);
+      var d = tg.getImageData(0, 0, 8, 8).data;
+      var r = 0, gr = 0, b = 0;
+      for (var i = 0; i < d.length; i += 4) { r += d[i]; gr += d[i + 1]; b += d[i + 2]; }
+      var n = d.length / 4;
+      return [Math.round(r / n), Math.round(gr / n), Math.round(b / n)];
+    } catch (e) { return [90, 90, 120]; }
+  }
+
   function jsonRes(obj, status) {
     return new Response(JSON.stringify(obj), {
       status: status || 200,
@@ -241,11 +404,33 @@
       var tab = reqBody.tab || 'title';
       // 演示：不做真实 LLM 调用，用宏参拼出「像模像样」的生成结果，方便体验 AI生成 按钮
       if (tab === 'thumbnail') {
+        var refItem = reqBody.refImage ? demoCoverFind(String(reqBody.refImage)) : null;
+        if (refItem) {
+          // 演示版「假图生图」：以参考图为底做风格迁移，右下角回贴参考图
+          return demoRefThumbDataUrl(refItem, ctx).then(function (u) {
+            return jsonRes({
+              success: true,
+              imageUrl: u,
+              model: 'demo-image',
+              templateName: '封面生成指令（演示）',
+              rendered: '（演示）指令内容 + 参考图风格',
+              imagePrompt: '（演示）AI 生成提示词：参考图构图/配色 + ' +
+                String((ctx && ctx['合集组名称']) || '本剧') + ' 新场景',
+              refinerModel: 'demo-refiner',
+              refUsed: true,
+              visionModel: 'demo-vision',
+              styleBrief: DEMO_STYLE_BRIEF,
+              missing: []
+            });
+          });
+        }
         return Promise.resolve(jsonRes({
           success: true,
           imageUrl: demoThumbDataUrl(ctx),
           model: 'demo-image',
-          templateName: '封面生成指令（演示）'
+          templateName: '封面生成指令（演示）',
+          refUsed: false,
+          missing: []
         }));
       }
       var generated;
@@ -270,11 +455,70 @@
         missing: []
       }));
     }
+    if (path === '/api/cover-library') {
+      var lib = demoCoverLib();
+      return Promise.resolve(jsonRes({
+        success: true,
+        folders: lib.map(function (f) {
+          return { id: f.id, name: f.name, createdAt: f.createdAt, count: f.images.length, images: f.images };
+        })
+      }));
+    }
+    if (path === '/api/cover-library/folders' && method === 'POST') {
+      var nb = {};
+      try { nb = JSON.parse((init && init.body) || '{}'); } catch (e) { /* noop */ }
+      var nname = String(nb.name || '').trim();
+      if (!nname) return Promise.resolve(jsonRes({ error: '请填写文件夹名称' }, 400));
+      var l1 = demoCoverLib();
+      if (l1.some(function (f) { return f.name === nname; })) {
+        return Promise.resolve(jsonRes({ error: '已存在同名文件夹「' + nname + '」' }, 400));
+      }
+      var nf = { id: 'Fdemo' + Date.now().toString(36), name: nname, createdAt: new Date().toISOString(), count: 0, images: [] };
+      l1.push(nf);
+      return Promise.resolve(jsonRes({ success: true, folder: { id: nf.id, name: nf.name, count: 0, images: [] } }));
+    }
+    if (path.indexOf('/api/cover-library/folders/') === 0) {
+      var fid2 = decodeURIComponent(path.slice('/api/cover-library/folders/'.length));
+      var l2 = demoCoverLib();
+      var hit2 = l2.filter(function (f) { return f.id === fid2; })[0];
+      if (!hit2) return Promise.resolve(jsonRes({ error: '文件夹不存在' }, 404));
+      if (method === 'PUT') {
+        var pb = {};
+        try { pb = JSON.parse((init && init.body) || '{}'); } catch (e) { /* noop */ }
+        hit2.name = String(pb.name || hit2.name).trim();
+        return Promise.resolve(jsonRes({ success: true, folder: { id: hit2.id, name: hit2.name, count: hit2.images.length } }));
+      }
+      if (method === 'DELETE') {
+        var idx = l2.indexOf(hit2);
+        if (idx >= 0) l2.splice(idx, 1);
+        return Promise.resolve(jsonRes({ success: true }));
+      }
+    }
+    if (path === '/api/cover-library/images' && method === 'DELETE') {
+      var q = url.indexOf('?') >= 0 ? url.slice(url.indexOf('?') + 1) : '';
+      var mfile = q.match(/file=([^&]*)/);
+      var rel = mfile ? decodeURIComponent(mfile[1]) : '';
+      var l3 = demoCoverLib();
+      l3.forEach(function (f) {
+        f.images = f.images.filter(function (im) { return im.file !== rel; });
+        f.count = f.images.length;
+      });
+      return Promise.resolve(jsonRes({ success: true }));
+    }
     if (path === '/api/config') {
       return Promise.resolve(jsonRes({ configured: false, clientId: '', clientSecret: '', hasOAuth: false }));
     }
     if (path === '/api/ai/config') {
-      return Promise.resolve(jsonRes({ configured: false, hasKey: false, apiKey: null }));
+      return Promise.resolve(jsonRes({
+        baseUrl: 'https://api.deepseek.com',
+        model: 'deepseek-chat',
+        imageModel: 'demo-image',
+        visionModel: 'demo-vision',
+        hasKey: true,
+        keyMasked: 'demo****demo',
+        isDefaultBaseUrl: true,
+        configured: true
+      }));
     }
     if (path === '/api/ai/test') {
       return Promise.resolve(jsonRes({ success: false, error: '演示环境未配置 AI Key' }));
@@ -338,8 +582,61 @@
     this._timer = null;
     if (this.onabort) this.onabort({ type: 'abort' });
   };
-  DemoXHR.prototype.send = function () {
+  function demoCoverUpload(fd, cb) {
+    var lib = demoCoverLib();
+    var fid = fd && fd.get ? String(fd.get('folderId') || '') : '';
+    var folder = lib.filter(function (f) { return f.id === fid; })[0];
+    if (!folder) return cb([]);
+    var files = fd && fd.getAll ? fd.getAll('images') : [];
+    var n = Math.min(files.length, 50);
+    if (!n) return cb([]);
+    var done = 0, out = [];
+    files.slice(0, n).forEach(function (f, i) {
+      var fr = new FileReader();
+      fr.onload = function () {
+        var item = {
+          file: 'covers/' + fid + '/up-' + Date.now().toString(36) + '-' + i + '.png',
+          name: f.name || ('upload-' + (i + 1) + '.png'),
+          url: String(fr.result || ''),
+          size: f.size || 0,
+          mtime: new Date().toISOString()
+        };
+        folder.images.unshift(item);
+        folder.count = folder.images.length;
+        out.push(item);
+        done++;
+        if (done >= n) cb(out);
+      };
+      fr.onerror = function () { done++; if (done >= n) cb(out); };
+      fr.readAsDataURL(f);
+    });
+  }
+
+  DemoXHR.prototype.send = function (body) {
     var self = this;
+    // 封面库批量上传：真读文件（FileReader → dataURL），进度走快节奏
+    if (this._url.indexOf('/api/cover-library/upload') === 0) {
+      var doneFlag = false, uploadRes = [];
+      demoCoverUpload(body, function (res) { uploadRes = res; doneFlag = true; });
+      var cpct = 0;
+      this._timer = setInterval(function () {
+        cpct = doneFlag ? 100 : Math.min(92, cpct + 14);
+        if (self.upload && self.upload.onprogress) {
+          self.upload.onprogress({ lengthComputable: true, loaded: cpct * 1024, total: 100 * 1024 });
+        }
+        if (cpct >= 100 && !self._done) {
+          self._done = true;
+          clearInterval(self._timer); self._timer = null;
+          self.status = 200;
+          self.responseText = JSON.stringify({
+            success: true,
+            uploaded: uploadRes.map(function (x) { return { file: x.file, url: x.url, name: x.name, size: x.size }; })
+          });
+          if (self.onload) setTimeout(self.onload, 120);
+        }
+      }, 160);
+      return;
+    }
     var total = 180 * 1024 * 1024; // 模拟 180MB
     var pct = 0;
     this._timer = setInterval(function () {

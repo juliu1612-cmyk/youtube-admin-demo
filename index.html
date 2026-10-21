@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache" data-page-node-id="KTB9nog34dVMTyI6KzyhZO">
 <meta http-equiv="Expires" content="0" data-page-node-id="NAXDVA9FEyCdFmpnLdPy9a">
 <title>YouTube Studio — 视频上传</title>
-<link rel="stylesheet" href="./css/style.css?v=20261020d" data-page-node-id="WsExLEeRHJJ5lmtEOpYs5D">
+<link rel="stylesheet" href="./css/style.css?v=demo5" data-page-node-id="WsExLEeRHJJ5lmtEOpYs5D">
 <style>
   /* Critical: prevent broken layout when CSS fails or page is opened via file:// */
   html{font-size:16px;-webkit-font-smoothing:antialiased}
@@ -83,6 +83,10 @@
       <a href="#" class="nav-item" data-page="instructions" id="navInstructions">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="7" x2="16" y2="7"/><line x1="9" y1="11" x2="16" y2="11"/></svg>
         <span>指令库</span>
+      </a>
+      <a href="#" class="nav-item" data-page="coverlib" id="navCoverLib">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>封面库</span>
       </a>
       <a href="#" class="nav-item" data-page="settings" data-page-node-id="FZoXqYJ7LJm9Yu6zmtF7sV">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="af4aoZl4FYLMhAOAMyEToE"><circle cx="12" cy="12" r="3" data-page-node-id="4y7cgU6c5LbnFdzMYc5sV7"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" data-page-node-id="yzGc6jKCnlKqFWX8ATXuu3"/></svg>
@@ -239,6 +243,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-page-node-id="WGGCfiJQKpt7LRJQBSZAma"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" data-page-node-id="IPSUukXqf1U5oIireWCqYj"/><circle cx="8.5" cy="8.5" r="1.5" data-page-node-id="4ueBtzYt2Dq8I3EOv9YMOL"/><polyline points="21 15 16 10 5 21" data-page-node-id="OIMVDJiAyNkoWuexFoS6lz"/></svg>
                 <span data-page-node-id="I7rYjYsL9fWBeDpqFjB7lD">自定义缩略图</span>
                 <button type="button" class="field-link-btn" id="btnAiGenThumb" title="按「指令库 → 封面指令」中匹配当前频道的模板生成封面" data-page-node-id="btnAiGenThumb01">AI生成</button>
+                <button type="button" class="field-link-btn field-ref-btn" id="btnAiGenThumbRef" title="从封面库选一张图作为参考（AI 先理解它的构图/配色/风格，再生成新封面）">参考图</button>
                 <span class="section-hint" data-page-node-id="07bkvtGsID27XBIsFm4GMq">（可选）推荐 1280x720，最大 10MB</span>
               </div>
               <div class="thumbnail-form" data-page-node-id="uDuRAQw9RAonDjm2kBjkBR">
@@ -835,6 +840,7 @@
           <div class="field-group">
             <div class="field-label">视频封面
               <button type="button" class="field-link-btn" id="ytvAiGenThumb" title="按「指令库 → 封面指令」中匹配当前频道的模板生成封面">AI生成</button>
+              <button type="button" class="field-link-btn field-ref-btn" id="ytvAiGenThumbRef" title="从封面库选一张图作为参考">参考图</button>
               <span class="ytv-counter" id="ytvThumbHint">不选则保持现有封面</span>
             </div>
             <div class="ytv-thumb-row">
@@ -952,6 +958,109 @@
       </div>
     </div>
 
+    <!-- ========== 封面库页面 ========== -->
+    <section class="page" id="page-coverlib">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <h2>封面库</h2>
+        </div>
+        <div class="toolbar-right">
+          <span class="translation-count-hint" id="coverLibHint"></span>
+          <button class="btn-secondary" id="coverLibRefreshBtn" type="button">刷新</button>
+          <button class="btn-primary" id="coverLibNewFolderBtn" type="button">新建文件夹</button>
+        </div>
+      </div>
+
+      <div class="coverlib-tip">
+        这里存放封面素材：自定义文件夹 → 批量上传图片。AI 生成封面时可以选其中 1 张当参考图，模型会先理解它的构图 / 配色 / 打光 / 风格，再结合「指令库」的封面指令生成新封面。
+      </div>
+
+      <div class="coverlib-wrap">
+        <aside class="coverlib-side">
+          <div class="coverlib-side-head">文件夹</div>
+          <div class="coverlib-folders" id="coverLibFolders"></div>
+          <div class="empty-state coverlib-empty-sm" id="coverLibFolderEmpty" style="display:none">
+            <h3>暂无文件夹</h3>
+            <p>点击右上角「新建文件夹」建一个素材分组</p>
+          </div>
+        </aside>
+
+        <div class="coverlib-main">
+          <div class="coverlib-main-head">
+            <div class="coverlib-main-title" id="coverLibCurFolder">未选择文件夹</div>
+            <div class="coverlib-main-actions">
+              <button class="btn-secondary" id="coverLibRenameBtn" type="button">重命名</button>
+              <button class="btn-secondary coverlib-danger" id="coverLibDelFolderBtn" type="button">删除文件夹</button>
+              <button class="btn-primary" id="coverLibUploadBtn" type="button">批量上传图片</button>
+            </div>
+          </div>
+
+          <div class="coverlib-drop" id="coverLibDrop">
+            <input type="file" id="coverLibFileInput" accept="image/jpeg,image/png,image/gif,image/bmp,image/webp" multiple hidden>
+            <div class="coverlib-drop-inner">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>把图片拖到这里，或点击「批量上传图片」；单张 ≤ 10MB，一次最多 50 张</span>
+            </div>
+            <div class="coverlib-progress" id="coverLibProgress" style="display:none"></div>
+          </div>
+
+          <div class="coverlib-grid" id="coverLibGrid"></div>
+          <div class="empty-state" id="coverLibImgEmpty" style="display:none">
+            <h3>这个文件夹还没有图片</h3>
+            <p>上传封面素材后，AI 生成封面时就能选它作为参考图</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 参考封面选择弹窗（AI 生成封面时单选 1 张） -->
+    <div class="modal-mask" id="coverPickMask" style="display:none">
+      <div class="modal-card coverpick-card">
+        <div class="modal-header">
+          <h3>选择参考封面</h3>
+          <button class="modal-close" id="coverPickCloseBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="modal-body coverpick-body">
+          <div class="coverpick-tip">选 1 张图作参考：AI 会先「看懂」它的构图、配色、打光与风格，再结合指令库生成一张新封面（不会照抄原图主体）。不选则按指令库直接生成。</div>
+          <div class="coverpick-tools">
+            <select id="coverPickFolderSel"></select>
+            <span class="ytv-counter" id="coverPickHint"></span>
+          </div>
+          <div class="coverpick-grid" id="coverPickGrid"></div>
+          <div class="empty-state coverlib-empty-sm" id="coverPickEmpty" style="display:none">
+            <h3>封面库还没有图片</h3>
+            <p>先到「封面库」新建文件夹并上传图片</p>
+          </div>
+        </div>
+        <div class="coverpick-footer">
+          <button class="btn-secondary" id="coverPickClearBtn" type="button">不使用参考图</button>
+          <div style="flex:1"></div>
+          <button class="btn-secondary" id="coverPickCancelBtn" type="button">取 消</button>
+          <button class="btn-primary" id="coverPickOkBtn" type="button">确 定</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 封面库：文件夹命名弹窗（新建 / 重命名共用） -->
+    <div class="modal-mask" id="coverNameMask" style="display:none">
+      <div class="modal-card" style="max-width:420px">
+        <div class="modal-header">
+          <h3 id="coverNameTitle">新建文件夹</h3>
+          <button class="modal-close" id="coverNameCloseBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="modal-body" style="padding:18px 22px">
+          <div class="field-label" style="margin-bottom:8px">文件夹名称</div>
+          <input id="coverNameInput" type="text" maxlength="60" placeholder="如：乡村生活 · 竖版封面" style="width:100%">
+          <span class="field-hint" style="display:block;margin-top:8px;font-size:11.5px;color:var(--text-muted)">用一组素材归类，比如按题材 / 风格 / 剧集分组</span>
+        </div>
+        <div class="coverpick-footer">
+          <div style="flex:1"></div>
+          <button class="btn-secondary" id="coverNameCancelBtn" type="button">取 消</button>
+          <button class="btn-primary" id="coverNameOkBtn" type="button">确 定</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ========== 设置页面 ========== -->
     <section class="page" id="page-settings" data-page-node-id="nVD4w3a6e1zjZM8NcdafdU">
       <div class="toolbar" data-page-node-id="xWi7M4FsgH7P87cJnQAI7f">
@@ -1038,6 +1147,11 @@
             <div class="field-label" data-page-node-id="aiCfgImageModelLabel01">图片生成模型</div>
             <input type="text" id="settingAiImageModel" placeholder="留空=不启用 AI 生成封面，如 Kwai-Kolors/Kolors" data-page-node-id="aiCfgImageModelInput01">
             <span class="field-hint" data-page-node-id="aiCfgImageModelHint01">用于上传弹窗「AI生成封面」，需该服务支持 OpenAI 兼容 images 接口（SiliconFlow / 智谱等）。留空则隐藏该能力的可用性，接口会提示未配置。</span>
+          </div>
+          <div class="field" data-page-node-id="aiCfgVisionModelField01">
+            <div class="field-label" data-page-node-id="aiCfgVisionModelLabel01">视觉理解模型（可选）</div>
+            <input type="text" id="settingAiVisionModel" placeholder="留空=用上面的模型名称，如 gpt-4o-mini / glm-4v / Qwen-VL" data-page-node-id="aiCfgVisionModelInput01">
+            <span class="field-hint" data-page-node-id="aiCfgVisionModelHint01">AI 生成封面时若选择了「封面库」参考图，会先用这个多模态模型看懂参考图的构图 / 配色 / 打光 / 风格，再结合指令库生成新封面。该模型必须支持图片输入；不支持时会自动降级为不参考原图，不影响出图。</span>
           </div>
           <div class="settings-actions" style="display:flex;gap:12px;margin-top:16px;align-items:center;flex-wrap:wrap" data-page-node-id="aiCfgActions01">
             <button class="btn-primary" id="btnSaveAiConfig" data-page-node-id="btnSaveAiConfig01">保存 AI 配置</button>
@@ -1577,6 +1691,7 @@
           <div class="field-label" data-page-node-id="uytThumbLabel001">
             缩略图
             <button type="button" class="field-link-btn" id="uytAiGenThumb" title="按「指令库 → 封面指令」中匹配当前频道的模板生成封面" data-page-node-id="uytAiGenThumb001">AI生成</button>
+            <button type="button" class="field-link-btn field-ref-btn" id="uytAiGenThumbRef" title="从封面库选一张图作为参考">参考图</button>
             <span class="field-hint-inline" data-page-node-id="uytThumbHint001">（可选）推荐 1280x720，最大 10MB</span>
           </div>
           <input type="file" id="uytThumbFileInput" accept=".jpg,.jpeg,.png,.gif,.bmp,.webp" hidden data-page-node-id="uytThumbFileInput001">
@@ -2014,8 +2129,8 @@
   </aside>
 </div>
 
-<script src="./js/demo-mock.js?v=demo4"></script>
-<script src="./js/app.js?v=20261020d"></script>
+<script src="./js/demo-mock.js?v=demo5"></script>
+    <script src="./js/app.js?v=demo5"></script>
 <script>
   if(location.protocol === 'file:'){
     document.getElementById('fileWarning').style.display = 'block';
