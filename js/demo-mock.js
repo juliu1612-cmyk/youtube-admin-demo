@@ -46,6 +46,106 @@
     copyrightTypes: ['独家买断', '分账授权']
   };
 
+  /* ---------- 指令库：宏参 / 模型 / 示例指令（与真实后端同结构） ---------- */
+  var DEMO_MACROS = [
+    { key: '合集组名称', desc: '当前视频所属合集组的名称' },
+    { key: '合集简介', desc: '当前视频所属合集组的简介' },
+    { key: '内容语言', desc: '本次产出的目标语言，如「英语」' },
+    { key: '频道名称', desc: '发布目标频道的名称' },
+    { key: '译文标题', desc: '已翻译/生成的视频标题' },
+    { key: '译文简介', desc: '已翻译/生成的视频简介' }
+  ];
+
+  var DEMO_MODELS = [
+    { value: 'deepseek-chat', label: 'DeepSeek · deepseek-chat' },
+    { value: 'deepseek-reasoner', label: 'DeepSeek · deepseek-reasoner' },
+    { value: 'gpt-4o', label: 'OpenAI · gpt-4o' },
+    { value: 'gpt-4o-mini', label: 'OpenAI · gpt-4o-mini' },
+    { value: 'gpt-3.5-turbo', label: 'OpenAI · gpt-3.5-turbo' },
+    { value: 'claude-3-5-sonnet-20241022', label: 'Anthropic · claude-3-5-sonnet' },
+    { value: 'qwen-plus', label: '通义千问 · qwen-plus' }
+  ];
+
+  var DEMO_INSTRUCTIONS = {
+    title: [
+      {
+        id: 'insDemoTitle01',
+        name: '英语标题生成指令（演示）',
+        model: 'deepseek-chat',
+        channels: [],
+        content: '你是短剧频道「{{频道名称}}」的运营专家。\n' +
+          '请根据下面的中文原标题与合集信息，生成 1 条 {{内容语言}} 视频标题。\n\n' +
+          '合集组：{{合集组名称}}\n合集简介：{{合集简介}}\n原中文标题：{{译文标题}}\n\n' +
+          '要求：\n1. 长度控制在 60 字符以内；\n2. 保留原剧的爽点与悬念；\n3. 只输出标题本身，不要解释。',
+        updatedAt: '2026-10-18T05:00:00.000Z'
+      },
+      {
+        id: 'insDemoTitle02',
+        name: '西语标题改写指令（演示）',
+        model: 'gpt-4o-mini',
+        channels: ['UCdemo00000000000000000B2'],
+        content: 'Eres el responsable del canal「{{频道名称}}」.\n' +
+          'Reescribe el título「{{译文标题}}」en {{内容语言}} para el grupo「{{合集组名称}}」.\n' +
+          'Máximo 70 caracteres, mantén el gancho emocional. Devuelve solo el título.',
+        updatedAt: '2026-10-17T05:00:00.000Z'
+      }
+    ],
+    description: [
+      {
+        id: 'insDemoDesc01',
+        name: '简介生成指令（演示）',
+        model: 'deepseek-chat',
+        channels: [],
+        content: '为频道「{{频道名称}}」的视频写一段 {{内容语言}} 简介。\n\n' +
+          '标题：{{译文标题}}\n现有简介：{{译文简介}}\n所属合集：{{合集组名称}}（{{合集简介}}）\n\n' +
+          '要求：前两行是钩子，中间 3-5 行剧情简介，结尾 5 个话题标签。总长不超过 800 字符。',
+        updatedAt: '2026-10-18T05:00:00.000Z'
+      }
+    ],
+    thumbnail: [
+      {
+        id: 'insDemoThumb01',
+        name: '封面生成指令（演示）',
+        model: 'gpt-4o',
+        channels: [],
+        content: '生成一张 16:9 的短剧封面图。\n' +
+          '频道：{{频道名称}}｜合集：{{合集组名称}}｜标题：{{译文标题}}\n' +
+          '风格：高对比度、强情绪、居中人物特写，右下角留出标题区域。',
+        updatedAt: '2026-10-16T05:00:00.000Z'
+      }
+    ]
+  };
+
+  /* 演示封面：用 canvas 现画一张 1280x720，返回 dataURL（无需外部图片资源） */
+  function demoThumbDataUrl(ctx) {
+    try {
+      var c = document.createElement('canvas');
+      c.width = 1280; c.height = 720;
+      var g = c.getContext('2d');
+      var grd = g.createLinearGradient(0, 0, 1280, 720);
+      grd.addColorStop(0, '#0f172a');
+      grd.addColorStop(0.55, '#4c1d95');
+      grd.addColorStop(1, '#be185d');
+      g.fillStyle = grd;
+      g.fillRect(0, 0, 1280, 720);
+      g.fillStyle = 'rgba(255,255,255,.10)';
+      g.beginPath(); g.arc(1050, 150, 260, 0, Math.PI * 2); g.fill();
+      g.fillStyle = '#fff';
+      g.font = 'bold 58px "PingFang SC", "Microsoft YaHei", sans-serif';
+      g.fillText('AI 生成封面 · 演示', 90, 300);
+      g.font = '400 40px "PingFang SC", "Microsoft YaHei", sans-serif';
+      var line = (ctx && (ctx['合集组名称'] || ctx['频道名称'])) || '演示频道';
+      g.fillStyle = 'rgba(255,255,255,.85)';
+      g.fillText(String(line).slice(0, 16), 90, 380);
+      g.font = '400 28px "PingFang SC", "Microsoft YaHei", sans-serif';
+      g.fillStyle = 'rgba(255,255,255,.55)';
+      g.fillText((ctx && ctx['译文标题'] || '').slice(0, 30), 90, 600);
+      return c.toDataURL('image/png');
+    } catch (e) {
+      return '';
+    }
+  }
+
   function jsonRes(obj, status) {
     return new Response(JSON.stringify(obj), {
       status: status || 200,
@@ -122,10 +222,48 @@
       return Promise.resolve(jsonRes({ default: '', byChannel: {}, updatedAt: '2026-10-15T09:09:59.774Z' }));
     }
     if (path === '/api/instructions') {
-      return Promise.resolve(jsonRes({ title: [], description: [], thumbnail: [] }));
+      return Promise.resolve(jsonRes({
+        instructions: DEMO_INSTRUCTIONS,
+        macros: DEMO_MACROS,
+        models: DEMO_MODELS,
+        globalModel: DEMO_MODELS[0].value
+      }));
     }
     if (path === '/api/instructions/preview' || path === '/api/instructions/run') {
-      return Promise.resolve(jsonRes({ success: false, error: '演示环境未配置 AI 服务，指令生成不可用', rendered: '' }, 200));
+      var reqBody = {};
+      try { reqBody = JSON.parse((init && init.body) || '{}'); } catch (e) { /* noop */ }
+      var ctx = reqBody.ctx || {};
+      var tab = reqBody.tab || 'title';
+      // 演示：不做真实 LLM 调用，用宏参拼出「像模像样」的生成结果，方便体验 AI生成 按钮
+      if (tab === 'thumbnail') {
+        return Promise.resolve(jsonRes({
+          success: true,
+          imageUrl: demoThumbDataUrl(ctx),
+          model: 'demo-image',
+          templateName: '封面生成指令（演示）'
+        }));
+      }
+      var generated;
+      if (tab === 'title') {
+        generated = (ctx['合集组名称'] ? '【' + ctx['合集组名称'] + '】' : '') +
+          '第 01 集｜' + ((ctx['译文标题'] || '精彩短剧').slice(0, 22)) +
+          '，反转来得太突然';
+      } else {
+        generated = '【' + (ctx['频道名称'] || '演示频道') + '】' +
+          ((ctx['合集组名称'] || '演示合集')) + '\n\n' +
+          (ctx['合集简介'] || '本合集为演示数据。') + '\n\n' +
+          '本集看点：' + ((ctx['译文标题'] || '剧情高能反转').slice(0, 40)) + '。\n' +
+          '语言：' + (ctx['内容语言'] || '中文（简体）') + '\n\n' +
+          '#短剧 #反转 #高能 #追剧 #演示数据';
+      }
+      return Promise.resolve(jsonRes({
+        success: true,
+        generated: generated,
+        rendered: String(generated),
+        model: 'demo-model',
+        templateName: (tab === 'title' ? '英语标题生成指令（演示）' : '简介生成指令（演示）'),
+        missing: []
+      }));
     }
     if (path === '/api/config') {
       return Promise.resolve(jsonRes({ configured: false, clientId: '', clientSecret: '', hasOAuth: false }));

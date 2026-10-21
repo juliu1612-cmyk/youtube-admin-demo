@@ -814,9 +814,27 @@ const INS_TAB_CN = { title: '标题', description: '简介', thumbnail: '封面'
 const _insGenBusy = {}; // key = `${scope}:${tab}`
 
 // 取当前弹窗的宏参上下文 + 目标频道 ID
-// scope: 'main'（上传主表单） | 'uyt'（快传弹窗）
+// scope: 'main'（上传主表单） | 'uyt'（快传弹窗） | 'ytv'（YT视频列表编辑弹窗）
 function insCollectCtx(scope) {
   const isUyt = scope === 'uyt';
+  const isYtv = scope === 'ytv';
+  // YT视频列表：行数据里已有频道名 / 频道ID / 关联合集组，标题简介取弹窗当前值
+  if (isYtv) {
+    const r = _ytvView[_ytvEditIdx] || {};
+    const titleEl = $('#ytvEditTitleInput');
+    const descEl = $('#ytvEditDescInput');
+    return {
+      ctx: {
+        '合集组名称': r.linkedCollection || '',
+        '合集简介': ytvCollectionIntro(r.linkedCollection),
+        '内容语言': r.language || '',
+        '频道名称': r.channelTitle || '',
+        '译文标题': titleEl ? String(titleEl.value || '').trim() : '',
+        '译文简介': descEl ? String(descEl.value || '').trim() : ''
+      },
+      channelId: r.channelId || ''
+    };
+  }
   const src = isUyt ? getUytSourceContext() : getSelectedSourceContext();
   let channelId = '';
   let channelTitle = '';
@@ -945,6 +963,58 @@ function insFillUytThumb(data) {
   if (pi) pi.src = url;
   if (nameEl) nameEl.textContent = 'AI 生成封面';
   uytUpdateThumbUI();
+}
+
+// ─── YT视频列表编辑弹窗：AI 生成回填 ──────────────────
+// 关联合集组名 → 本地合集（翻译系统 / 自建内容）的简介，供「合集简介」宏参
+function ytvCollectionIntro(name) {
+  const key = String(name || '').trim();
+  if (!key) return '';
+  let list = [];
+  try { list = list.concat(typeof getTranslationCollections === 'function' ? getTranslationCollections() : []); } catch (e) { /* 本地数据异常时跳过 */ }
+  try { list = list.concat(typeof getSelfCollections === 'function' ? getSelfCollections() : []); } catch (e) { /* 本地数据异常时跳过 */ }
+  const hit = list.find(c => c && ((c.name || '') === key || (c.linkedCollection || '') === key));
+  return hit ? String(hit.intro || '') : '';
+}
+
+function insFillYtvTitle(data) {
+  const v = String(data.generated || '').slice(0, 100);
+  const el = $('#ytvEditTitleInput');
+  if (el) { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }
+  if (typeof ytvUpdateCounters === 'function') ytvUpdateCounters();
+}
+
+function insFillYtvDesc(data) {
+  const v = String(data.generated || '');
+  const el = $('#ytvEditDescInput');
+  if (el) { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }
+  if (typeof ytvUpdateCounters === 'function') ytvUpdateCounters();
+}
+
+function insFillYtvThumb(data) {
+  const url = String(data.imageUrl || '');
+  if (!url) throw new Error('未返回图片数据');
+  const fileEl = $('#ytvEditThumbFile');
+  if (!fileEl) throw new Error('封面控件未就绪，请重新打开编辑弹窗');
+  const blob = dataUrlToBlob(url);
+  const file = new File([blob], 'ai-thumbnail.png', { type: blob.type || 'image/png' });
+  // 写回 input.files，保存时才会真正把新封面同步到 YouTube
+  try {
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    fileEl.files = dt.files;
+  } catch (e) {
+    throw new Error('当前浏览器不支持自动写入封面文件，请下载后手动选择');
+  }
+  const img = $('#ytvEditThumbImg');
+  const prev = $('#ytvEditThumbPreview');
+  const upBtn = $('#ytvThumbUploadBtn');
+  const upText = $('#ytvThumbUploadText');
+  const hint = $('#ytvThumbHint');
+  if (img && prev) { img.src = url; prev.classList.add('ytv-has-img'); }
+  if (upBtn) upBtn.classList.add('ytv-picked');
+  if (upText) upText.textContent = '已生成新封面';
+  if (hint) hint.textContent = 'AI 已生成封面，保存时同步到 YouTube';
 }
 
 // 取当前视频来源上下文：优先当前选中剧集，退回筛选器中选中的合集组
@@ -6894,6 +6964,8 @@ let _ytvBound = false;
 // 筛选条件与过滤后视图（渲染和编辑索引都基于视图）
 const _ytvFilters = { channelTitle: '', channelId: '', owner: '', collection: '' };
 let _ytvView = [];
+// 当前编辑弹窗对应的行索引（-1 = 未打开），供 AI 生成取宏参上下文
+let _ytvEditIdx = -1;
 
 // 归属人：取「社媒账号采集表」里该频道的 meta.owner（发布频道上面维护的归属人）
 // state.channels 由 /api/auth/status 下发；若尚未就绪则回源拉 /api/channels
@@ -6929,7 +7001,8 @@ function ytvCollectLocal() {
     map.set(vid, {
       linkedCollection: prev.linkedCollection || info.linkedCollection || '',
       channelId: prev.channelId || info.channelId || '',
-      channelTitle: prev.channelTitle || info.channelTitle || ''
+      channelTitle: prev.channelTitle || info.channelTitle || '',
+      language: prev.language || info.language || ''
     });
   };
   try {
@@ -6937,7 +7010,8 @@ function ytvCollectLocal() {
       put(t.videoId, {
         linkedCollection: t.linkedCollection || '',
         channelId: t.channelId || '',
-        channelTitle: t.channelTitle || ''
+        channelTitle: t.channelTitle || '',
+        language: t.language || ''
       });
     });
   } catch (e) { /* 本地数据异常时跳过 */ }
@@ -6947,7 +7021,8 @@ function ytvCollectLocal() {
       put(r.videoId, {
         linkedCollection: r.collectionName || r.linkedCollection || '',
         channelId: r.channelId || '',
-        channelTitle: ''
+        channelTitle: '',
+        language: r.language || ''
       });
     });
   } catch (e) { /* 本地数据异常时跳过 */ }
@@ -6992,7 +7067,8 @@ async function loadYtVideos() {
         title: it.title || '',
         description: it.description || '',
         thumbnailUrl: it.thumbnailUrl || '',
-        linkedCollection: l.linkedCollection || ''
+        linkedCollection: l.linkedCollection || '',
+        language: l.language || ''
       };
     });
     ytvRebuildFilterOptions();
@@ -7093,6 +7169,7 @@ function ytvRender() {
 function ytvOpenEdit(idx) {
   const r = _ytvView[idx];
   if (!r) return;
+  _ytvEditIdx = idx;
   $('#ytvEditVideoId').value = r.videoId;
   // 可编辑字段
   $('#ytvEditTitleInput').value = r.title || '';
@@ -7144,6 +7221,7 @@ function ytvUpdateCounters() {
 function ytvCloseEdit() {
   const mask = $('#ytvEditMask');
   if (mask) mask.style.display = 'none';
+  _ytvEditIdx = -1;
 }
 
 async function ytvSaveEdit() {
@@ -7255,6 +7333,16 @@ function bindYtVideos() {
   if (cancel) cancel.addEventListener('click', ytvCloseEdit);
   const save = $('#ytvEditSaveBtn');
   if (save) save.addEventListener('click', ytvSaveEdit);
+  // AI生成：按「指令库」里匹配该视频所属频道的模板生成 标题 / 简介 / 封面
+  const ytvGen = [
+    ['#ytvAiGenTitle', { tab: 'title', scope: 'ytv', btnId: 'ytvAiGenTitle', fill: insFillYtvTitle }],
+    ['#ytvAiGenDesc', { tab: 'description', scope: 'ytv', btnId: 'ytvAiGenDesc', fill: insFillYtvDesc }],
+    ['#ytvAiGenThumb', { tab: 'thumbnail', scope: 'ytv', btnId: 'ytvAiGenThumb', fill: insFillYtvThumb }]
+  ];
+  ytvGen.forEach(([sel, cfg]) => {
+    const btn = $(sel);
+    if (btn) btn.addEventListener('click', () => insGenAndFill(cfg));
+  });
   const mask = $('#ytvEditMask');
   if (mask) mask.addEventListener('click', e => { if (e.target === mask) ytvCloseEdit(); });
   const nav = $('.nav-item[data-page="ytvideos"]');

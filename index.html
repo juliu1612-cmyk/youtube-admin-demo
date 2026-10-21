@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache" data-page-node-id="KTB9nog34dVMTyI6KzyhZO">
 <meta http-equiv="Expires" content="0" data-page-node-id="NAXDVA9FEyCdFmpnLdPy9a">
 <title>YouTube Studio — 视频上传</title>
-<link rel="stylesheet" href="./css/style.css?v=20261020a" data-page-node-id="WsExLEeRHJJ5lmtEOpYs5D">
+<link rel="stylesheet" href="./css/style.css?v=20261020b" data-page-node-id="WsExLEeRHJJ5lmtEOpYs5D">
 <style>
   /* Critical: prevent broken layout when CSS fails or page is opened via file:// */
   html{font-size:16px;-webkit-font-smoothing:antialiased}
@@ -818,15 +818,24 @@
         <div class="modal-body ytv-edit-body">
           <input type="hidden" id="ytvEditVideoId">
           <div class="field-group">
-            <div class="field-label">视频标题 <span class="ytv-counter" id="ytvTitleCount">0 / 100</span></div>
+            <div class="field-label">视频标题
+              <button type="button" class="field-link-btn" id="ytvAiGenTitle" title="按「指令库 → 标题指令」中匹配当前频道的模板生成标题">AI生成</button>
+              <span class="ytv-counter" id="ytvTitleCount">0 / 100</span>
+            </div>
             <input class="field-input" id="ytvEditTitleInput" type="text" maxlength="100" placeholder="输入视频标题">
           </div>
           <div class="field-group">
-            <div class="field-label">视频简介 <span class="ytv-counter" id="ytvDescCount">0 / 5000</span></div>
+            <div class="field-label">视频简介
+              <button type="button" class="field-link-btn" id="ytvAiGenDesc" title="按「指令库 → 简介指令」中匹配当前频道的模板生成简介">AI生成</button>
+              <span class="ytv-counter" id="ytvDescCount">0 / 5000</span>
+            </div>
             <textarea class="field-input ytv-desc-input" id="ytvEditDescInput" rows="6" maxlength="5000" placeholder="输入视频简介"></textarea>
           </div>
           <div class="field-group">
-            <div class="field-label">视频封面 <span class="ytv-counter" id="ytvThumbHint">不选则保持现有封面</span></div>
+            <div class="field-label">视频封面
+              <button type="button" class="field-link-btn" id="ytvAiGenThumb" title="按「指令库 → 封面指令」中匹配当前频道的模板生成封面">AI生成</button>
+              <span class="ytv-counter" id="ytvThumbHint">不选则保持现有封面</span>
+            </div>
             <div class="ytv-thumb-row">
               <div class="ytv-thumb-current" id="ytvEditThumbPreview">
                 <img id="ytvEditThumbImg" src="" alt="封面预览">
@@ -1993,8 +2002,8 @@
   </aside>
 </div>
 
-<script src="./js/demo-mock.js?v=demo1"></script>
-<script src="./js/app.js?v=20261020a"></script>
+<script src="./js/demo-mock.js?v=demo2"></script>
+<script src="./js/app.js?v=20261020b"></script>
 <script>
   if(location.protocol === 'file:'){
     document.getElementById('fileWarning').style.display = 'block';
