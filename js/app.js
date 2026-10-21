@@ -803,13 +803,22 @@ function buildMainDescCtx(channelId) {
   const src = getSelectedSourceContext();
   const ch = (state.channels || []).find(c => c.id === channelId);
   const titleEl = $('#title');
+  const descEl = $('#description');
+  const group = (src && (src.linkedCollection || src.collectionName)) || '';
+  // 说明框当前值；若仍是上次自动填入的模版结果则不作为宏参输入，避免 {{译文简介}} 自我套娃
+  const rawDesc = descEl ? String(descEl.value || '').trim() : '';
   return {
     channelId: channelId || '',
     title: titleEl ? String(titleEl.value || '').trim() : '',
     channelTitle: ch ? (ch.title || (ch.meta && ch.meta.channelName) || '') : '',
-    collectionGroup: (src && (src.linkedCollection || src.collectionName)) || '',
+    collectionGroup: group,
+    // 合集简介：优先取剧集所属合集的 intro，再按合集名去本地合集里反查
+    collectionIntro: (src && src.intro)
+      || (typeof ytvCollectionIntro === 'function' ? ytvCollectionIntro(group) : '')
+      || '',
     language: (src && src.language) || '',
-    type: (src && src.type) || ''
+    type: (src && src.type) || '',
+    description: (rawDesc && rawDesc !== _mainAutoDesc) ? rawDesc : ''
   };
 }
 
@@ -1407,6 +1416,53 @@ function fillSelectOptions(selectEl, options, currentValue) {
     options.map(o => `<option value="${escapeHtml(o)}" ${o === currentValue ? 'selected' : ''}>${escapeHtml(o)}</option>`).join('');
 }
 
+// ─── 频道「视频简介模版」的宏参插入条 ──────────────
+// 宏参沿用指令库那 6 个（合集组名称 / 合集简介 / 内容语言 / 频道名称 / 译文标题 / 译文简介）
+const DESC_TPL_MACROS_FALLBACK = [
+  { key: '合集组名称', desc: '当前视频所属合集组的名称' },
+  { key: '合集简介', desc: '当前视频所属合集组的简介' },
+  { key: '内容语言', desc: '本次产出的目标语言，如「英语」' },
+  { key: '频道名称', desc: '发布目标频道的名称' },
+  { key: '译文标题', desc: '已翻译/生成的视频标题' },
+  { key: '译文简介', desc: '已翻译/生成的视频简介' }
+];
+let _descTplMacros = [];
+
+async function ensureDescTplMacros() {
+  if (_descTplMacros.length) return _descTplMacros;
+  // 优先复用指令库已加载的宏参，避免多打一次接口
+  if (typeof _insMacros !== 'undefined' && Array.isArray(_insMacros) && _insMacros.length) {
+    _descTplMacros = _insMacros;
+    return _descTplMacros;
+  }
+  try {
+    const res = await fetch('/api/description-templates');
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && Array.isArray(data.macros) && data.macros.length) {
+      _descTplMacros = data.macros;
+      return _descTplMacros;
+    }
+  } catch (e) { /* 接口异常时用内置兜底 */ }
+  _descTplMacros = DESC_TPL_MACROS_FALLBACK;
+  return _descTplMacros;
+}
+
+// barId：宏参按钮条容器；targetSel：点击后插入到的 textarea
+function renderDescTplMacroBar(barId, targetSel) {
+  const bar = $(barId || '#descTplMacroBar');
+  if (!bar) return;
+  const target = targetSel || '#editDescTemplate';
+  bar.innerHTML = _descTplMacros.map(m =>
+    `<button class="ins-macro-btn" type="button" data-desctpl-macro="${escapeHtml(m.key)}" title="${escapeHtml(m.desc || '')}">${escapeHtml(m.key)}</button>`
+  ).join('') + '<span class="ins-macro-tip">点击插入宏参</span>';
+  $$('[data-desctpl-macro]', bar).forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ta = $(target);
+      if (ta) insInsertMacro(ta, `{{${btn.dataset.desctplMacro}}}`);
+    });
+  });
+}
+
 async function openChannelEditModal(channelId, options = {}) {
   _editChannelId = channelId;
   const channel = state.channels.find(c => c.id === channelId);
@@ -1449,6 +1505,8 @@ async function openChannelEditModal(channelId, options = {}) {
   $('#editChannelName').value = meta.channelName || '';
   $('#editRemark').value = meta.remark || '';
   $('#editDescTemplate').value = meta.descTemplate || '';
+  await ensureDescTplMacros();
+  renderDescTplMacroBar();
 
   $('#channelEditModal').style.display = 'flex';
 
@@ -2869,9 +2927,9 @@ function resolveDescTemplateFor(channelId) {
   return (per && String(per).trim()) ? String(per) : (_descTemplates.default || '');
 }
 
-function renderDescTemplateClient(tpl, ctx = {}) {
-  if (!tpl) return '';
-  const map = {
+// 模板变量表：{英文变量} 与 {{中文宏参}} 合一，与服务端 buildDescTemplateMap 保持一致
+function buildDescTemplateMap(ctx = {}) {
+  const base = {
     title: ctx.title || '',
     channelTitle: ctx.channelTitle || '',
     channelUrl: ctx.channelId ? `https://www.youtube.com/channel/${ctx.channelId}` : (ctx.channelUrl || ''),
@@ -2880,7 +2938,26 @@ function renderDescTemplateClient(tpl, ctx = {}) {
     type: ctx.type || '',
     date: ctx.date || new Date().toISOString().slice(0, 10)
   };
-  return String(tpl).replace(/\{\s*(\w+)\s*\}/g, (m, k) => (k in map ? map[k] : m)).slice(0, 5000);
+  return Object.assign(base, {
+    '合集组名称': base.collectionGroup,
+    '合集简介': ctx.collectionIntro || '',
+    '内容语言': base.language,
+    '频道名称': base.channelTitle,
+    '译文标题': base.title,
+    '译文简介': ctx.description || ''
+  });
+}
+
+// 渲染：先 {{中文宏参}} 再 {英文变量}，两者可以混用
+function renderDescTemplateClient(tpl, ctx = {}) {
+  if (!tpl) return '';
+  const map = buildDescTemplateMap(ctx);
+  return String(tpl)
+    .replace(/\{\{\s*([^}\s][^}]*?)\s*\}\}|\{\s*(\w+)\s*\}/g, (m, macroKey, varKey) => {
+      const key = macroKey != null ? String(macroKey).trim() : String(varKey).trim();
+      return (key in map) ? map[key] : m;
+    })
+    .slice(0, 5000);
 }
 
 async function loadDescTemplates() {
@@ -2890,6 +2967,8 @@ async function loadDescTemplates() {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
     _descTemplates = { default: data.default || '', byChannel: data.byChannel || {} };
+    if (Array.isArray(data.macros) && data.macros.length) _descTplMacros = data.macros;
+    renderDescTplMacroBar('#descTplSysMacroBar', '#descTplText');
     const sel = $('#descTplChannel');
     if (sel) {
       const cur = sel.value;
@@ -5103,13 +5182,17 @@ function uytBuildDescCtx() {
   const ep = col && (col.episodes || [])[(_uytCtx && _uytCtx.epIdx) || 0];
   const channelId = ($('#uytChannel') && $('#uytChannel').value) || '';
   const ch = (state.channels || []).find(c => c.id === channelId);
+  // 说明框当前值；若仍是上次自动填入的模版结果则不作为宏参输入，避免 {{译文简介}} 自我套娃
+  const rawDesc = (($('#uytDesc') && $('#uytDesc').value.trim()) || '');
   return {
     channelId,
     title: (($('#uytTitle') && $('#uytTitle').value.trim()) || (col && col.name) || ''),
     channelTitle: ch ? ch.title : '',
     collectionGroup: (col && col.linkedCollection) || '',
+    collectionIntro: (col && col.intro) || '',
     language: (ep && ep.language) || '',
-    type: (ep && ep.type) || ''
+    type: (ep && ep.type) || '',
+    description: (rawDesc && rawDesc !== _uytAutoDesc) ? rawDesc : ''
   };
 }
 

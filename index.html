@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache" data-page-node-id="KTB9nog34dVMTyI6KzyhZO">
 <meta http-equiv="Expires" content="0" data-page-node-id="NAXDVA9FEyCdFmpnLdPy9a">
 <title>YouTube Studio — 视频上传</title>
-<link rel="stylesheet" href="./css/style.css?v=20261020c" data-page-node-id="WsExLEeRHJJ5lmtEOpYs5D">
+<link rel="stylesheet" href="./css/style.css?v=20261020d" data-page-node-id="WsExLEeRHJJ5lmtEOpYs5D">
 <style>
   /* Critical: prevent broken layout when CSS fails or page is opened via file:// */
   html{font-size:16px;-webkit-font-smoothing:antialiased}
@@ -1064,6 +1064,7 @@
           </div>
           <div class="field" data-page-node-id="descTplTextField01">
             <div class="field-label" data-page-node-id="descTplTextLabel01">说明模板</div>
+            <div class="ins-macro-bar" id="descTplSysMacroBar" data-page-node-id="descTplSysMacroBar01"></div>
             <textarea id="descTplText" rows="9" placeholder="上传时若未填写说明，就自动套用这里的内容" data-page-node-id="descTplTextArea01"></textarea>
             <span class="field-hint" data-page-node-id="descTplTextHint01">可用变量：<code data-page-node-id="descTplVar1">{title}</code> 影片名称、<code data-page-node-id="descTplVar2">{channelTitle}</code> 频道名称、<code data-page-node-id="descTplVar3">{channelUrl}</code> 频道链接、<code data-page-node-id="descTplVar4">{collectionGroup}</code> 合集组、<code data-page-node-id="descTplVar5">{language}</code> 语言、<code data-page-node-id="descTplVar6">{type}</code> 类型、<code data-page-node-id="descTplVar7">{date}</code> 日期。最多 5000 字。</span>
           </div>
@@ -1768,10 +1769,11 @@
 
         <div class="field" data-page-node-id="descTplField01">
           <div class="field-label" data-page-node-id="descTplLabel01">视频简介模版</div>
+          <div class="ins-macro-bar" id="descTplMacroBar" data-page-node-id="descTplMacroBar01"></div>
           <textarea id="editDescTemplate" data-field="descTemplate" rows="6" maxlength="5000"
             placeholder="留空则不自动填写。上传视频时会自动填入这里的内容作为视频简介"></textarea>
           <span class="field-hint" id="descTplVarsHint" data-page-node-id="descTplHint01">
-            可用变量：{title} 视频标题 · {channelTitle} 频道名称 · {channelUrl} 频道链接 · {collectionGroup} 合集组 · {language} 语言 · {type} 类型 · {date} 日期
+            点上方按钮插入宏参（{{合集组名称}} 等），上传时会替换成实际内容；也可用变量：{title} 视频标题 · {channelTitle} 频道名称 · {channelUrl} 频道链接 · {collectionGroup} 合集组 · {language} 语言 · {type} 类型 · {date} 日期
           </span>
         </div>
       </form>
@@ -2012,8 +2014,8 @@
   </aside>
 </div>
 
-<script src="./js/demo-mock.js?v=demo3"></script>
-<script src="./js/app.js?v=20261020c"></script>
+<script src="./js/demo-mock.js?v=demo4"></script>
+<script src="./js/app.js?v=20261020d"></script>
 <script>
   if(location.protocol === 'file:'){
     document.getElementById('fileWarning').style.display = 'block';
