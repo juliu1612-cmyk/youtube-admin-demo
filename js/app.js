@@ -1346,13 +1346,6 @@ function renderChannelsPage() {
     if (!val) return '<span class="td-empty">—</span>';
     return escapeHtml(val);
   }
-  // 视频简介模版：表格里不铺全文，只标「已设置 N 字」，鼠标悬停看全文
-  function descTplTag(val) {
-    const s = String(val || '').trim();
-    if (!s) return '<span class="td-empty">—</span>';
-    return `<span class="table-tag success">已设置 · ${s.length} 字</span>`;
-  }
-
   tbody.innerHTML = filtered.map(c => {
     const m = c.meta || {};
     const displayName = m.channelName || c.title;
@@ -1377,7 +1370,6 @@ function renderChannelsPage() {
       <td>${rankTag(m.ranking)}</td>
       <td>${statusTag(m.status)}</td>
       <td><span class="td-channel-remark">${tdText(m.remark)}</span></td>
-      <td><span class="td-desctpl" title="${escapeHtml(m.descTemplate || '')}">${descTplTag(m.descTemplate)}</span></td>
       <td>
         <button class="table-action-btn" data-edit-cid="${c.id}">编辑</button>
         <button class="table-action-btn danger" data-remove-cid="${c.id}">移除</button>
@@ -1429,52 +1421,7 @@ function fillSelectOptions(selectEl, options, currentValue) {
     options.map(o => `<option value="${escapeHtml(o)}" ${o === currentValue ? 'selected' : ''}>${escapeHtml(o)}</option>`).join('');
 }
 
-// ─── 频道「视频简介模版」的宏参插入条 ──────────────
-// 宏参沿用指令库那 6 个（合集组名称 / 合集简介 / 内容语言 / 频道名称 / 译文标题 / 译文简介）
-const DESC_TPL_MACROS_FALLBACK = [
-  { key: '合集组名称', desc: '当前视频所属合集组的名称' },
-  { key: '合集简介', desc: '当前视频所属合集组的简介' },
-  { key: '内容语言', desc: '本次产出的目标语言，如「英语」' },
-  { key: '频道名称', desc: '发布目标频道的名称' },
-  { key: '译文标题', desc: '已翻译/生成的视频标题' },
-  { key: '译文简介', desc: '已翻译/生成的视频简介' }
-];
-let _descTplMacros = [];
-
-async function ensureDescTplMacros() {
-  if (_descTplMacros.length) return _descTplMacros;
-  // 优先复用指令库已加载的宏参，避免多打一次接口
-  if (typeof _insMacros !== 'undefined' && Array.isArray(_insMacros) && _insMacros.length) {
-    _descTplMacros = _insMacros;
-    return _descTplMacros;
-  }
-  try {
-    const res = await fetch('/api/description-templates');
-    const data = await res.json().catch(() => ({}));
-    if (res.ok && Array.isArray(data.macros) && data.macros.length) {
-      _descTplMacros = data.macros;
-      return _descTplMacros;
-    }
-  } catch (e) { /* 接口异常时用内置兜底 */ }
-  _descTplMacros = DESC_TPL_MACROS_FALLBACK;
-  return _descTplMacros;
-}
-
-// barId：宏参按钮条容器；targetSel：点击后插入到的 textarea
-function renderDescTplMacroBar(barId, targetSel) {
-  const bar = $(barId || '#descTplMacroBar');
-  if (!bar) return;
-  const target = targetSel || '#editDescTemplate';
-  bar.innerHTML = _descTplMacros.map(m =>
-    `<button class="ins-macro-btn" type="button" data-desctpl-macro="${escapeHtml(m.key)}" title="${escapeHtml(m.desc || '')}">${escapeHtml(m.key)}</button>`
-  ).join('') + '<span class="ins-macro-tip">点击插入宏参</span>';
-  $$('[data-desctpl-macro]', bar).forEach(btn => {
-    btn.addEventListener('click', () => {
-      const ta = $(target);
-      if (ta) insInsertMacro(ta, `{{${btn.dataset.desctplMacro}}}`);
-    });
-  });
-}
+// 注：频道「视频简介模版」已不再提供宏参插入条，只支持 {title} 等英文变量
 
 async function openChannelEditModal(channelId, options = {}) {
   _editChannelId = channelId;
@@ -1518,8 +1465,6 @@ async function openChannelEditModal(channelId, options = {}) {
   $('#editChannelName').value = meta.channelName || '';
   $('#editRemark').value = meta.remark || '';
   $('#editDescTemplate').value = meta.descTemplate || '';
-  await ensureDescTplMacros();
-  renderDescTplMacroBar();
 
   $('#channelEditModal').style.display = 'flex';
 
@@ -2982,8 +2927,6 @@ async function loadDescTemplates() {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
     _descTemplates = { default: data.default || '', byChannel: data.byChannel || {} };
-    if (Array.isArray(data.macros) && data.macros.length) _descTplMacros = data.macros;
-    renderDescTplMacroBar('#descTplSysMacroBar', '#descTplText');
     const sel = $('#descTplChannel');
     if (sel) {
       const cur = sel.value;

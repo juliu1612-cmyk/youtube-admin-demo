@@ -1255,9 +1255,6 @@ body.has-processing-panel main{padding-bottom:70px}
   border-collapse:collapse;
   font-size:12px;
 }
-/* 视频简介模版：全文可能很长，表格里只做「已设置 N 字」标记 + title 悬停全文 */
-.channels-table .col-desctpl{white-space:nowrap}
-.channels-table .td-desctpl{white-space:nowrap;cursor:help}
 .channels-table thead{background:var(--bg-surface)}
 .channels-table th{
   padding:10px 12px;
