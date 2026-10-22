@@ -4145,6 +4145,9 @@ function resetTranslationFilter() {
   _tsFilterState.group = '';
   const nameInput = $('#tsFilterName');
   if (nameInput) nameInput.value = '';
+  // 供应商：演示用筛选项，暂不参与列表过滤，重置时清空即可
+  const supplierSel = $('#tsFilterSupplier');
+  if (supplierSel) supplierSel.value = '';
   populateTsGroupFilter();
   renderTsActiveTab();
 }
