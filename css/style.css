@@ -1871,11 +1871,12 @@ body.has-processing-panel main{padding-bottom:70px}
 
 /* ─── 发布任务列表 ──────────────────────────── */
 .pub-task-table-wrap{padding:0 28px 28px;overflow-x:auto}
-.pub-task-table{min-width:1000px}
+.pub-task-table{min-width:1120px}
 .pub-task-table .col-title{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
 .pub-task-table .col-channel{color:var(--text-secondary)}
 .pub-task-table .col-created{color:var(--text-secondary);white-space:nowrap}
 .pub-task-table .col-status{white-space:nowrap}
+.pub-task-table .col-cover-status{white-space:nowrap}
 .pub-task-table .col-actions{width:170px}
 .pub-task-table .action-btns .btn-reason{color:#dc2626;border-color:rgba(220,38,38,.4)}
 .pub-task-table .action-btns .btn-reason:hover{background:#dc2626;color:#fff;border-color:#dc2626}

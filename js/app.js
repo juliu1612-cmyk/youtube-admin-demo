@@ -5104,22 +5104,27 @@ function dataUrlToBlob(dataUrl) {
   return new Blob([arr], { type: mime });
 }
 
-// 发布成功后上传封面（失败只提示，不影响发布结果）
-async function uploadUytThumbnail(videoId, taskTitle) {
-  if (!_uytThumbDataUrl) return;
+// 发布成功后上传封面（失败只提示，不影响发布结果）；taskId 传入时把结果写入发布任务的「封面状态」
+async function uploadUytThumbnail(videoId, taskTitle, taskId, thumbDataUrl) {
+  const dataUrl = thumbDataUrl || _uytThumbDataUrl;
+  if (!dataUrl) return;
   try {
-    const blob = dataUrlToBlob(_uytThumbDataUrl);
+    const blob = dataUrlToBlob(dataUrl);
     const fd = new FormData();
     fd.append('videoId', videoId);
     fd.append('thumbnail', blob, _uytThumbUploadName || 'thumbnail.png');
     const res = await fetch('/api/thumbnails/set', { method: 'POST', body: fd });
     const data = await res.json().catch(() => ({}));
     if (res.ok && data.success) {
+      if (taskId) updatePublishTask(taskId, { coverStatus: '已完成', coverError: '' });
       showToast(`「${taskTitle}」封面已上传`, 'success');
     } else {
-      showToast(`「${taskTitle}」封面上传失败：${data.error || data.detail || '未知错误'}`, 'error');
+      const msg = data.error || data.detail || '未知错误';
+      if (taskId) updatePublishTask(taskId, { coverStatus: '失败', coverError: msg });
+      showToast(`「${taskTitle}」封面上传失败：${msg}`, 'error');
     }
   } catch (err) {
+    if (taskId) updatePublishTask(taskId, { coverStatus: '失败', coverError: err.message });
     showToast(`「${taskTitle}」封面上传失败：${err.message}`, 'error');
   }
 }
@@ -5324,6 +5329,7 @@ function submitUploadYt() {
     language: ep.language || '',
     operator: col.operator || '',
     videoUrl,
+    hasCover: !!thumbDataUrl,
     retryBody: body
   });
   closeUploadYtModal();
@@ -5331,6 +5337,12 @@ function submitUploadYt() {
 
   // 后台执行，完成后提示结果（页面不展示上传进度）
   runPublishTask(taskRec.id, body, taskTitle, thumbDataUrl);
+}
+
+// 视频上传失败时，同步把封面状态标记为失败（封面环节还没开始执行）
+function markPubTaskCoverNotRun(taskId, reason) {
+  const t = getPublishTasks().find(x => x.id === taskId);
+  if (t && t.hasCover) updatePublishTask(taskId, { coverStatus: '失败', coverError: reason });
 }
 
 // 统一的发布执行器（首次创建与失败重试共用）
@@ -5344,6 +5356,7 @@ function runPublishTask(taskId, body, taskTitle, thumbDataUrl) {
     // 后台会话失效（服务重启/过期）：明确提示重新登录，并刷新侧边栏登录状态
     if (res.status === 401) {
       const msg = '后台登录已失效，请刷新页面重新登录后再重试';
+      markPubTaskCoverNotRun(taskId, '视频上传失败，未执行封面上传');
       updatePublishTask(taskId, { status: PT_STATUS.FAILED, error: msg });
       showToast('后台登录已失效，页面即将跳转登录页…', 'error');
       setTimeout(() => { window.location.href = '/login.html'; }, 2000);
@@ -5355,15 +5368,18 @@ function runPublishTask(taskId, body, taskTitle, thumbDataUrl) {
       // 同步写入「发布内容关联表」(yt_upload_records)，让关联表和 YT 视频列表同时出现该视频
       ytvSyncPublishTaskToHistory(taskId, data.videoId, data.url || '');
       showToast(`「${taskTitle}」发布成功：${data.url || ''}`, 'success');
-      // AI 生成的封面随发布自动上传
+      // AI/手动选择的封面随发布自动上传，结果写入「封面状态」
       if (thumbDataUrl) {
-        await uploadUytThumbnail(data.videoId, taskTitle);
+        await uploadUytThumbnail(data.videoId, taskTitle, taskId, thumbDataUrl);
       }
     } else {
-      updatePublishTask(taskId, { status: PT_STATUS.FAILED, error: data.detail || data.error || '未知错误' });
-      showToast(`「${taskTitle}」发布失败：${data.detail || data.error || '未知错误'}`, 'error');
+      const msg = data.detail || data.error || '未知错误';
+      markPubTaskCoverNotRun(taskId, '视频上传失败，未执行封面上传');
+      updatePublishTask(taskId, { status: PT_STATUS.FAILED, error: msg });
+      showToast(`「${taskTitle}」发布失败：${msg}`, 'error');
     }
   }).catch(err => {
+    markPubTaskCoverNotRun(taskId, '视频上传失败，未执行封面上传');
     updatePublishTask(taskId, { status: PT_STATUS.FAILED, error: err.message });
     showToast(`「${taskTitle}」发布失败：${err.message}`, 'error');
   });
@@ -5377,14 +5393,14 @@ const PT_STATUS = { QUEUED: '排队中', PROCESSING: '处理中', DONE: '已完�
 // 首次使用的示例数据（每种状态多条，覆盖不同频道/合集组/语言/操作人）
 const PUBLISH_TASKS_SEED = [
   // 已完成 4 条
-  { id: 'PTdemo01', title: 'Hidden Marriage CEO Sweet Love EP1', channelTitle: '天骄剧场', linkedCollection: 'Vlog 日常', language: '英语', operator: '王雪', videoUrl: 'https://media.w3.org/2010/05/bunny/movie.mp4', status: '已完成', error: '', videoId: 'dQw4w9WgXcQ', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', createdAt: '2026-09-22 09:15:00', finishedAt: '2026-09-22 09:17:20', retryBody: null },
-  { id: 'PTdemo05', title: 'Rebirth of the Genius Doctor EP5', channelTitle: 'AI Agent', linkedCollection: '教程系列', language: '韩语', operator: '李强', videoUrl: 'https://media.w3.org/2010/05/bunny/movie.mp4', status: '已完成', error: '', videoId: 'yPYZpwSpKmA', url: 'https://www.youtube.com/watch?v=yPYZpwSpKmA', createdAt: '2026-09-21 15:22:41', finishedAt: '2026-09-21 15:24:18', retryBody: null },
-  { id: 'PTdemo06', title: 'The War God Returns EP2 - Back with a Vengeance', channelTitle: 'Rural AIGent', linkedCollection: '产品评测', language: '西班牙语', operator: '赵敏', videoUrl: 'https://media.w3.org/2010/05/sintel/trailer.mp4', status: '已完成', error: '', videoId: 'aqz-KE-bpKQ', url: 'https://www.youtube.com/watch?v=aqz-KE-bpKQ', createdAt: '2026-09-20 10:08:15', finishedAt: '2026-09-20 10:11:42', retryBody: null },
-  { id: 'PTdemo07', title: 'Sweet Trap - My Fierce Boyfriend EP8', channelTitle: '天骄剧场', linkedCollection: '开箱体验', language: '葡萄牙语', operator: '陈晨', videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4', status: '已完成', error: '', videoId: 'kJQP7kiw5Fk', url: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk', createdAt: '2026-09-19 17:45:03', finishedAt: '2026-09-19 17:47:55', retryBody: null },
+  { id: 'PTdemo01', title: 'Hidden Marriage CEO Sweet Love EP1', channelTitle: '天骄剧场', linkedCollection: 'Vlog 日常', language: '英语', operator: '王雪', videoUrl: 'https://media.w3.org/2010/05/bunny/movie.mp4', status: '已完成', error: '', videoId: 'dQw4w9WgXcQ', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', createdAt: '2026-09-22 09:15:00', finishedAt: '2026-09-22 09:17:20', coverStatus: '已完成', coverError: '', retryBody: null },
+  { id: 'PTdemo05', title: 'Rebirth of the Genius Doctor EP5', channelTitle: 'AI Agent', linkedCollection: '教程系列', language: '韩语', operator: '李强', videoUrl: 'https://media.w3.org/2010/05/bunny/movie.mp4', status: '已完成', error: '', videoId: 'yPYZpwSpKmA', url: 'https://www.youtube.com/watch?v=yPYZpwSpKmA', createdAt: '2026-09-21 15:22:41', finishedAt: '2026-09-21 15:24:18', coverStatus: '已完成', coverError: '', retryBody: null },
+  { id: 'PTdemo06', title: 'The War God Returns EP2 - Back with a Vengeance', channelTitle: 'Rural AIGent', linkedCollection: '产品评测', language: '西班牙语', operator: '赵敏', videoUrl: 'https://media.w3.org/2010/05/sintel/trailer.mp4', status: '已完成', error: '', videoId: 'aqz-KE-bpKQ', url: 'https://www.youtube.com/watch?v=aqz-KE-bpKQ', createdAt: '2026-09-20 10:08:15', finishedAt: '2026-09-20 10:11:42', coverStatus: '失败', coverError: '封面上传失败：thumbnailNotAllowed 频道尚未完成验证', retryBody: null },
+  { id: 'PTdemo07', title: 'Sweet Trap - My Fierce Boyfriend EP8', channelTitle: '天骄剧场', linkedCollection: '开箱体验', language: '葡萄牙语', operator: '陈晨', videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4', status: '已完成', error: '', videoId: 'kJQP7kiw5Fk', url: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk', createdAt: '2026-09-19 17:45:03', finishedAt: '2026-09-19 17:47:55', coverStatus: '已完成', coverError: '', retryBody: null },
   // 处理中 3 条
-  { id: 'PTdemo02', title: 'Rebirth of the Genius Doctor EP2', channelTitle: 'AI Agent', linkedCollection: '教程系列', language: '韩语', operator: '李强', videoUrl: 'https://media.w3.org/2010/05/sintel/trailer.mp4', status: '处理中', error: '', videoId: '', url: '', createdAt: '2026-09-23 13:05:12', finishedAt: '', retryBody: null },
-  { id: 'PTdemo08', title: 'Millennium Fox Fairy EP4 - Demon Hunter in Love', channelTitle: '天骄剧场', linkedCollection: '游戏实况', language: '泰语', operator: '王雪', videoUrl: 'https://media.w3.org/2010/05/video/movie_300.mp4', status: '处理中', error: '', videoId: '', url: '', createdAt: '2026-09-23 13:52:30', finishedAt: '', retryBody: null },
-  { id: 'PTdemo09', title: 'Urban Master EP1 - Awakening Power', channelTitle: 'Rural AIGent', linkedCollection: '技术分享', language: '印尼语', operator: '陈晨', videoUrl: 'https://media.w3.org/2010/05/bunny/movie.mp4', status: '处理中', error: '', videoId: '', url: '', createdAt: '2026-09-23 13:58:06', finishedAt: '', retryBody: null },
+  { id: 'PTdemo02', title: 'Rebirth of the Genius Doctor EP2', channelTitle: 'AI Agent', linkedCollection: '教程系列', language: '韩语', operator: '李强', videoUrl: 'https://media.w3.org/2010/05/sintel/trailer.mp4', status: '处理中', error: '', videoId: '', url: '', createdAt: '2026-09-23 13:05:12', finishedAt: '', coverStatus: '处理中', coverError: '', retryBody: null },
+  { id: 'PTdemo08', title: 'Millennium Fox Fairy EP4 - Demon Hunter in Love', channelTitle: '天骄剧场', linkedCollection: '游戏实况', language: '泰语', operator: '王雪', videoUrl: 'https://media.w3.org/2010/05/video/movie_300.mp4', status: '处理中', error: '', videoId: '', url: '', createdAt: '2026-09-23 13:52:30', finishedAt: '', coverStatus: '处理中', coverError: '', retryBody: null },
+  { id: 'PTdemo09', title: 'Urban Master EP1 - Awakening Power', channelTitle: 'Rural AIGent', linkedCollection: '技术分享', language: '印尼语', operator: '陈晨', videoUrl: 'https://media.w3.org/2010/05/bunny/movie.mp4', status: '处理中', error: '', videoId: '', url: '', createdAt: '2026-09-23 13:58:06', finishedAt: '', coverStatus: '处理中', coverError: '', retryBody: null },
   // 失败 3 条
   { id: 'PTdemo03', title: 'Millennium Fox Fairy EP1', channelTitle: 'Rural AIGent', linkedCollection: '开箱体验', language: '西班牙语', operator: '赵敏', videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4', status: '失败', error: '下载视频失败: Client network socket disconnected', videoId: '', url: '', createdAt: '2026-09-23 12:44:30', finishedAt: '2026-09-23 12:45:02', retryBody: null },
   { id: 'PTdemo10', title: 'Hidden Marriage CEO Sweet Love EP3', channelTitle: 'AI Agent', linkedCollection: 'Vlog 日常', language: '英语', operator: '王雪', videoUrl: 'https://media.w3.org/2010/05/sintel/trailer.mp4', status: '失败', error: '上传视频到 YouTube失败: uploadLimitExceeded 当日上传配额已用尽', videoId: '', url: '', createdAt: '2026-09-23 11:30:18', finishedAt: '2026-09-23 11:32:44', retryBody: null },
@@ -5441,6 +5457,9 @@ function createPublishTask(info) {
     language: info.language || '',
     operator: info.operator || '',
     videoUrl: info.videoUrl || '',
+    hasCover: !!info.hasCover,
+    coverStatus: info.hasCover ? '处理中' : '',
+    coverError: '',
     status: PT_STATUS.QUEUED,
     error: '',
     videoId: '',
@@ -5494,9 +5513,20 @@ function retryPublishTask(id) {
     showToast('该任务缺少原始发布参数（示例数据），无法重试。请重新发起发布', 'error');
     return;
   }
-  updatePublishTask(id, { status: PT_STATUS.PROCESSING, error: '', videoId: '', url: '' });
+  // 重试不会重传封面（封面 dataUrl 未随任务持久化），封面状态一并清空为「不适用」
+  updatePublishTask(id, { status: PT_STATUS.PROCESSING, error: '', videoId: '', url: '', coverStatus: '', coverError: '' });
   showToast(`「${t.title}」已重新开始发布…`, 'info');
   runPublishTask(t.id, t.retryBody, t.title);
+}
+
+// 封面状态标签：处理中 / 已完成 / 失败（失败时附带原因）；空 = 该任务没有封面，不适用
+function pubTaskCoverTag(t) {
+  const s = t.coverStatus || '';
+  if (!s) return '<span class="cell-empty">—</span>';
+  if (s === '已完成') return '<span class="table-tag success">已完成</span>';
+  if (s === '处理中') return '<span class="table-tag warn">处理中</span>';
+  if (s === '失败') return `<span class="table-tag danger" title="${escapeHtml(t.coverError || '')}">失败</span>`;
+  return `<span class="table-tag gray">${escapeHtml(s)}</span>`;
 }
 
 // 发布状态标签
@@ -5608,6 +5638,8 @@ function renderPublishTasks() {
       <td>${escapeHtml(t.createdAt)}</td>
       <td class="col-status">${pubTaskStatusTag(t)}${t.status === PT_STATUS.FAILED && t.error
         ? `<div class="pt-error-text" title="${escapeHtml(t.error)}">${escapeHtml(t.error)}</div>` : ''}</td>
+      <td class="col-cover-status">${pubTaskCoverTag(t)}${t.coverStatus === '失败' && t.coverError
+        ? `<div class="pt-error-text" title="${escapeHtml(t.coverError)}">${escapeHtml(t.coverError)}</div>` : ''}</td>
       <td class="col-actions">
         <div class="action-btns">
           ${t.status === PT_STATUS.FAILED ? `
