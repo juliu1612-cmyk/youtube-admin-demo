@@ -2939,3 +2939,22 @@ body.has-processing-panel main{padding-bottom:70px}
   background:var(--bg-input);border:1px solid var(--border);
   color:var(--text-primary);font-size:13px;
 }
+
+/* ─── 屏蔽视频页 ─────────────────────────── */
+.blk-filter-actions{display:flex;gap:8px}
+.blk-table{min-width:720px}
+.blk-table .col-blk-chid{width:280px;white-space:nowrap}
+.blk-table .col-blk-vid{width:200px;white-space:nowrap}
+.blk-table td{font-size:13px}
+.blk-video-link{
+  color:var(--accent-light);text-decoration:none;
+  border-bottom:1px dashed transparent;transition:var(--transition);
+}
+.blk-video-link:hover{border-bottom-color:var(--accent-light)}
+.blk-scan-info{
+  margin:0 20px 12px;padding:10px 14px;
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:var(--radius);font-size:12px;color:var(--text-muted);
+  line-height:1.8;
+}
+.blk-scan-errors{margin-top:4px;color:#f87171}

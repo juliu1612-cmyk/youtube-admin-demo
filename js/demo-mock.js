@@ -572,12 +572,42 @@
     if (path.indexOf('/api/self-media/video') === 0) {
       return Promise.resolve(jsonRes({ success: true }));
     }
+    if (path === '/api/blocked-videos') {
+      return Promise.resolve(jsonRes({
+        success: true,
+        scannedAt: new Date().toISOString(),
+        threshold: 200,
+        channels: DEMO_BLOCKED_CHANNELS,
+        videos: DEMO_BLOCKED_VIDEOS,
+        errors: []
+      }));
+    }
     /* 其余接口（上传 from-url、captions 等）统一返回成功 */
     return Promise.resolve(jsonRes({ success: true, demo: true, videoId: 'demo' + Date.now().toString(36) }));
   };
 
   /* ---------- XMLHttpRequest 拦截（仅上传类接口，模拟后台进度） ---------- */
   var RealXHR = window.XMLHttpRequest;
+
+  /* 屏蔽视频演示数据：Studio 显示「已屏蔽」的视频（版权 Content ID 拦截） */
+  var DEMO_BLOCKED_VIDEOS = [
+    { channelId: 'UCdemo00000000000000000A1', channelTitle: '演示频道 · 都市剧场', videoId: 'dQw4w9WgXcQ' },
+    { channelId: 'UCdemo00000000000000000A1', channelTitle: '演示频道 · 都市剧场', videoId: 'bX7kLpQ2mNv' },
+    { channelId: 'UCdemo00000000000000000A1', channelTitle: '演示频道 · 都市剧场', videoId: 'Hk3tYs9RiCw' },
+    { channelId: 'UCdemo00000000000000000A1', channelTitle: '演示频道 · 都市剧场', videoId: 'Lm8pQd4ZtXe' },
+    { channelId: 'UCdemo00000000000000000B2', channelTitle: '演示频道 · 海外短剧', videoId: 'Pn5rVt2KjHo' },
+    { channelId: 'UCdemo00000000000000000B2', channelTitle: '演示频道 · 海外短剧', videoId: 'Qs9wEb6MgUa' },
+    { channelId: 'UCdemo00000000000000000B2', channelTitle: '演示频道 · 海外短剧', videoId: 'Rv4nJc1LpYe' },
+    { channelId: 'UCdemo00000000000000000C3', channelTitle: 'Demo English Channel', videoId: 'Tz7mFa3ShUo' },
+    { channelId: 'UCdemo00000000000000000C3', channelTitle: 'Demo English Channel', videoId: 'Wb2xKq8NdPr' },
+    { channelId: 'UCdemo00000000000000000C3', channelTitle: 'Demo English Channel', videoId: 'Yc6vLs5RtEi' }
+  ];
+  var DEMO_BLOCKED_CHANNELS = [
+    { id: DEMO_CHANNELS[0].id, title: DEMO_CHANNELS[0].title, videoCount: 42, blockedCount: 4 },
+    { id: DEMO_CHANNELS[1].id, title: DEMO_CHANNELS[1].title, videoCount: 28, blockedCount: 3 },
+    { id: DEMO_CHANNELS[2].id, title: DEMO_CHANNELS[2].title, videoCount: 15, blockedCount: 3 }
+  ];
+
   var UPLOAD_PATTERNS = ['/api/self-media/video', '/api/upload', '/api/thumbnails', '/api/captions'];
 
   function DemoXHR() {

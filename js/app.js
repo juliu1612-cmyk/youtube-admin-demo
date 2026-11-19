@@ -8619,3 +8619,142 @@ if (document.readyState === 'loading') {
 } else {
   bindCoverLibrary();
 }
+
+
+// ════════════════════════════════════════════════════════
+//  屏蔽视频（版权屏蔽检测：regionRestriction.blocked ≥ 200 国 ⇒ Studio「已屏蔽」）
+// ════════════════════════════════════════════════════════
+const BLK_CACHE_KEY = 'yt_blocked_scan';
+let _blockedData = { scannedAt: '', videos: [], channels: [], errors: [] };
+let _blockedBound = false;
+
+function blkLoadCache() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(BLK_CACHE_KEY) || 'null');
+    if (raw && Array.isArray(raw.videos)) _blockedData = raw;
+  } catch (e) { /* 缓存损坏则忽略 */ }
+}
+
+function blkSaveCache() {
+  try { localStorage.setItem(BLK_CACHE_KEY, JSON.stringify(_blockedData)); } catch (e) {}
+}
+
+function blkEscapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function blkFiltered() {
+  const cid = ($('#blkFilterChannelId')?.value || '').trim().toLowerCase();
+  const ctitle = ($('#blkFilterChannelTitle')?.value || '').trim().toLowerCase();
+  const vid = ($('#blkFilterVideoId')?.value || '').trim().toLowerCase();
+  return (_blockedData.videos || []).filter(v => {
+    if (cid && !String(v.channelId || '').toLowerCase().includes(cid)) return false;
+    if (ctitle && !String(v.channelTitle || '').toLowerCase().includes(ctitle)) return false;
+    if (vid && !String(v.videoId || '').toLowerCase().includes(vid)) return false;
+    return true;
+  });
+}
+
+function blkRender() {
+  const tbody = $('#blkTableBody');
+  const empty = $('#blkEmpty');
+  const hint = $('#blkCountHint');
+  if (!tbody) return;
+  const list = blkFiltered();
+  hint.textContent = _blockedData.scannedAt
+    ? `共 ${(_blockedData.videos || []).length} 条屏蔽视频 · 当前显示 ${list.length} 条`
+    : '';
+  if (!list.length) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = list.map(v => `
+    <tr>
+      <td class="col-blk-chid">${blkEscapeHtml(v.channelId)}</td>
+      <td>${blkEscapeHtml(v.channelTitle)}</td>
+      <td class="col-blk-vid"><a class="blk-video-link" href="https://www.youtube.com/watch?v=${encodeURIComponent(v.videoId)}" target="_blank" rel="noopener">${blkEscapeHtml(v.videoId)}</a></td>
+    </tr>`).join('');
+}
+
+function blkRenderScanInfo() {
+  const info = $('#blkScanInfo');
+  if (!info) return;
+  const chans = _blockedData.channels || [];
+  const errors = _blockedData.errors || [];
+  if (!_blockedData.scannedAt) { info.style.display = 'none'; return; }
+  const time = new Date(_blockedData.scannedAt).toLocaleString('zh-CN');
+  const perChan = chans.map(c =>
+    `${blkEscapeHtml(c.title)}：${c.videoCount} 条视频 / ${c.blockedCount} 条屏蔽`
+  ).join('　|　');
+  const errTxt = errors.length
+    ? `<div class="blk-scan-errors">${errors.map(e => `⚠️ ${blkEscapeHtml(e.channelTitle)}：${blkEscapeHtml(e.error)}`).join('<br>')}</div>`
+    : '';
+  info.innerHTML = `上次扫描：${time}<br>${perChan}${errTxt}`;
+  info.style.display = '';
+}
+
+function blkResetFilters() {
+  const ids = ['blkFilterChannelId', 'blkFilterChannelTitle', 'blkFilterVideoId'];
+  ids.forEach(id => { const el = $(`#${id}`); if (el) el.value = ''; });
+  blkRender();
+}
+
+async function blkScan(btn) {
+  if (btn) { btn.disabled = true; btn.classList.add('loading'); btn.textContent = '扫描中…'; }
+  try {
+    const res = await fetch('/api/blocked-videos');
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(errMsg(data) || `HTTP ${res.status}`);
+    _blockedData = {
+      scannedAt: data.scannedAt || new Date().toISOString(),
+      videos: data.videos || [],
+      channels: data.channels || [],
+      errors: data.errors || []
+    };
+    blkSaveCache();
+    blkRender();
+    blkRenderScanInfo();
+    const blockedN = _blockedData.videos.length;
+    const errN = _blockedData.errors.length;
+    if (errN) showToast(`扫描完成：发现 ${blockedN} 条屏蔽视频，${errN} 个频道扫描失败`, 'warn', 6000);
+    else showToast(`扫描完成：发现 ${blockedN} 条屏蔽视频`, 'success');
+  } catch (err) {
+    showToast('扫描失败：' + err.message, 'error', 6000);
+  } finally {
+    if (btn) { btn.disabled = false; btn.classList.remove('loading'); btn.textContent = '开始扫描'; }
+  }
+}
+
+function bindBlockedVideos() {
+  if (_blockedBound) return;
+  _blockedBound = true;
+  blkLoadCache();
+  blkRender();
+  blkRenderScanInfo();
+
+  const scanBtn = $('#blkScanBtn');
+  if (scanBtn) scanBtn.addEventListener('click', () => blkScan(scanBtn));
+  const searchBtn = $('#blkSearchBtn');
+  if (searchBtn) searchBtn.addEventListener('click', blkRender);
+  const resetBtn = $('#blkResetBtn');
+  if (resetBtn) resetBtn.addEventListener('click', blkResetFilters);
+  // 三个搜索框：输入即过滤，回车等同点查询
+  ['blkFilterChannelId', 'blkFilterChannelTitle', 'blkFilterVideoId'].forEach(id => {
+    const el = $(`#${id}`);
+    if (!el) return;
+    el.addEventListener('input', blkRender);
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') blkRender(); });
+  });
+
+  // 导航进入时用缓存立即渲染
+  const nav = $('.nav-item[data-page="blocked"]');
+  if (nav) nav.addEventListener('click', () => { blkLoadCache(); blkRender(); blkRenderScanInfo(); });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bindBlockedVideos);
+} else {
+  bindBlockedVideos();
+}
