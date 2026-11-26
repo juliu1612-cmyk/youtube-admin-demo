@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache" data-page-node-id="KTB9nog34dVMTyI6KzyhZO">
 <meta http-equiv="Expires" content="0" data-page-node-id="NAXDVA9FEyCdFmpnLdPy9a">
 <title>YouTube Studio — 视频上传</title>
-<link rel="stylesheet" href="./css/style.css?v=demo11" data-page-node-id="WsExLEeRHJJ5lmtEOpYs5D">
+<link rel="stylesheet" href="./css/style.css?v=demo12" data-page-node-id="WsExLEeRHJJ5lmtEOpYs5D">
 <style>
   /* Critical: prevent broken layout when CSS fails or page is opened via file:// */
   html{font-size:16px;-webkit-font-smoothing:antialiased}
@@ -178,6 +178,14 @@
               </div>
               <div class="field" data-page-node-id="sourceEpField01">
                 <div class="field-label">视频来源 <span class="required">*</span></div>
+                <div class="source-mode-row" id="sourceModeRow" data-page-node-id="sourceModeRow001">
+                  <label class="source-mode-opt active" data-page-node-id="srcModeCol001">
+                    <input type="radio" name="sourceMode" value="collection" checked data-page-node-id="srcModeColRadio001">合集剧集
+                  </label>
+                  <label class="source-mode-opt" data-page-node-id="srcModeLocal001">
+                    <input type="radio" name="sourceMode" value="local" data-page-node-id="srcModeLocalRadio001">本地视频文件
+                  </label>
+                </div>
                 <div class="source-combobox" id="sourceCombo" data-page-node-id="sourceCombo001">
                   <input type="text" id="sourceEpisodeDisplay" class="source-display-input" placeholder="点击选择剧集(可输入关键字搜索)..." readonly data-page-node-id="srcEpDisp001">
                   <select id="sourceEpisode" data-page-node-id="sourceEpSel01" style="display:none;">
@@ -200,6 +208,11 @@
                     <div class="source-count-hint" id="sourceCountHint" data-page-node-id="sourceCountHint001"></div>
                   </div>
                 </div>
+                <label class="local-video-picker" id="localVideoPicker" style="display:none" data-page-node-id="localVideoPicker001">
+                  <input type="file" id="localVideoFile" accept="video/*,.mkv,.flv,.wmv,.ts" hidden data-page-node-id="localVideoFile001">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="localVideoIco001"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" data-page-node-id="localVideoIcoP001"/><polyline points="17 8 12 3 7 8" data-page-node-id="localVideoIcoPl001"/><line x1="12" y1="3" x2="12" y2="15" data-page-node-id="localVideoIcoL001"/></svg>
+                  <span id="localVideoText" data-page-node-id="localVideoText001">点击选择本地视频文件（mp4 / mov / mkv 等）</span>
+                </label>
               </div>
             </div>
           </div>
@@ -2193,8 +2206,8 @@
   </aside>
 </div>
 
-<script src="./js/demo-mock.js?v=demo11"></script>
-    <script src="./js/app.js?v=demo11"></script>
+<script src="./js/demo-mock.js?v=demo12"></script>
+    <script src="./js/app.js?v=demo12"></script>
 <script>
   if(location.protocol === 'file:'){
     document.getElementById('fileWarning').style.display = 'block';

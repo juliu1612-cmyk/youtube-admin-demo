@@ -14,6 +14,8 @@ const state = {
   sourceFilterLanguage: '',    // 视频来源筛选:语言
   sourceFilterType: '',        // 视频来源筛选:类型
   sourceEpisodeSearch: '',     // 视频来源 combobox 搜索关键字
+  sourceMode: 'collection',    // 视频来源模式: collection(合集剧集) / local(本地视频文件)
+  localVideoFile: null,        // 本地模式选中的视频 File 对象
   videoUrl: '',
   tags: [],
   localizations: [],
@@ -173,7 +175,7 @@ function populateChannelSelect() {
 function updateStep1NextButton() {
   const btn = $('#btnNextStep1');
   if (!btn) return;
-  const hasSource = !!$('#sourceEpisode').value;
+  const hasSource = state.sourceMode === 'local' ? !!state.localVideoFile : !!$('#sourceEpisode').value;
   const hasChannel = !!$('#targetChannel').value;
   btn.disabled = !(hasSource && hasChannel);
 }
@@ -238,6 +240,10 @@ function showUploadToast() {
 }
 
 function getUploadFileName() {
+  // 本地视频模式：直接用文件名
+  if (state.sourceMode === 'local' && state.localVideoFile) {
+    return state.localVideoFile.name;
+  }
   // 优先使用当前选中的剧集名
   const sel = $('#sourceEpisode');
   if (sel && sel.value) {
@@ -363,6 +369,12 @@ function cancelUploadTask(id) {
     showToast('上传已取消', 'info');
     return;
   }
+  // 本地视频直传（XHR）：中止 XHR，abort 事件回调里统一清理状态
+  if (step2UploadXhr) {
+    try { step2UploadXhr.abort(); } catch (e) { /* noop */ }
+    step2UploadXhr = null;
+    return;
+  }
   if (uploadAbortController) {
     uploadAbortController.abort();
     uploadAbortController = null;
@@ -390,6 +402,13 @@ async function startStep2Upload() {
   showUploadToast();
   startUploadToastProgress(toastId);
   showBottomUploadPanel('正在上传视频到 YouTube...');
+
+  // 本地视频文件：走 XHR 直传（fetch 拿不到真实上传进度），用真实进度替代模拟进度
+  if (state.sourceMode === 'local' && state.localVideoFile) {
+    stopUploadToastProgress();
+    state.step2UploadPromise = uploadLocalVideoQuick(toastId, state.localVideoFile);
+    return;
+  }
 
   // 存储上传 Promise，供 handleSubmit 在未完成时等待
   state.step2UploadPromise = (async () => {
@@ -436,6 +455,70 @@ async function startStep2Upload() {
       throw err; // re-throw 让 handleSubmit 感知上传失败
     }
   })(); // end of step2UploadPromise IIFE
+}
+
+// 本地视频文件快速上传：multipart 直传 /api/upload/quick
+// （服务端用文件名做占位标题、私享上传；channelId 用于渲染「视频简介模版」占位简介）
+function uploadLocalVideoQuick(toastId, file) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    step2UploadXhr = xhr;
+    const fd = new FormData();
+    fd.append('video', file, file.name);
+    fd.append('channelId', $('#targetChannel')?.value || state.activeChannelId || '');
+
+    const failLocal = (msg) => {
+      stopUploadToastProgress();
+      state.uploading = false;
+      state.step2Uploaded = false;
+      updateUploadToastItem(toastId, 'failed', null);
+      $('#processingStatusIcon').textContent = '❌';
+      $('#processingStatusTitle').textContent = '上传失败';
+      $('#processingPercentBadge').textContent = '';
+      $('#progressBarFill').style.width = '100%';
+      $('#progressBarFill').className = 'progress-bar-fill error';
+      showToast('上传失败: ' + msg, 'error');
+    };
+
+    xhr.open('POST', '/api/upload/quick');
+    xhr.upload.addEventListener('progress', e => {
+      if (!e.lengthComputable) return;
+      const pct = Math.round((e.loaded / e.total) * 100);
+      updateUploadToastItem(toastId, 'uploading', pct);
+      if (pct < 100) updateBottomUploadProgress(pct);
+    });
+    xhr.addEventListener('load', () => {
+      step2UploadXhr = null;
+      let data = {};
+      try { data = JSON.parse(xhr.responseText || '{}'); } catch (e) { /* ignore */ }
+      if (xhr.status >= 200 && xhr.status < 300 && data.success) {
+        stopUploadToastProgress();
+        updateUploadToastItem(toastId, 'completed', 100);
+        showBottomUploadDone(data.videoId, data.url);
+        resolve(data);
+      } else {
+        const detail = data.detail ? `（${typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail)}）` : '';
+        failLocal((data.error || `上传失败 (${xhr.status})`) + detail);
+        reject(new Error((data.error || `上传失败 (${xhr.status})`) + detail));
+      }
+    });
+    xhr.addEventListener('error', () => {
+      step2UploadXhr = null;
+      failLocal('网络错误');
+      reject(new Error('网络错误'));
+    });
+    xhr.addEventListener('abort', () => {
+      step2UploadXhr = null;
+      stopUploadToastProgress();
+      state.uploading = false;
+      state.step2Uploaded = false;
+      updateUploadToastItem(toastId, 'cancelled', null);
+      const err = new Error('已取消');
+      err.name = 'AbortError';
+      reject(err);
+    });
+    xhr.send(fd);
+  });
 }
 
 function showBottomUploadPanel(msg) {
@@ -505,10 +588,118 @@ function formatDuration(sec) {
   return `${m}:${s.toString().padStart(2,'0')}`;
 }
 
+// 视频来源模式切回「合集剧集」并清掉本地文件选择（发布完成/重置表单时调用）
+function resetLocalVideoSource() {
+  state.sourceMode = 'collection';
+  state.localVideoFile = null;
+  const row = $('#sourceModeRow');
+  if (row) {
+    row.querySelectorAll('.source-mode-opt').forEach(l => l.classList.toggle('active', l.querySelector('input').value === 'collection'));
+    const colRadio = row.querySelector('input[value="collection"]');
+    const locRadio = row.querySelector('input[value="local"]');
+    if (colRadio) colRadio.checked = true;
+    if (locRadio) locRadio.checked = false;
+  }
+  const combo = $('#sourceCombo');
+  if (combo) combo.style.display = '';
+  const picker = $('#localVideoPicker');
+  if (picker) { picker.style.display = 'none'; picker.classList.remove('picked'); }
+  const txt = $('#localVideoText');
+  if (txt) txt.textContent = '点击选择本地视频文件（mp4 / mov / mkv 等）';
+  const fileEl = $('#localVideoFile');
+  if (fileEl) fileEl.value = '';
+}
+
 // ─── Step Navigation ─────────────────────────
+// 视频来源模式切换：合集剧集 ↔ 本地视频文件
+function bindSourceModeToggle() {
+  const row = $('#sourceModeRow');
+  if (!row) return;
+  row.addEventListener('change', e => {
+    const mode = e.target.value;
+    if (!mode || mode === state.sourceMode) return;
+    state.sourceMode = mode;
+    // 高亮
+    row.querySelectorAll('.source-mode-opt').forEach(l => l.classList.toggle('active', l.querySelector('input').value === mode));
+    // 显示切换
+    const combo = $('#sourceCombo');
+    const picker = $('#localVideoPicker');
+    if (combo) combo.style.display = mode === 'collection' ? '' : 'none';
+    if (picker) picker.style.display = mode === 'local' ? 'flex' : 'none';
+    // 清掉另一边的已选内容（防止两边都"有值"但按钮状态错乱）
+    if (mode === 'local') {
+      const sel = $('#sourceEpisode');
+      if (sel) sel.value = '';
+      const disp = $('#sourceEpisodeDisplay');
+      if (disp) disp.value = '';
+    } else {
+      state.localVideoFile = null;
+      const picker = $('#localVideoPicker');
+      if (picker) picker.classList.remove('picked');
+      const txt = $('#localVideoText');
+      if (txt) txt.textContent = '点击选择本地视频文件（mp4 / mov / mkv 等）';
+      const fileEl = $('#localVideoFile');
+      if (fileEl) fileEl.value = '';
+    }
+    updateStep1NextButton();
+  });
+  // 本地文件选择
+  const fileEl = $('#localVideoFile');
+  if (fileEl) {
+    fileEl.addEventListener('change', () => {
+      const f = fileEl.files && fileEl.files[0];
+      if (!f) return;
+      // 校验：video/* 类型或常见视频扩展名
+      const isVideo = (f.type && f.type.startsWith('video/')) || /\.(mp4|mov|m4v|webm|avi|mkv|flv|wmv|mpg|mpeg|ts)$/i.test(f.name);
+      if (!isVideo) {
+        showToast('请选择视频文件（mp4 / mov / mkv 等）', 'error');
+        fileEl.value = '';
+        return;
+      }
+      state.localVideoFile = f;
+      const picker = $('#localVideoPicker');
+      if (picker) picker.classList.add('picked');
+      const txt = $('#localVideoText');
+      if (txt) txt.textContent = `${f.name}（${formatSize(f.size)}）`;
+      updateStep1NextButton();
+    });
+  }
+}
+
 function bindStepNavigation() {
+  bindSourceModeToggle();
   // Step 1 → 2: 选好视频 + 频道后点下一步触发上传，并跳到填写信息（上传在后台进行）
   $('#btnNextStep1').addEventListener('click', async () => {
+    // 本地视频文件模式
+    if (state.sourceMode === 'local') {
+      if (!state.localVideoFile) {
+        showToast('请先选择本地视频文件', 'error');
+        return;
+      }
+      const channelLocal = $('#targetChannel').value;
+      if (!channelLocal) {
+        showToast('请先选择发布频道', 'error');
+        return;
+      }
+      state.videoUrl = '';
+      state.step2Uploaded = false;
+      state.step2UploadPromise = null;
+      state.step2VideoId = null;
+      state.step2VideoUrl = null;
+      try {
+        const swRes = await fetch('/api/channels/switch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ channelId: channelLocal })
+        });
+        if (swRes.ok) state.activeChannelId = channelLocal;
+      } catch (e) {
+        console.warn('频道同步失败:', e);
+      }
+      startStep2Upload();
+      goToStep(2);
+      return;
+    }
     // 校验视频来源(必须是已选剧集)
     const sel = $('#sourceEpisode');
     if (!sel || !sel.value) {
@@ -2684,6 +2875,7 @@ function resetAll() {
   populateSourceFilterOptions();
   populateSourceEpisodeOptions();
   state.videoUrl = '';
+  resetLocalVideoSource();
   state.step2Uploaded = false;
   state.step2UploadPromise = null;
   state.step2VideoId = null;
@@ -2731,6 +2923,7 @@ function resetAllExceptProcessing() {
   populateSourceFilterOptions();
   populateSourceEpisodeOptions();
   state.videoUrl = '';
+  resetLocalVideoSource();
   state.step2Uploaded = false;
   state.step2UploadPromise = null;
   state.step2VideoId = null;
