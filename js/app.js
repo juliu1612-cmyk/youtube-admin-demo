@@ -2895,8 +2895,8 @@ function resetAll() {
   $('#containsSyntheticMedia').checked = false;
   $('#ageRestricted').checked = false;
   $$('#privacyGroup .radio-card').forEach(c => c.classList.remove('active'));
-  const privateCard = $('#privacyGroup [data-value="private"]');
-  if (privateCard) privateCard.classList.add('active');
+  const defaultPrivacyCard = $('#privacyGroup [data-value="public"]');
+  if (defaultPrivacyCard) defaultPrivacyCard.classList.add('active');
   // 重置字幕状态
   resetCaptions();
   // 重置缩略图状态
@@ -2943,8 +2943,8 @@ function resetAllExceptProcessing() {
   $('#containsSyntheticMedia').checked = false;
   $('#ageRestricted').checked = false;
   $$('#privacyGroup .radio-card').forEach(c => c.classList.remove('active'));
-  const privateCard = $('#privacyGroup [data-value="private"]');
-  if (privateCard) privateCard.classList.add('active');
+  const defaultPrivacyCard2 = $('#privacyGroup [data-value="public"]');
+  if (defaultPrivacyCard2) defaultPrivacyCard2.classList.add('active');
   resetCaptions();
   resetThumbnail();
   updateStep1NextButton();
