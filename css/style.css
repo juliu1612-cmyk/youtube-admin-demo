@@ -2958,3 +2958,24 @@ body.has-processing-panel main{padding-bottom:70px}
   line-height:1.8;
 }
 .blk-scan-errors{margin-top:4px;color:#f87171}
+
+/* ─── 上传视频：视频来源模式切换 + 本地文件选择 ── */
+.source-mode-row{display:flex;gap:8px;margin-bottom:10px}
+.source-mode-opt{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 14px;border:1px solid var(--border);border-radius:999px;
+  font-size:13px;color:var(--text-muted);cursor:pointer;
+  transition:var(--transition);user-select:none;
+}
+.source-mode-opt input{margin:0;accent-color:var(--accent)}
+.source-mode-opt:hover{border-color:var(--accent);color:var(--text)}
+.source-mode-opt.active{border-color:var(--accent);color:var(--accent-light);background:var(--accent-subtle)}
+.local-video-picker{
+  display:flex;align-items:center;gap:10px;
+  padding:14px;border:1px dashed var(--border);border-radius:var(--radius);
+  background:var(--bg-input);color:var(--text-muted);font-size:13px;
+  cursor:pointer;transition:var(--transition);
+}
+.local-video-picker:hover{border-color:var(--accent);color:var(--text)}
+.local-video-picker svg{width:18px;height:18px;flex:none}
+.local-video-picker.picked{border-style:solid;border-color:var(--accent);color:var(--text)}
